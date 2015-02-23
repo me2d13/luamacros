@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="9"/>
+    <BuildModes Active="Default"/>
+    <Units Count="13">
+      <Unit0>
+        <Filename Value="LuaMacros.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="LuaMacros"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="8" Y="18"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="umainfrm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uMainFrm"/>
+        <EditorIndex Value="0"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="60"/>
+        <CursorPos X="7" Y="79"/>
+        <UsageCount Value="32"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="MemMap.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MemMap"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="34"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="uXplCommon.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uXplCommon"/>
+        <EditorIndex Value="4"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="33" Y="23"/>
+        <UsageCount Value="32"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="uXplControl.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uXplControl"/>
+        <EditorIndex Value="3"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="16"/>
+        <CursorPos X="15" Y="16"/>
+        <UsageCount Value="32"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="uglobals.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uGlobals"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="43"/>
+        <CursorPos X="18" Y="59"/>
+        <UsageCount Value="31"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="uluaengine.pas"/>
+        <UnitName Value="uLuaEngine"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="116"/>
+        <CursorPos X="52" Y="135"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="..\inc\lua\lua.pas"/>
+        <UnitName Value="Lua"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1017"/>
+        <CursorPos X="6" Y="1030"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="C:\Apps\lazarus126\packager\registration\registerfcl.pas"/>
+        <UnitName Value="RegisterFCL"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="24"/>
+        <CursorPos X="3" Y="43"/>
+        <UsageCount Value="9"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\inc\variants.pp"/>
+        <UnitName Value="variants"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="93"/>
+        <CursorPos X="43" Y="111"/>
+        <UsageCount Value="9"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\objpas.pp"/>
+        <UnitName Value="objpas"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="12"/>
+        <CursorPos X="8" Y="28"/>
+        <UsageCount Value="9"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="C:\Apps\lazarus126\packager\registration\fcllaz.pas"/>
+        <UnitName Value="fcllaz"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="9"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="uluacmdxpl.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uLuaCmdXpl"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="130" Y="29"/>
+        <UsageCount Value="21"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit12>
+    </Units>
+    <General>
+      <ActiveWindowIndexAtStart Value="0"/>
+    </General>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="194" Column="25" TopLine="175"/>
+      </Position1>
+      <Position2>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="197" Column="26" TopLine="175"/>
+      </Position2>
+      <Position3>
+        <Filename Value="uglobals.pas"/>
+        <Caret Line="51" Column="1" TopLine="30"/>
+      </Position3>
+      <Position4>
+        <Filename Value="uXplControl.pas"/>
+        <Caret Line="34" Column="18" TopLine="14"/>
+      </Position4>
+      <Position5>
+        <Filename Value="uglobals.pas"/>
+        <Caret Line="23" Column="20" TopLine="10"/>
+      </Position5>
+      <Position6>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="18" Column="33" TopLine="10"/>
+      </Position6>
+      <Position7>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="85" Column="5" TopLine="79"/>
+      </Position7>
+      <Position8>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="59" Column="1" TopLine="54"/>
+      </Position8>
+      <Position9>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="193" Column="35" TopLine="175"/>
+      </Position9>
+      <Position10>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="170" Column="1" TopLine="149"/>
+      </Position10>
+      <Position11>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="192" Column="1" TopLine="184"/>
+      </Position11>
+      <Position12>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="23" Column="21" TopLine="1"/>
+      </Position12>
+      <Position13>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="79" Column="12" TopLine="60"/>
+      </Position13>
+      <Position14>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="111" Column="1" TopLine="79"/>
+      </Position14>
+      <Position15>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="105" Column="15" TopLine="81"/>
+      </Position15>
+      <Position16>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="24" Column="17" TopLine="1"/>
+      </Position16>
+      <Position17>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="136" Column="1" TopLine="101"/>
+      </Position17>
+      <Position18>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="131" Column="22" TopLine="104"/>
+      </Position18>
+      <Position19>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="136" Column="7" TopLine="104"/>
+      </Position19>
+      <Position20>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="108" Column="14" TopLine="95"/>
+      </Position20>
+      <Position21>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="109" Column="18" TopLine="95"/>
+      </Position21>
+      <Position22>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="108" Column="13" TopLine="95"/>
+      </Position22>
+      <Position23>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="110" Column="32" TopLine="95"/>
+      </Position23>
+      <Position24>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="109" Column="37" TopLine="91"/>
+      </Position24>
+      <Position25>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="110" Column="18" TopLine="91"/>
+      </Position25>
+      <Position26>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="130" Column="5" TopLine="103"/>
+      </Position26>
+      <Position27>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="111" Column="1" TopLine="103"/>
+      </Position27>
+      <Position28>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="110" Column="10" TopLine="91"/>
+      </Position28>
+      <Position29>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="112" Column="45" TopLine="106"/>
+      </Position29>
+      <Position30>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="138" Column="18" TopLine="116"/>
+      </Position30>
+    </JumpHistory>
+  </ProjectSession>
+  <EditorMacros Count="0"/>
+</CONFIG>
