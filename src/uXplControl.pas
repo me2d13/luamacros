@@ -20,12 +20,6 @@ type
     procedure SetCustomXplVariable(pName: String; pIndex: Integer; pValue: Variant; isArray: Boolean);
     procedure WaitForXplane(mSec: Integer = 500);
     procedure WaitForXplaneSlot(pSlot: Integer; mSec: Integer = 500);
-    function GetLatitude: double;
-    function GetLongitude: double;
-    function GetHeading: double;
-    function GetElevation: double;
-    function GetPosRefreshInterval: Integer;
-    procedure SetPosRefreshInterval(const Value: Integer);
     function GetFreeComSlot: Integer;
   public
     { Public declarations }
@@ -39,12 +33,6 @@ type
     procedure SetXplVariable(pName: String; pValue: Variant);
     procedure SetXplArrayItem(pName: String; pIndex: Integer; pValue: Variant);
     procedure ExecuteCommand(pCmdName: String; pMode: Byte = HDMC_EXEC_COMMAND);
-    property ActiveDuringCompilation: Boolean read fActiveDuringCompilation write fActiveDuringCompilation;
-    property Latitude: double read GetLatitude;
-    property Longitude: double read GetLongitude;
-    property Heading: double read GetHeading;
-    property Elevation: double read GetElevation;
-    property PosRefreshInterval: Integer read GetPosRefreshInterval write SetPosRefreshInterval;
   end;
 
   TXPLRefHolder = class
@@ -276,11 +264,6 @@ begin
   end;
 end;
 
-function TXPLcontrol.GetElevation: double;
-begin
-  Result := pBuffer^.Height;
-end;
-
 function TXPLcontrol.GetFreeComSlot: Integer;
 var I: Integer;
 begin
@@ -291,26 +274,6 @@ begin
       exit;
     end;
   Result := -1;
-end;
-
-function TXPLcontrol.GetHeading: double;
-begin
-  Result := pBuffer^.Heading;
-end;
-
-function TXPLcontrol.GetLatitude: double;
-begin
-  Result := pBuffer^.Latitude;
-end;
-
-function TXPLcontrol.GetLongitude: double;
-begin
-  Result := pBuffer^.Longitude;
-end;
-
-function TXPLcontrol.GetPosRefreshInterval: Integer;
-begin
-  Result := pBuffer^.PosInterval;
 end;
 
 function TXPLcontrol.GetXplArrayItem(pName: String; pIndex: Integer): Variant;
@@ -411,33 +374,6 @@ begin
       DebugLog(Format('Registered var %s at address %x.', [pName, pBuffer^.ComSlots[lSlot].DataRef]))
     end;
   end;
-end;
-
-procedure TXPLcontrol.SetPosRefreshInterval(const Value: Integer);
-var
-  lSlot: Integer;
-begin
-  if (fMM.Memory = nil) or (not isXplaneConnected) then
-    exit;
-  lSlot := GetFreeComSlot;
-  if lSlot < 0 then
-  begin
-    WaitForXplane;
-    lSlot := GetFreeComSlot;
-    if lSlot < 0 then
-    begin
-      DebugLog('Can''t set moving map refresh interval, Xplane not listening.');
-      exit;
-    end;
-  end;
-  if Glb.IsModuleLogged('XPL') then
-    pBuffer^.Debug := True;
-  pBuffer^.ComSlots[lSlot].HDMcommand := HDMC_SET_POSINTERVAL;
-  pBuffer^.PosInterval := Value;
-  pBuffer^.ComSlots[lSlot].XplRequestFlag := 1; // trigger xpl
-  pBuffer^.XplRequestFlag := 1; // trigger xpl
-  // if unregistered, wait for result and note down the address
-  //WaitForXplaneSlot(lSlot);
 end;
 
 procedure TXPLcontrol.SetXplArrayItem(pName: String; pIndex: Integer;

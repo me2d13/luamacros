@@ -26,6 +26,7 @@ type
       procedure Init;
       procedure DebugLog(pMessage: String; pLogger: String);
       procedure LogError(pMessage: String; pLogger: String);
+      procedure LogModule(pLogger: String);
       function IsModuleLogged(pLogger: String) : boolean;
       property XplControl: TXPLcontrol read fXplCLcontrol;
       property LogFunction: TLogFunction read fLogFunction write fLogFunction;
@@ -63,7 +64,7 @@ end;
 
 procedure TGlobals.DebugLog(pMessage: String; pLogger: String);
 begin
-  if Assigned(fLogFunction) and (fLogAll or (fLoggedModules.IndexOf(pLogger) >= 0))then
+  if Assigned(fLogFunction) and IsModuleLogged(pLogger) then
   begin
     fLogFunction(Format('%s [%s]: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), pLogger, pMessage]));
   end;
@@ -77,9 +78,15 @@ begin
   end;
 end;
 
+procedure TGlobals.LogModule(pLogger: String);
+begin
+  if (not IsModuleLogged(pLogger)) then
+    fLoggedModules.Add(pLogger);
+end;
+
 function TGlobals.IsModuleLogged(pLogger: String): boolean;
 begin
-
+  Result := (fLogAll or (fLoggedModules.IndexOf(pLogger) >= 0));
 end;
 
 initialization

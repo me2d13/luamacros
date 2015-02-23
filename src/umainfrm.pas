@@ -75,8 +75,13 @@ const
 { TMainForm }
 
 procedure TMainForm.RunScriptActionExecute(Sender: TObject);
+var lSel: String;
 begin
-  Glb.LuaEngine.runCode(SynEdit1.Lines.GetText);
+  lSel := SynEdit1.SelText;
+  if (Length(Trim(lSel)) > 0) then
+      Glb.LuaEngine.runCode(lSel)
+  else
+      Glb.LuaEngine.runCode(SynEdit1.Lines.GetText);
 end;
 
 procedure TMainForm.SaveActionExecute(Sender: TObject);

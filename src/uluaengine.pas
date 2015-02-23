@@ -47,16 +47,25 @@ const
 function FormPrint(luaState : TLuaState) : integer;
 var arg : PAnsiChar;
 begin
-     //reads the first parameter passed to Increment as an integer
      arg := lua_tostring(luaState, 1);
-
-     //print
      MainForm.print(arg);
-
-     //clears current Lua stack
      Lua_Pop(luaState, Lua_GetTop(luaState));
+     Result := 0;
+end;
 
-     //Result : number of results to give back to Lua
+function LogModule(luaState : TLuaState) : integer;
+var arg : PAnsiChar;
+begin
+     arg := lua_tostring(luaState, 1);
+     Glb.LogModule(arg);
+     Lua_Pop(luaState, Lua_GetTop(luaState));
+     Result := 0;
+end;
+
+function LogAll(luaState : TLuaState) : integer;
+var arg : PAnsiChar;
+begin
+     Glb.LogAll:=true;
      Result := 0;
 end;
 
@@ -70,6 +79,9 @@ begin
     exit;
   end;
   fLua.RegisterFunction('lmc_xpl_command','lmc_xpl_command',nil,@XplCommand);
+  fLua.RegisterFunction('print','lmc_print',nil,@FormPrint);
+  fLua.RegisterFunction('lmc_log_module','lmc_log_module',nil,@LogModule);
+  fLua.RegisterFunction('lmc_log_all','lmc_log_all',nil,@LogAll);
 end;
 
 constructor TLuaEngine.Create;
@@ -135,8 +147,6 @@ begin
   luaL_openlibs(fLua.LuaInstance);
   //activates the Garbage collector on the Lua side
   lua_gc(fLua.LuaInstance, LUA_GCRESTART, 0);
-  fLua.RegisterFunction('print','lmc_print',nil,@FormPrint);
-
   RegisterFunctions;
 end;
 

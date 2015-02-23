@@ -467,10 +467,6 @@ object MainForm: TMainForm
         MouseActions = <>
         MouseTextActions = <>
         MouseSelActions = <>
-        Lines.Strings = (
-          'lmc_print(''ahoj'');'
-          'lmc_xpl_command(''sim/view/still_spot'');'
-        )
         VisibleSpecialChars = [vscSpace, vscTabAtLast]
         SelectedColor.FrameEdges = sfeAround
         SelectedColor.BackPriority = 50
