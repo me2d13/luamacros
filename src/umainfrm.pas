@@ -27,6 +27,7 @@ type
     SaveDialog1: TSaveDialog;
     StatusBar1: TStatusBar;
     SynEdit1: TSynEdit;
+    Timer1: TTimer;
     ToolBar1: TToolBar;
     ToolButton1: TToolButton;
     ToolButton2: TToolButton;
@@ -40,6 +41,7 @@ type
     procedure SaveActionExecute(Sender: TObject);
     procedure SaveAsActionExecute(Sender: TObject);
     procedure SynEdit1Change(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     { private declarations }
     fEditorDirty: boolean;
@@ -97,6 +99,11 @@ end;
 procedure TMainForm.SynEdit1Change(Sender: TObject);
 begin
   EditorDirty:=true;
+end;
+
+procedure TMainForm.Timer1Timer(Sender: TObject);
+begin
+  Glb.TickMe;
 end;
 
 

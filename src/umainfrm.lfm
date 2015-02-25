@@ -803,4 +803,10 @@ object MainForm: TMainForm
     left = 196
     top = 122
   end
+  object Timer1: TTimer
+    Interval = 50
+    OnTimer = Timer1Timer
+    left = 270
+    top = 129
+  end
 end

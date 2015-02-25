@@ -27,7 +27,7 @@ type
 implementation
 
 uses uMainFrm, uGlobals,
-  uLuaCmdXpl;
+  uLuaCmdXpl, uLuaCmdDevice;
 
 const
 {$IFDEF UNIX}
@@ -82,6 +82,8 @@ begin
   fLua.RegisterFunction('print','lmc_print',nil,@FormPrint);
   fLua.RegisterFunction('lmc_log_module','lmc_log_module',nil,@LogModule);
   fLua.RegisterFunction('lmc_log_all','lmc_log_all',nil,@LogAll);
+  fLua.RegisterFunction('lmc_print_devices','lmc_print_devices',nil,@PrintDevices);
+  fLua.RegisterFunction('lmc_device_name_check_ask','lmc_device_name_check_ask',nil,@CheckDeviceNameWithAsk);
 end;
 
 constructor TLuaEngine.Create;

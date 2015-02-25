@@ -4,15 +4,15 @@
     <PathDelim Value="\"/>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="14">
+    <Units Count="21">
       <Unit0>
         <Filename Value="LuaMacros.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="LuaMacros"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
-        <CursorPos X="8" Y="18"/>
-        <UsageCount Value="33"/>
+        <CursorPos X="27" Y="14"/>
+        <UsageCount Value="41"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
       <Unit1>
@@ -22,12 +22,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uMainFrm"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="61"/>
-        <CursorPos X="33" Y="79"/>
-        <UsageCount Value="33"/>
+        <TopLine Value="104"/>
+        <CursorPos X="27" Y="121"/>
+        <UsageCount Value="41"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -39,18 +38,18 @@
         <WindowIndex Value="0"/>
         <TopLine Value="34"/>
         <CursorPos X="1" Y="1"/>
-        <UsageCount Value="33"/>
+        <UsageCount Value="41"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit2>
       <Unit3>
         <Filename Value="uXplCommon.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplCommon"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="8"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="33" Y="23"/>
-        <UsageCount Value="33"/>
+        <UsageCount Value="41"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit3>
@@ -58,11 +57,11 @@
         <Filename Value="uXplControl.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplControl"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="7"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="55" Y="396"/>
-        <UsageCount Value="33"/>
+        <UsageCount Value="41"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit4>
@@ -70,77 +69,77 @@
         <Filename Value="uglobals.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uGlobals"/>
-        <EditorIndex Value="3"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="61"/>
-        <CursorPos X="3" Y="82"/>
-        <UsageCount Value="32"/>
+        <TopLine Value="19"/>
+        <CursorPos X="32" Y="46"/>
+        <UsageCount Value="40"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit5>
       <Unit6>
-        <Filename Value="uluaengine.pas"/>
-        <UnitName Value="uLuaEngine"/>
-        <EditorIndex Value="1"/>
+        <Filename Value="uluacmdxpl.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uLuaCmdXpl"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="74"/>
-        <CursorPos X="64" Y="82"/>
-        <UsageCount Value="15"/>
-        <Loaded Value="True"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="31"/>
+        <UsageCount Value="30"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit6>
       <Unit7>
+        <Filename Value="uluaengine.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uLuaEngine"/>
+        <EditorIndex Value="5"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="59"/>
+        <CursorPos X="1" Y="86"/>
+        <UsageCount Value="21"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit7>
+      <Unit8>
         <Filename Value="..\inc\lua\lua.pas"/>
         <UnitName Value="Lua"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1017"/>
         <CursorPos X="6" Y="1030"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit7>
-      <Unit8>
+      </Unit8>
+      <Unit9>
         <Filename Value="C:\Apps\lazarus126\packager\registration\registerfcl.pas"/>
         <UnitName Value="RegisterFCL"/>
         <WindowIndex Value="0"/>
         <TopLine Value="24"/>
         <CursorPos X="3" Y="43"/>
-        <UsageCount Value="9"/>
-      </Unit8>
-      <Unit9>
+        <UsageCount Value="8"/>
+      </Unit9>
+      <Unit10>
         <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\inc\variants.pp"/>
         <UnitName Value="variants"/>
         <WindowIndex Value="0"/>
         <TopLine Value="93"/>
         <CursorPos X="43" Y="111"/>
-        <UsageCount Value="9"/>
-      </Unit9>
-      <Unit10>
+        <UsageCount Value="8"/>
+      </Unit10>
+      <Unit11>
         <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\objpas.pp"/>
         <UnitName Value="objpas"/>
         <WindowIndex Value="0"/>
         <TopLine Value="12"/>
         <CursorPos X="8" Y="28"/>
-        <UsageCount Value="9"/>
-      </Unit10>
-      <Unit11>
+        <UsageCount Value="8"/>
+      </Unit11>
+      <Unit12>
         <Filename Value="C:\Apps\lazarus126\packager\registration\fcllaz.pas"/>
         <UnitName Value="fcllaz"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="1" Y="1"/>
-        <UsageCount Value="9"/>
-      </Unit11>
-      <Unit12>
-        <Filename Value="uluacmdxpl.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="uLuaCmdXpl"/>
-        <EditorIndex Value="2"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="130" Y="29"/>
-        <UsageCount Value="22"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
+        <UsageCount Value="8"/>
       </Unit12>
       <Unit13>
         <Filename Value="C:\Apps\lazarus126\components\synedit\synedit.pp"/>
@@ -148,132 +147,206 @@
         <WindowIndex Value="0"/>
         <TopLine Value="866"/>
         <CursorPos X="14" Y="883"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit13>
+      <Unit14>
+        <Filename Value="udxdeviceservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uDxDeviceService"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="116"/>
+        <CursorPos X="31" Y="132"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="udevice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uDevice"/>
+        <EditorIndex Value="3"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="7"/>
+        <CursorPos X="28" Y="7"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="udxdevice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uDxDevice"/>
+        <EditorIndex Value="4"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="29"/>
+        <UsageCount Value="27"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="udeviceservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uDeviceService"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="70"/>
+        <CursorPos X="25" Y="99"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="uluacmddevice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uLuaCmdDevice"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="3"/>
+        <CursorPos X="9" Y="25"/>
+        <UsageCount Value="26"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="..\inc\DirectX_Borland_D9-10\DirectInput.pas"/>
+        <UnitName Value="DirectInput"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="3280"/>
+        <CursorPos X="10" Y="3299"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\wininc\base.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="81"/>
+        <CursorPos X="6" Y="100"/>
+        <UsageCount Value="10"/>
+      </Unit20>
     </Units>
     <General>
       <ActiveWindowIndexAtStart Value="0"/>
     </General>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="umainfrm.pas"/>
-        <Caret Line="170" Column="1" TopLine="149"/>
+        <Filename Value="udxdeviceservice.pas"/>
+        <Caret Line="88" Column="1" TopLine="69"/>
       </Position1>
       <Position2>
-        <Filename Value="umainfrm.pas"/>
-        <Caret Line="192" Column="1" TopLine="184"/>
+        <Filename Value="udxdeviceservice.pas"/>
+        <Caret Line="92" Column="25" TopLine="74"/>
       </Position2>
       <Position3>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="23" Column="21" TopLine="1"/>
+        <Filename Value="udxdeviceservice.pas"/>
+        <Caret Line="93" Column="13" TopLine="75"/>
       </Position3>
       <Position4>
-        <Filename Value="umainfrm.pas"/>
-        <Caret Line="79" Column="12" TopLine="60"/>
+        <Filename Value="udxdeviceservice.pas"/>
+        <Caret Line="119" Column="6" TopLine="100"/>
       </Position4>
       <Position5>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="111" Column="1" TopLine="79"/>
+        <Filename Value="udxdeviceservice.pas"/>
+        <Caret Line="127" Column="4" TopLine="107"/>
       </Position5>
       <Position6>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="105" Column="15" TopLine="81"/>
+        <Filename Value="udxdeviceservice.pas"/>
+        <Caret Line="129" Column="21" TopLine="108"/>
       </Position6>
       <Position7>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="24" Column="17" TopLine="1"/>
+        <Filename Value="udxdeviceservice.pas"/>
+        <Caret Line="35" Column="39" TopLine="13"/>
       </Position7>
       <Position8>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="136" Column="1" TopLine="101"/>
+        <Filename Value="udxdeviceservice.pas"/>
+        <Caret Line="127" Column="88" TopLine="108"/>
       </Position8>
       <Position9>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="131" Column="22" TopLine="104"/>
+        <Filename Value="udxdeviceservice.pas"/>
+        <Caret Line="135" Column="8" TopLine="114"/>
       </Position9>
       <Position10>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="136" Column="7" TopLine="104"/>
+        <Filename Value="udxdeviceservice.pas"/>
+        <Caret Line="143" Column="4" TopLine="119"/>
       </Position10>
       <Position11>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="108" Column="14" TopLine="95"/>
+        <Filename Value="udevice.pas"/>
+        <Caret Line="21" Column="45" TopLine="1"/>
       </Position11>
       <Position12>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="109" Column="18" TopLine="95"/>
+        <Filename Value="udxdevice.pas"/>
+        <Caret Line="21" Column="26" TopLine="1"/>
       </Position12>
       <Position13>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="108" Column="13" TopLine="95"/>
+        <Filename Value="udxdeviceservice.pas"/>
+        <Caret Line="49" Column="16" TopLine="31"/>
       </Position13>
       <Position14>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="110" Column="32" TopLine="95"/>
+        <Filename Value="udxdeviceservice.pas"/>
+        <Caret Line="38" Column="5" TopLine="2"/>
       </Position14>
       <Position15>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="109" Column="37" TopLine="91"/>
+        <Filename Value="udxdevice.pas"/>
+        <Caret Line="71" Column="9" TopLine="42"/>
       </Position15>
       <Position16>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="110" Column="18" TopLine="91"/>
+        <Filename Value="udxdevice.pas"/>
+        <Caret Line="74" Column="4" TopLine="42"/>
       </Position16>
       <Position17>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="130" Column="5" TopLine="103"/>
+        <Filename Value="udxdevice.pas"/>
+        <Caret Line="20" Column="30" TopLine="5"/>
       </Position17>
       <Position18>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="111" Column="1" TopLine="103"/>
+        <Filename Value="udxdevice.pas"/>
+        <Caret Line="80" Column="6" TopLine="52"/>
       </Position18>
       <Position19>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="110" Column="10" TopLine="91"/>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="58" Column="28" TopLine="42"/>
       </Position19>
       <Position20>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="112" Column="45" TopLine="106"/>
+        <Filename Value="udxdevice.pas"/>
+        <Caret Line="35" Column="20" TopLine="28"/>
       </Position20>
       <Position21>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="138" Column="18" TopLine="116"/>
+        <Filename Value="udxdevice.pas"/>
+        <Caret Line="20" Column="17" TopLine="4"/>
       </Position21>
       <Position22>
-        <Filename Value="uXplControl.pas"/>
-        <Caret Line="57" Column="1" TopLine="31"/>
+        <Filename Value="udxdevice.pas"/>
+        <Caret Line="81" Column="49" TopLine="52"/>
       </Position22>
       <Position23>
-        <Filename Value="uXplControl.pas"/>
-        <Caret Line="279" Column="1" TopLine="263"/>
+        <Filename Value="udxdevice.pas"/>
+        <Caret Line="83" Column="65" TopLine="53"/>
       </Position23>
       <Position24>
-        <Filename Value="uglobals.pas"/>
-        <Caret Line="29" Column="4" TopLine="10"/>
+        <Filename Value="udxdevice.pas"/>
+        <Caret Line="19" Column="1" TopLine="7"/>
       </Position24>
       <Position25>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="60" Column="12" TopLine="42"/>
+        <Filename Value="udevice.pas"/>
+        <Caret Line="19" Column="30" TopLine="1"/>
       </Position25>
       <Position26>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="147" Column="1" TopLine="125"/>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="7" Column="32" TopLine="32"/>
       </Position26>
       <Position27>
-        <Filename Value="umainfrm.pas"/>
-        <Caret Line="60" Column="19" TopLine="60"/>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="26" Column="27" TopLine="3"/>
       </Position27>
       <Position28>
-        <Filename Value="umainfrm.pas"/>
-        <Caret Line="79" Column="12" TopLine="77"/>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="95" Column="83" TopLine="67"/>
       </Position28>
       <Position29>
-        <Filename Value="umainfrm.pas"/>
-        <Caret Line="26" Column="29" TopLine="1"/>
+        <Filename Value="udxdevice.pas"/>
+        <Caret Line="64" Column="33" TopLine="47"/>
       </Position29>
       <Position30>
-        <Filename Value="umainfrm.pas"/>
-        <Caret Line="79" Column="24" TopLine="61"/>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
       </Position30>
     </JumpHistory>
   </ProjectSession>

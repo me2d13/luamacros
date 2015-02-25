@@ -7,7 +7,8 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, uMainFrm, MemMap, uXplCommon, uXplControl, uGlobals, uLuaCmdXpl
+  Forms, uMainFrm, MemMap, uXplCommon, uXplControl, uGlobals, uLuaCmdXpl, 
+uDxDeviceService, uDevice, uDxDevice, udeviceservice, uLuaCmdDevice, uLuaEngine
   { you can add units after this };
 
 {$R *.res}
