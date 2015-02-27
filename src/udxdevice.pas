@@ -73,9 +73,15 @@ begin
     if fJoyState.rgbButtons[I] <> lOldState.rgbButtons[I] then
     begin
       if lOldState.rgbButtons[I] = 0 then
-        Glb.DebugLog(Format('Event: %s button %d DOWN', [LogIdent, I]), cDxLoggerName)
+      begin
+        Glb.DebugLog(Format('Event: %s button %d DOWN', [LogIdent, I]), cDxLoggerName);
+        Glb.LuaEngine.OnDeviceEvent(self, I, cDirectionDown);
+      end
       else
-        Glb.DebugLog(Format('Event: %s button %d UP', [LogIdent, I]), cDxLoggerName)
+      begin
+        Glb.DebugLog(Format('Event: %s button %d UP', [LogIdent, I]), cDxLoggerName);
+        Glb.LuaEngine.OnDeviceEvent(self, I, cDirectionUp);
+      end;
     end;
   end;
 end;

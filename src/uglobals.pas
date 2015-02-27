@@ -5,7 +5,7 @@ unit uGlobals;
 interface
 
 uses
-  Classes, SysUtils, uXplControl, uLuaEngine, uDeviceService;
+  Classes, SysUtils, uXplControl, uLuaEngine, uDeviceService, uDevice;
 
 type
 
@@ -31,6 +31,7 @@ type
       procedure Print(pMessage: String);
       function IsModuleLogged(pLogger: String) : boolean;
       procedure TickMe;
+      function ScanDevice: TDevice;
 
       property XplControl: TXPLcontrol read fXplCLcontrol;
       property LogFunction: TLogFunction read fLogFunction write fLogFunction;
@@ -111,6 +112,11 @@ end;
 procedure TGlobals.TickMe;
 begin
   fDeviceService.TickMe;;
+end;
+
+function TGlobals.ScanDevice: TDevice;
+begin
+
 end;
 
 initialization

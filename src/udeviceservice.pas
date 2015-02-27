@@ -24,6 +24,8 @@ type
       function DetectDevices: Integer;
       procedure TickMe;
       procedure CheckNameAsk(pName: String);
+      function AssignNameByRegexp(pName: String; pRegexp: String): String;
+      function GetByName(pDeviceName:String): TDevice;
 
       property Devices:TDeviceList read fDevices;
   end;
@@ -31,7 +33,7 @@ type
 implementation
 
 uses
-  uGlobals;
+  uGlobals, regexpr;
 
 { TDeviceService }
 
@@ -102,6 +104,43 @@ begin
     Glb.DebugLog(Format('Name %s assigned to device %s %s', [pName, lItem.TypeCaption, lItem.SystemId]), cDeviceLoggerName);
     lItem.Name:=pName;
   end;
+end;
+
+function TDeviceService.AssignNameByRegexp(pName: String; pRegexp: String
+  ): String;
+var
+  lRe: TRegExpr;
+  lItem: TDevice;
+begin
+  Result := '';
+  lRe := TRegExpr.Create;
+  try
+    lRe.Expression:=pRegexp;
+    for lItem in fDevices do
+    begin
+      if (lRe.Exec(lItem.SystemId)) then
+      begin
+        lItem.Name:=pName;
+        Result := lItem.SystemId;
+        break;
+      end;
+    end;
+  finally
+    lRe.Free;
+  end;
+end;
+
+function TDeviceService.GetByName(pDeviceName: String): TDevice;
+var
+  lItem: TDevice;
+begin
+  Result := nil;
+  for lItem in fDevices do
+    if (UpperCase(pDeviceName) = UpperCase(lItem.Name)) then
+    begin
+      Result := lItem;
+      break;
+    end;
 end;
 
 end.

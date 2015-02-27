@@ -1,13 +1,21 @@
 unit uLuaEngine;
 
-{$mode objfpc}{$H+}
-
 interface
 
 uses
-  Classes, SysUtils, Lua;
+  Classes, SysUtils, Lua, uDevice, fgl;
 
 type
+
+  TTrigger = class
+    public
+      Device: TDevice;
+      KeyNumber: Integer;
+      Direction: Integer;
+      LuaRef: Integer;
+  end;
+
+  TTriggerList = TFPGObjectList<TTrigger>;
 
   { TLuaEngine }
 
@@ -15,14 +23,19 @@ type
     private
       fLua: TLua;
       fInitOk: boolean;
+      fTriggers: TTriggerList;
       procedure RegisterFunctions;
+      procedure CallFunctionByRef(pRef: Integer);
     public
       constructor Create;
       destructor Destroy;override;
       procedure runCode(pSource: String);
       procedure Init;
       procedure UnInit;
+      procedure SetCallback(pDeviceName: String; pButton: Integer; pDirection: Integer; pHandlerRef: Integer);
+      procedure OnDeviceEvent(pDevice: TDevice; pButton: Integer; pDirection: Integer);
   end;
+
 
 implementation
 
@@ -53,6 +66,12 @@ begin
      Result := 0;
 end;
 
+function FormClear(luaState : TLuaState) : integer;
+begin
+     MainForm.ClearLog;
+     Result := 0;
+end;
+
 function LogModule(luaState : TLuaState) : integer;
 var arg : PAnsiChar;
 begin
@@ -80,10 +99,21 @@ begin
   end;
   fLua.RegisterFunction('lmc_xpl_command','lmc_xpl_command',nil,@XplCommand);
   fLua.RegisterFunction('print','lmc_print',nil,@FormPrint);
+  fLua.RegisterFunction('clear','lmc_clear',nil,@FormClear);
   fLua.RegisterFunction('lmc_log_module','lmc_log_module',nil,@LogModule);
   fLua.RegisterFunction('lmc_log_all','lmc_log_all',nil,@LogAll);
   fLua.RegisterFunction('lmc_print_devices','lmc_print_devices',nil,@PrintDevices);
   fLua.RegisterFunction('lmc_device_name_check_ask','lmc_device_name_check_ask',nil,@CheckDeviceNameWithAsk);
+  fLua.RegisterFunction('lmc_device_set_name','lmc_device_set_name',nil,@AssignDeviceNameByRegexp);
+  fLua.RegisterFunction('lmc_set_handler','lmc_set_handler',nil,@SetButtonCallback);
+end;
+
+procedure TLuaEngine.CallFunctionByRef(pRef: Integer);
+begin
+  if (fLua = nil) then
+    exit;
+  lua_rawgeti(fLua.LuaInstance, LUA_REGISTRYINDEX, pRef);
+  lua_pcall(fLua.LuaInstance, 0, 0, LUA_MULTRET);
 end;
 
 constructor TLuaEngine.Create;
@@ -105,12 +135,14 @@ begin
   begin
     fLua := nil;
   end;
+  fTriggers := TTriggerList.Create();
 end;
 
 destructor TLuaEngine.Destroy;
 begin
   if Assigned(fLua) then
     fLua.Free;
+  fTriggers.Free;
   inherited Destroy;
 end;
 
@@ -160,6 +192,42 @@ begin
     lua_gc(fLua.LuaInstance, LUA_GCCOLLECT, 0);
     //unregisters the function we loaded into the interpreter
     fLua.UnregisterFunctions(nil);
+  end;
+end;
+
+procedure TLuaEngine.SetCallback(pDeviceName: String; pButton: Integer;
+  pDirection: Integer; pHandlerRef: Integer);
+var
+  lDevice: TDevice;
+  lTrigger: TTrigger;
+begin
+  lDevice := Glb.DeviceService.GetByName(pDeviceName);
+  if (lDevice = nil) then
+    raise Exception('Device with name ' + pDeviceName + ' not found');
+  lTrigger := TTrigger.Create;
+  lTrigger.Device := lDevice;
+  lTrigger.KeyNumber:=pButton;
+  lTrigger.Direction:=pDirection;
+  lTrigger.LuaRef:=pHandlerRef;
+  fTriggers.Add(lTrigger);
+  Glb.DebugLog(Format('Added handler %d for device %s, key %d, direction %d',
+      [pHandlerRef, lDevice.Name, pButton, pDirection]), 'LUA');
+end;
+
+procedure TLuaEngine.OnDeviceEvent(pDevice: TDevice; pButton: Integer;
+  pDirection: Integer);
+var
+  lTrigger: TTrigger;
+begin
+  for lTrigger in fTriggers do
+  begin
+    if (pDevice = lTrigger.Device) and (pButton = lTrigger.KeyNumber) and
+      (pDirection = lTrigger.Direction) then
+    begin
+      Glb.DebugLog(Format('Calling handler %d for device %s, key %d, direction %d',
+          [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), 'LUA');
+      CallFunctionByRef(lTrigger.LuaRef);
+    end;
   end;
 end;
 

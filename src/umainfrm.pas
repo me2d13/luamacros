@@ -57,6 +57,7 @@ type
   public
     { public declarations }
     procedure print(what: String);
+    procedure ClearLog;
     property EditorDirty: boolean read fEditorDirty write SetEditorDirty;
     property FileName: String read fFileName write SetFileName;
   end;
@@ -197,6 +198,11 @@ end;
 procedure TMainForm.print(what: String);
 begin
   Memo1.Lines.Add(what);
+end;
+
+procedure TMainForm.ClearLog;
+begin
+  Memo1.Clear;
 end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
