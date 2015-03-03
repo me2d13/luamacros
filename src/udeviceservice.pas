@@ -5,7 +5,7 @@ unit uDeviceService;
 interface
 
 uses
-  Classes, SysUtils, uDevice, fgl, uDxDeviceService;
+  Classes, SysUtils, uDevice, fgl, uDxDeviceService, uComDeviceService;
 
 type
   TDeviceList = TFPGObjectList<TDevice>;
@@ -16,6 +16,7 @@ type
     private
       fDevices: TDeviceList;
       fDxService: TDxDeviceService;
+      fComService: TComDeviceService;
     public
       constructor Create;
       destructor Destroy; virtual;
@@ -26,6 +27,7 @@ type
       procedure CheckNameAsk(pName: String);
       function AssignNameByRegexp(pName: String; pRegexp: String): String;
       function GetByName(pDeviceName:String): TDevice;
+      procedure AddCom(pName:String; pPortName: String);
 
       property Devices:TDeviceList read fDevices;
   end;
@@ -41,12 +43,14 @@ constructor TDeviceService.Create;
 begin
   fDevices := TDeviceList.Create(False);
   fDxService := TDxDeviceService.Create;
+  fComService := TComDeviceService.Create;
 end;
 
 destructor TDeviceService.Destroy;
 begin
   fDxService.Free;
   fDevices.Free;
+  fComService.Free;
   inherited;
 end;
 
@@ -141,6 +145,11 @@ begin
       Result := lItem;
       break;
     end;
+end;
+
+procedure TDeviceService.AddCom(pName: String; pPortName: String);
+begin
+  fComService.AddComDevice(pName, pPortName);
 end;
 
 end.

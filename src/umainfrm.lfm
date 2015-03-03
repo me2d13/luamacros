@@ -1,36 +1,36 @@
 object MainForm: TMainForm
-  Left = 568
-  Height = 384
-  Top = 377
-  Width = 504
+  Left = 272
+  Height = 701
+  Top = 147
+  Width = 918
   Caption = 'Lua Macros'
-  ClientHeight = 384
-  ClientWidth = 504
+  ClientHeight = 701
+  ClientWidth = 918
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   LCLVersion = '1.2.6.0'
   object PairSplitter1: TPairSplitter
     Cursor = crVSplit
     Left = 0
-    Height = 335
+    Height = 652
     Top = 26
-    Width = 504
+    Width = 918
     Align = alClient
-    Position = 150
+    Position = 250
     SplitterType = pstVertical
     object PairSplitterSide1: TPairSplitterSide
       Cursor = crArrow
       Left = 0
-      Height = 150
+      Height = 250
       Top = 0
-      Width = 504
-      ClientWidth = 504
-      ClientHeight = 150
+      Width = 918
+      ClientWidth = 918
+      ClientHeight = 250
       inline SynEdit1: TSynEdit
         Left = 0
-        Height = 150
+        Height = 250
         Top = 0
-        Width = 504
+        Width = 918
         Align = alClient
         Font.Height = -13
         Font.Name = 'Courier New'
@@ -537,34 +537,36 @@ object MainForm: TMainForm
     object PairSplitterSide2: TPairSplitterSide
       Cursor = crArrow
       Left = 0
-      Height = 180
-      Top = 155
-      Width = 504
-      ClientWidth = 504
-      ClientHeight = 180
+      Height = 397
+      Top = 255
+      Width = 918
+      ClientWidth = 918
+      ClientHeight = 397
       object Memo1: TMemo
         Left = 0
-        Height = 180
+        Height = 397
         Top = 0
-        Width = 504
+        Width = 918
         Align = alClient
+        ReadOnly = True
         ScrollBars = ssAutoBoth
         TabOrder = 0
+        WordWrap = False
       end
     end
   end
   object StatusBar1: TStatusBar
     Left = 0
     Height = 23
-    Top = 361
-    Width = 504
+    Top = 678
+    Width = 918
     Panels = <>
   end
   object ToolBar1: TToolBar
     Left = 0
     Height = 26
     Top = 0
-    Width = 504
+    Width = 918
     Caption = 'ToolBar1'
     Images = ImageList1
     TabOrder = 2

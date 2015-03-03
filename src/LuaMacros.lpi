@@ -29,15 +29,18 @@
         <CommandLineParams Value="test.lua"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="2">
+    <RequiredPackages Count="3">
       <Item1>
-        <PackageName Value="SynEdit"/>
+        <PackageName Value="LazSerialPort"/>
       </Item1>
       <Item2>
-        <PackageName Value="LCL"/>
+        <PackageName Value="SynEdit"/>
       </Item2>
+      <Item3>
+        <PackageName Value="LCL"/>
+      </Item3>
     </RequiredPackages>
-    <Units Count="13">
+    <Units Count="15">
       <Unit0>
         <Filename Value="LuaMacros.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -106,6 +109,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uLuaCmdDevice"/>
       </Unit12>
+      <Unit13>
+        <Filename Value="ucomdevice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uComDevice"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="ucomdeviceservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uComDeviceService"/>
+      </Unit14>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -116,7 +129,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\inc\lua;..\inc\XPL_SDK212_XPLM;..\inc\DirectX_Borland_D9-10"/>
+      <OtherUnitFiles Value="..\inc\lua;..\inc\XPL_SDK212_XPLM;..\inc\DirectX_Borland_D9-10;..\inc\AsyncFree104"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

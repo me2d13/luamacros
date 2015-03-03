@@ -13,6 +13,7 @@ type
       KeyNumber: Integer;
       Direction: Integer;
       LuaRef: Integer;
+      WholeDevice: Boolean;
   end;
 
   TTriggerList = TFPGObjectList<TTrigger>;
@@ -25,7 +26,8 @@ type
       fInitOk: boolean;
       fTriggers: TTriggerList;
       procedure RegisterFunctions;
-      procedure CallFunctionByRef(pRef: Integer);
+      procedure CallFunctionByRef(pRef: Integer);overload;
+      procedure CallFunctionByRef(pRef: Integer; pData: String);overload;
     public
       constructor Create;
       destructor Destroy;override;
@@ -33,14 +35,16 @@ type
       procedure Init;
       procedure UnInit;
       procedure SetCallback(pDeviceName: String; pButton: Integer; pDirection: Integer; pHandlerRef: Integer);
-      procedure OnDeviceEvent(pDevice: TDevice; pButton: Integer; pDirection: Integer);
+      procedure SetDeviceCallback(pDeviceName: String; pHandlerRef: Integer);
+      procedure OnDeviceEvent(pDevice: TDevice; pButton: Integer; pDirection: Integer);overload;
+      procedure OnDeviceEvent(pDevice: TDevice; pData: String);overload;
   end;
 
 
 implementation
 
 uses uMainFrm, uGlobals,
-  uLuaCmdXpl, uLuaCmdDevice;
+  uLuaCmdXpl, uLuaCmdDevice, uComDevice;
 
 const
 {$IFDEF UNIX}
@@ -105,7 +109,9 @@ begin
   fLua.RegisterFunction('lmc_print_devices','lmc_print_devices',nil,@PrintDevices);
   fLua.RegisterFunction('lmc_device_name_check_ask','lmc_device_name_check_ask',nil,@CheckDeviceNameWithAsk);
   fLua.RegisterFunction('lmc_device_set_name','lmc_device_set_name',nil,@AssignDeviceNameByRegexp);
-  fLua.RegisterFunction('lmc_set_handler','lmc_set_handler',nil,@SetButtonCallback);
+  fLua.RegisterFunction('lmc_set_handler','lmc_set_handler',nil,@LuaCmdSetCallback);
+  //fLua.RegisterFunction('lmc_set_handler','lmc_set_handler',nil,@SetDeviceCallback);
+  fLua.RegisterFunction('lmc_add_com','lmc_add_com',nil,@AddCom);
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer);
@@ -114,6 +120,15 @@ begin
     exit;
   lua_rawgeti(fLua.LuaInstance, LUA_REGISTRYINDEX, pRef);
   lua_pcall(fLua.LuaInstance, 0, 0, LUA_MULTRET);
+end;
+
+procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pData: String);
+begin
+  if (fLua = nil) then
+    exit;
+  lua_rawgeti(fLua.LuaInstance, LUA_REGISTRYINDEX, pRef);
+  lua_pushstring(fLua.LuaInstance, pChar(pData));
+  lua_pcall(fLua.LuaInstance, 1, 0, LUA_MULTRET);
 end;
 
 constructor TLuaEngine.Create;
@@ -209,9 +224,32 @@ begin
   lTrigger.KeyNumber:=pButton;
   lTrigger.Direction:=pDirection;
   lTrigger.LuaRef:=pHandlerRef;
+  lTrigger.WholeDevice:=False;
   fTriggers.Add(lTrigger);
   Glb.DebugLog(Format('Added handler %d for device %s, key %d, direction %d',
       [pHandlerRef, lDevice.Name, pButton, pDirection]), 'LUA');
+end;
+
+procedure TLuaEngine.SetDeviceCallback(pDeviceName: String; pHandlerRef: Integer
+  );
+var
+  lDevice: TDevice;
+  lTrigger: TTrigger;
+begin
+  lDevice := Glb.DeviceService.GetByName(pDeviceName);
+  if (lDevice = nil) then
+    raise Exception('Device with name ' + pDeviceName + ' not found');
+  if (lDevice is TComDevice) then
+  begin
+    (lDevice as TComDevice).Active:=true;
+  end;
+  lTrigger := TTrigger.Create;
+  lTrigger.Device := lDevice;
+  lTrigger.WholeDevice:=True;
+  lTrigger.LuaRef:=pHandlerRef;
+  fTriggers.Add(lTrigger);
+  Glb.DebugLog(Format('Added handler %d for whole device %s',
+      [pHandlerRef, lDevice.Name]), 'LUA');
 end;
 
 procedure TLuaEngine.OnDeviceEvent(pDevice: TDevice; pButton: Integer;
@@ -227,6 +265,21 @@ begin
       Glb.DebugLog(Format('Calling handler %d for device %s, key %d, direction %d',
           [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), 'LUA');
       CallFunctionByRef(lTrigger.LuaRef);
+    end;
+  end;
+end;
+
+procedure TLuaEngine.OnDeviceEvent(pDevice: TDevice; pData: String);
+var
+  lTrigger: TTrigger;
+begin
+  for lTrigger in fTriggers do
+  begin
+    if (pDevice = lTrigger.Device) and (lTrigger.WholeDevice) then
+    begin
+      Glb.DebugLog(Format('Calling handler %d for device %s with data %s',
+          [lTrigger.LuaRef, pDevice.Name, pData]), 'LUA');
+      CallFunctionByRef(lTrigger.LuaRef, pData);
     end;
   end;
 end;

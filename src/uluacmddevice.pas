@@ -10,7 +10,9 @@ uses
 function PrintDevices(luaState : TLuaState) : integer;
 function CheckDeviceNameWithAsk(luaState : TLuaState) : integer;
 function AssignDeviceNameByRegexp(luaState : TLuaState) : integer;
-function SetButtonCallback(luaState : TLuaState) : integer;
+function LuaCmdSetCallback(luaState : TLuaState) : integer;
+function SetDeviceCallback(luaState : TLuaState) : integer;
+function AddCom(luaState : TLuaState) : integer;
 
 implementation
 
@@ -54,24 +56,51 @@ begin
   Result := 1;
 end;
 
-function SetButtonCallback(luaState: TLuaState): integer;
+function LuaCmdSetCallback(luaState: TLuaState): integer;
 var
   lDeviceName : PAnsiChar;
   lButton : Integer;
   lDirection : Integer;
   lHandlerRef: Integer;
+  lNumOfParams: Integer;
 begin
   // Device name
   // Button number
   // 0 = down, 1 = up
   // handler
+  lNumOfParams:=lua_gettop(luaState);
   lDeviceName := lua_tostring(luaState, 1);
-  lButton:= Trunc(lua_tonumber(luaState, 2));
-  lDirection:= Trunc(lua_tonumber(luaState, 3));
-  if (lDirection <> cDirectionUp) then
-    lDirection:=cDirectionDown;
-  lHandlerRef := luaL_ref(luaState, LUA_REGISTRYINDEX);
-  Glb.LuaEngine.SetCallback(lDeviceName,lButton, lDirection, lHandlerRef);
+  if (lNumOfParams = 4) then
+  begin
+    lButton:= Trunc(lua_tonumber(luaState, 2));
+    lDirection:= Trunc(lua_tonumber(luaState, 3));
+    if (lDirection <> cDirectionUp) then
+      lDirection:=cDirectionDown;
+    lHandlerRef := luaL_ref(luaState, LUA_REGISTRYINDEX);
+    Glb.LuaEngine.SetCallback(lDeviceName,lButton, lDirection, lHandlerRef);
+  end;
+  if (lNumOfParams = 2) then
+  begin
+    // whole device
+    lHandlerRef := luaL_ref(luaState, LUA_REGISTRYINDEX);
+    Glb.LuaEngine.SetDeviceCallback(lDeviceName, lHandlerRef);
+  end;
+  Result := 0;
+end;
+
+function SetDeviceCallback(luaState: TLuaState): integer;
+begin
+
+end;
+
+function AddCom(luaState: TLuaState): integer;
+var
+  lDevName : PAnsiChar;
+  lComName : PAnsiChar;
+begin
+  lDevName := lua_tostring(luaState, 1);
+  lComName := lua_tostring(luaState, 2);
+  Glb.DeviceService.AddCom(lDevName, lComName);
   Result := 0;
 end;
 

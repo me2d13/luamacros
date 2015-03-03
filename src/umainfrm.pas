@@ -5,8 +5,8 @@ unit uMainFrm;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, SynEdit, Forms, Controls, Graphics, Dialogs,
-  PairSplitter, ExtCtrls, ComCtrls, StdCtrls, ActnList, uLuaEngine;
+  Classes, SysUtils, FileUtil, SynEdit, Forms, Controls, Graphics,
+  Dialogs, PairSplitter, ExtCtrls, ComCtrls, StdCtrls, ActnList, uLuaEngine;
 
 type
 

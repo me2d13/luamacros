@@ -149,7 +149,6 @@ begin
     lDev.DetectChanges;
 end;
 
-{ TDxDeviceService }
 
 
 end.
