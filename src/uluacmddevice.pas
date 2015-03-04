@@ -11,8 +11,8 @@ function PrintDevices(luaState : TLuaState) : integer;
 function CheckDeviceNameWithAsk(luaState : TLuaState) : integer;
 function AssignDeviceNameByRegexp(luaState : TLuaState) : integer;
 function LuaCmdSetCallback(luaState : TLuaState) : integer;
-function SetDeviceCallback(luaState : TLuaState) : integer;
 function AddCom(luaState : TLuaState) : integer;
+function SendCom(luaState : TLuaState) : integer;
 
 implementation
 
@@ -88,19 +88,39 @@ begin
   Result := 0;
 end;
 
-function SetDeviceCallback(luaState: TLuaState): integer;
-begin
-
-end;
-
 function AddCom(luaState: TLuaState): integer;
 var
   lDevName : PAnsiChar;
   lComName : PAnsiChar;
+  lNumOfParams : Integer;
+  lSpeed: Integer;
+  lParity: String;
+  lDataBits: Integer;
+  lStopBits: Integer;
 begin
+  lNumOfParams:=lua_gettop(luaState);
   lDevName := lua_tostring(luaState, 1);
   lComName := lua_tostring(luaState, 2);
+  if (lNumOfParams = 6) then
+  begin
+    lSpeed := lua_tointeger(luaState, 3);
+    lDataBits:=lua_tointeger(luaState, 4);
+    lParity:=lua_tostring(luaState, 5);
+    lStopBits:=lua_tointeger(luaState, 6);
+    Glb.DeviceService.AddCom(lDevName, lComName, lSpeed, lDataBits, lParity, lStopBits);
+  end;
   Glb.DeviceService.AddCom(lDevName, lComName);
+  Result := 0;
+end;
+
+function SendCom(luaState: TLuaState): integer;
+var
+  lDevName : PAnsiChar;
+  lData : PAnsiChar;
+begin
+  lDevName := lua_tostring(luaState, 1);
+  lData := lua_tostring(luaState, 2);
+  Glb.DeviceService.SendToCom(lDevName, lData);
   Result := 0;
 end;
 

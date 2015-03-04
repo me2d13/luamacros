@@ -43,6 +43,7 @@ object MainForm: TMainForm
         Gutter.MouseActions = <>
         RightGutter.Width = 0
         RightGutter.MouseActions = <>
+        Highlighter = SynLuaSyn1
         Keystrokes = <        
           item
             Command = ecUp
@@ -810,5 +811,17 @@ object MainForm: TMainForm
     OnTimer = Timer1Timer
     left = 270
     top = 129
+  end
+  object SynLuaSyn1: TSynLuaSyn
+    CommentAttri.FrameEdges = sfeAround
+    FunctionAttri.FrameEdges = sfeAround
+    IdentifierAttri.FrameEdges = sfeAround
+    KeyAttri.FrameEdges = sfeAround
+    NumberAttri.FrameEdges = sfeAround
+    SpaceAttri.FrameEdges = sfeAround
+    StringAttri.FrameEdges = sfeAround
+    SymbolAttri.FrameEdges = sfeAround
+    left = 369
+    top = 147
   end
 end

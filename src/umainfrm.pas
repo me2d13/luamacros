@@ -5,8 +5,9 @@ unit uMainFrm;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, SynEdit, Forms, Controls, Graphics,
-  Dialogs, PairSplitter, ExtCtrls, ComCtrls, StdCtrls, ActnList, uLuaEngine;
+  Classes, SysUtils, FileUtil, SynEdit, Forms, Controls, Graphics, Dialogs,
+  PairSplitter, ExtCtrls, ComCtrls, StdCtrls, ActnList, SynHighlighterLua,
+  uLuaEngine;
 
 type
 
@@ -27,6 +28,7 @@ type
     SaveDialog1: TSaveDialog;
     StatusBar1: TStatusBar;
     SynEdit1: TSynEdit;
+    SynLuaSyn1: TSynLuaSyn;
     Timer1: TTimer;
     ToolBar1: TToolBar;
     ToolButton1: TToolButton;

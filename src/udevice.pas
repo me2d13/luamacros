@@ -23,6 +23,8 @@ type
       function TypeCaption: String; virtual;
   end;
 
+  TDeviceException = class (Exception);
+
 const
   cDeviceLoggerName = 'DEV';
   cDirectionDown = 0;

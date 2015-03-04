@@ -14,16 +14,37 @@ type
     TComDevice = class(TDevice)
     private
       fComPort: TLazSerial;
+      fSpeed: TBaudRate;
+      fParity: TParity;
+      fDataBits: TDataBits;
+      fStopBits: TStopBits;
+      fCustomValues: Boolean;
       function GetActive: Boolean;
+      function GetDataBits: Integer;
+      function GetParity: char;
+      function GetSpeed: Integer;
+      function GetStopBits: Integer;
       procedure OnRxData(Sender: TObject);
       procedure SetActive(AValue: Boolean);
+      procedure SetDataBits(AValue: Integer);
+      procedure SetParity(AValue: char);
+      procedure SetSpeed(AValue: Integer);
+      procedure SetStopBits(AValue: Integer);
     public
       constructor Create;
       destructor Destroy;override;
       function TypeCaption: String; override;
       procedure Init;
+      procedure SendData(pData: String);
       property Active: Boolean read GetActive write SetActive;
+      property Speed:Integer read GetSpeed write SetSpeed;
+      property Parity:char read GetParity write SetParity;
+      property DataBits:Integer read GetDataBits write SetDataBits;
+      property StopBits:Integer read GetStopBits write SetStopBits;
   end;
+
+  TSerialException = class (Exception);
+  TWrongSerialConfigurationException = class (TSerialException);
 
 const
   cComLoggerName = 'COM';
@@ -50,6 +71,36 @@ begin
   Result := (fComPort <> nil) and fComPort.Active;
 end;
 
+function TComDevice.GetDataBits: Integer;
+begin
+  if (fComPort <> nil) then
+    fDataBits:=fComPort.DataBits;
+  Result := ConstsBits[fDataBits];
+end;
+
+function TComDevice.GetParity: char;
+begin
+  if (fComPort <> nil) then
+    fParity:=fComPort.Parity;
+  Result := ConstsParity[fParity];
+end;
+
+function TComDevice.GetSpeed: Integer;
+begin
+  if (fComPort <> nil) then
+    fSpeed:=fComPort.BaudRate;
+  Result := ConstsBaud[fSpeed];
+end;
+
+function TComDevice.GetStopBits: Integer;
+begin
+  if (fComPort <> nil) then
+    fStopBits:=fComPort.StopBits;
+  Result := ConstsStopBits[fStopBits];
+  if (Result = 0) then
+    Result := 1; // we do not support 1.5 now, so make 1 and 1.5 same value (1)
+end;
+
 procedure TComDevice.SetActive(AValue: Boolean);
 begin
   Glb.DebugLog('Setting port '+Name+' active ' + BoolToStr(AValue), cComLoggerName);
@@ -59,9 +110,68 @@ begin
     fComPort.Active:=AValue;
 end;
 
+procedure TComDevice.SetDataBits(AValue: Integer);
+var
+  lVal: TDataBits;
+begin
+  for lVal in TDataBits do
+    if ConstsBits[lVal] = AValue then
+    begin
+      fDataBits:=lVal;
+      fCustomValues:=True;
+      exit;
+    end;
+  raise TWrongSerialConfigurationException.CreateFmt('Wrong data bits value %d', [AValue]);
+end;
+
+procedure TComDevice.SetParity(AValue: char);
+var
+  lVal: TParity;
+begin
+  for lVal in TParity do
+    if ConstsParity[lVal] = AValue then
+    begin
+      fParity:=lVal;
+      fCustomValues:=True;
+      exit;
+    end;
+  raise TWrongSerialConfigurationException.CreateFmt('Wrong parity value %s', [AValue]);
+end;
+
+procedure TComDevice.SetSpeed(AValue: Integer);
+var
+  lVal: TBaudRate;
+begin
+  for lVal in TBaudRate do
+    if ConstsBaud[lVal] = AValue then
+    begin
+      fSpeed:=lVal;
+      fCustomValues:=True;
+      exit;
+    end;
+  raise TWrongSerialConfigurationException.CreateFmt('Wrong baud rate value %d', [AValue]);
+end;
+
+procedure TComDevice.SetStopBits(AValue: Integer);
+begin
+  if (AValue = 1) then
+  begin
+    fStopBits:=sbOne;
+    fCustomValues:=True;
+  end
+  else if (AValue = 2) then
+  begin
+    fStopBits:=sbTwo;
+    fCustomValues:=True;
+  end
+  else
+    raise TWrongSerialConfigurationException.CreateFmt('Wrong stop bits value %d', [AValue]);
+end;
+
 constructor TComDevice.Create;
 begin
   fComPort := nil;
+  fCustomValues := False; // can handle all 4 as they can not be set separately
 end;
 
 destructor TComDevice.Destroy;
@@ -80,9 +190,25 @@ procedure TComDevice.Init;
 begin
   fComPort := TLazSerial.Create(MainForm);
   fComPort.Device:=SystemId;
+  if (fCustomValues) then
+  begin
+    fComPort.BaudRate:=fSpeed;
+    fComPort.DataBits:=fDataBits;
+    fComPort.Parity:=fParity;
+    fComPort.StopBits:=fStopBits;
+  end;
   fComPort.Active:=True;
   // callback
   fComPort.OnRxData:=OnRxData;
+end;
+
+procedure TComDevice.SendData(pData: String);
+begin
+  if (fComPort = nil) or (not fComPort.Active) then
+    Init;
+  if (fComPort = nil) or (not fComPort.Active) then
+    raise TSerialException.Create('Can not send data, COM port is not active.');
+  fComPort.WriteData(pData);
 end;
 
 end.

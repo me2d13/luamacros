@@ -27,7 +27,10 @@ type
       procedure CheckNameAsk(pName: String);
       function AssignNameByRegexp(pName: String; pRegexp: String): String;
       function GetByName(pDeviceName:String): TDevice;
-      procedure AddCom(pName:String; pPortName: String);
+      procedure AddCom(pName:String; pPortName: String);overload;
+      procedure AddCom(pName:String; pPortName: String; pSpeed: Integer; pDataBits: Integer;
+        pParity: String; pStopBits: Integer);overload;
+      procedure SendToCom(pDevName: String; pData: String);
 
       property Devices:TDeviceList read fDevices;
   end;
@@ -35,7 +38,7 @@ type
 implementation
 
 uses
-  uGlobals, regexpr;
+  uGlobals, regexpr, uComDevice;
 
 { TDeviceService }
 
@@ -150,6 +153,24 @@ end;
 procedure TDeviceService.AddCom(pName: String; pPortName: String);
 begin
   fComService.AddComDevice(pName, pPortName);
+end;
+
+procedure TDeviceService.AddCom(pName: String; pPortName: String;
+  pSpeed: Integer; pDataBits: Integer; pParity: String; pStopBits: Integer);
+begin
+  fComService.AddComDevice(pName, pPortName, pSpeed, pDataBits, pParity, pStopBits);
+end;
+
+procedure TDeviceService.SendToCom(pDevName: String; pData: String);
+var
+  lDev: TDevice;
+begin
+  lDev := GetByName(pDevName);
+  if (lDev = nil) then
+    raise TDeviceException.CreateFmt('Device %s not found.', [pDevName]);
+  if not (lDev is TComDevice) then
+    raise TDeviceException.CreateFmt('Device %s is not serial device, can not send data.', [pDevName]);
+  (lDev as TComDevice).SendData(pData);
 end;
 
 end.

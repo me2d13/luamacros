@@ -112,6 +112,7 @@ begin
   fLua.RegisterFunction('lmc_set_handler','lmc_set_handler',nil,@LuaCmdSetCallback);
   //fLua.RegisterFunction('lmc_set_handler','lmc_set_handler',nil,@SetDeviceCallback);
   fLua.RegisterFunction('lmc_add_com','lmc_add_com',nil,@AddCom);
+  fLua.RegisterFunction('lmc_send_to_com','lmc_send_to_com',nil,@SendCom);
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer);

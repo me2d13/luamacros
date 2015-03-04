@@ -26,6 +26,7 @@ type
       destructor Destroy; Override;
       procedure Init;
       procedure DebugLog(pMessage: String; pLogger: String);
+      procedure DebugLogFmt(pMessage: String; const Args : Array of const; pLogger: String);
       procedure LogError(pMessage: String; pLogger: String);
       procedure LogModule(pLogger: String);
       procedure Print(pMessage: String);
@@ -80,6 +81,12 @@ begin
   begin
     fLogFunction(Format('%s [%s]: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), pLogger, pMessage]));
   end;
+end;
+
+procedure TGlobals.DebugLogFmt(pMessage: String; const Args: array of const;
+  pLogger: String);
+begin
+  DebugLog(Format(pMessage, Args), pLogger);
 end;
 
 procedure TGlobals.LogError(pMessage: String; pLogger: String);
