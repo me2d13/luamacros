@@ -31,13 +31,32 @@ handler()
 -- 1st param: logical name
 -- 2nd param: button number
 -- 3rd param: direction, 0=down, 1=up
-lmc_set_handler('LB',2,0,handler)
+-- 4th param: callback function
+--lmc_set_handler('LB',2,0,handler)
 -- now callback is active
+
+-- another type of device callback - assigned to whole device
+-- 1st param: logical name
+-- 2nd param: callback function
+-- then callback function has 2 parameters and logic is in the function
+-- 1st param: button number
+-- 2nd param: direction, 0=down, 1=up
+lmc_set_handler('LB',function(button, direction)
+  print('Callback for whole joystick: button ' .. button .. ', direction '..direction)
+end)
 
 -- add COM port (with default config values) as device
 -- 1st param: logical name
 -- 2nd param: port name
-lmc_add_com('C3', 'COM3')
+--lmc_add_com('C3', 'COM3')
+-- add COM port (with full config) as device
+-- 1st param: logical name
+-- 2nd param: port name
+-- 3rd param: baud rate
+-- 4th param: data bits (8, 7 , 6, 5)
+-- 5th param: parity ('N', 'O', 'E', 'M', 'S')
+-- 6th param: stop bits (1,2)
+lmc_add_com('C3', 'COM3', 1200, 6, 'E', 2)
 
 -- check device was added
 lmc_print_devices()
@@ -48,3 +67,6 @@ lmc_print_devices()
 lmc_set_handler('C3',function(comVal)
   print(comVal)
 end)
+
+-- send data to COM port
+--lmc_send_to_com('C3', 'ahoj')

@@ -75,6 +75,9 @@ begin
     [pName, pPortName, pSpeed, pDataBits, pParity, pStopBits], cComLoggerName);
   lDevice := CreateComDevice(pName, pPortName);
   lDevice.Speed := pSpeed;
+  lDevice.DataBits:=pDataBits;
+  lDevice.Parity:=pParity;
+  lDevice.StopBits:=pStopBits;
   fDevices.Add(lDevice);
   Glb.DeviceService.Devices.Add(lDevice);
 end;

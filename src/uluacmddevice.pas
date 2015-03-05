@@ -108,8 +108,9 @@ begin
     lParity:=lua_tostring(luaState, 5);
     lStopBits:=lua_tointeger(luaState, 6);
     Glb.DeviceService.AddCom(lDevName, lComName, lSpeed, lDataBits, lParity, lStopBits);
-  end;
-  Glb.DeviceService.AddCom(lDevName, lComName);
+  end
+  else
+    Glb.DeviceService.AddCom(lDevName, lComName);
   Result := 0;
 end;
 

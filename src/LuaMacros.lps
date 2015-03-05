@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="31">
+    <Units Count="32">
       <Unit0>
         <Filename Value="LuaMacros.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -12,7 +12,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="27" Y="14"/>
-        <UsageCount Value="58"/>
+        <UsageCount Value="59"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
       <Unit1>
@@ -26,7 +26,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="28"/>
         <CursorPos X="1" Y="46"/>
-        <UsageCount Value="58"/>
+        <UsageCount Value="59"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -38,7 +38,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="34"/>
         <CursorPos X="1" Y="1"/>
-        <UsageCount Value="58"/>
+        <UsageCount Value="59"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit2>
       <Unit3>
@@ -49,7 +49,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="33" Y="23"/>
-        <UsageCount Value="58"/>
+        <UsageCount Value="59"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit3>
@@ -60,17 +60,19 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="27" Y="19"/>
-        <UsageCount Value="58"/>
+        <UsageCount Value="59"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit4>
       <Unit5>
         <Filename Value="uglobals.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uGlobals"/>
+        <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="86"/>
+        <TopLine Value="29"/>
         <CursorPos X="42" Y="89"/>
-        <UsageCount Value="57"/>
+        <UsageCount Value="58"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit5>
       <Unit6>
@@ -80,7 +82,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="1" Y="31"/>
-        <UsageCount Value="47"/>
+        <UsageCount Value="48"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit6>
       <Unit7>
@@ -90,9 +92,9 @@
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="8"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="83"/>
-        <CursorPos X="1" Y="113"/>
-        <UsageCount Value="38"/>
+        <TopLine Value="127"/>
+        <CursorPos X="32" Y="141"/>
+        <UsageCount Value="39"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit7>
@@ -104,7 +106,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="61"/>
         <CursorPos X="1" Y="92"/>
-        <UsageCount Value="45"/>
+        <UsageCount Value="46"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit8>
@@ -116,7 +118,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="40" Y="26"/>
-        <UsageCount Value="45"/>
+        <UsageCount Value="46"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit9>
@@ -126,9 +128,9 @@
         <UnitName Value="uDxDevice"/>
         <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="53"/>
-        <CursorPos X="62" Y="78"/>
-        <UsageCount Value="44"/>
+        <TopLine Value="54"/>
+        <CursorPos X="20" Y="62"/>
+        <UsageCount Value="45"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit10>
@@ -140,7 +142,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="140"/>
         <CursorPos X="20" Y="169"/>
-        <UsageCount Value="43"/>
+        <UsageCount Value="44"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit11>
@@ -150,9 +152,9 @@
         <UnitName Value="uLuaCmdDevice"/>
         <EditorIndex Value="9"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="92"/>
-        <CursorPos X="43" Y="121"/>
-        <UsageCount Value="43"/>
+        <TopLine Value="94"/>
+        <CursorPos X="22" Y="105"/>
+        <UsageCount Value="44"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit12>
@@ -162,9 +164,9 @@
         <UnitName Value="uComDevice"/>
         <EditorIndex Value="5"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="178"/>
-        <CursorPos X="11" Y="210"/>
-        <UsageCount Value="33"/>
+        <TopLine Value="95"/>
+        <CursorPos X="81" Y="106"/>
+        <UsageCount Value="34"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit13>
@@ -174,9 +176,9 @@
         <UnitName Value="uComDeviceService"/>
         <EditorIndex Value="7"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="56"/>
-        <CursorPos X="46" Y="56"/>
-        <UsageCount Value="28"/>
+        <TopLine Value="44"/>
+        <CursorPos X="3" Y="74"/>
+        <UsageCount Value="29"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit14>
@@ -273,12 +275,10 @@
       <Unit26>
         <Filename Value="C:\Apps\lazarus126\components\LazSerial\lazserial.pas"/>
         <UnitName Value="LazSerial"/>
-        <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
         <TopLine Value="64"/>
-        <CursorPos X="12" Y="69"/>
+        <CursorPos X="63" Y="84"/>
         <UsageCount Value="16"/>
-        <Loaded Value="True"/>
       </Unit26>
       <Unit27>
         <Filename Value="C:\Apps\lazarus126\lcl\include\control.inc"/>
@@ -297,8 +297,8 @@
       <Unit29>
         <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\sysutils\sysstrh.inc"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="105"/>
-        <CursorPos X="63" Y="124"/>
+        <TopLine Value="43"/>
+        <CursorPos X="46" Y="58"/>
         <UsageCount Value="10"/>
       </Unit29>
       <Unit30>
@@ -309,130 +309,137 @@
         <CursorPos X="3" Y="167"/>
         <UsageCount Value="10"/>
       </Unit30>
+      <Unit31>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\sysutils\sysstr.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1807"/>
+        <CursorPos X="38" Y="1817"/>
+        <UsageCount Value="10"/>
+      </Unit31>
     </Units>
     <General>
       <ActiveWindowIndexAtStart Value="0"/>
     </General>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="ucomdeviceservice.pas"/>
-        <Caret Line="75" Column="27" TopLine="45"/>
-      </Position1>
-      <Position2>
-        <Filename Value="ucomdeviceservice.pas"/>
-        <Caret Line="72" Column="23" TopLine="54"/>
-      </Position2>
-      <Position3>
-        <Filename Value="ucomdevice.pas"/>
-        <Caret Line="19" Column="7" TopLine="1"/>
-      </Position3>
-      <Position4>
-        <Filename Value="C:\Apps\lazarus126\components\LazSerial\lazserial.pas"/>
-        <Caret Line="67" Column="70" TopLine="50"/>
-      </Position4>
-      <Position5>
-        <Filename Value="ucomdevice.pas"/>
-        <Caret Line="75" Column="1" TopLine="63"/>
-      </Position5>
-      <Position6>
-        <Filename Value="ucomdevice.pas"/>
-        <Caret Line="77" Column="34" TopLine="68"/>
-      </Position6>
-      <Position7>
-        <Filename Value="ucomdevice.pas"/>
-        <Caret Line="30" Column="38" TopLine="24"/>
-      </Position7>
-      <Position8>
-        <Filename Value="ucomdevice.pas"/>
-        <Caret Line="112" Column="8" TopLine="109"/>
-      </Position8>
-      <Position9>
-        <Filename Value="ucomdevice.pas"/>
-        <Caret Line="118" Column="13" TopLine="109"/>
-      </Position9>
-      <Position10>
-        <Filename Value="uluacmddevice.pas"/>
-        <Caret Line="110" Column="25" TopLine="91"/>
-      </Position10>
-      <Position11>
-        <Filename Value="ucomdevice.pas"/>
-        <Caret Line="140" Column="25" TopLine="127"/>
-      </Position11>
-      <Position12>
-        <Filename Value="ucomdevice.pas"/>
-        <Caret Line="45" Column="55" TopLine="18"/>
-      </Position12>
-      <Position13>
-        <Filename Value="uluacmddevice.pas"/>
-        <Caret Line="15" Column="10" TopLine="1"/>
-      </Position13>
-      <Position14>
-        <Filename Value="uluacmddevice.pas"/>
-        <Caret Line="123" Column="21" TopLine="92"/>
-      </Position14>
-      <Position15>
-        <Filename Value="ucomdevice.pas"/>
-        <Caret Line="38" Column="34" TopLine="17"/>
-      </Position15>
-      <Position16>
-        <Filename Value="ucomdevice.pas"/>
-        <Caret Line="207" Column="15" TopLine="173"/>
-      </Position16>
-      <Position17>
-        <Filename Value="ucomdevice.pas"/>
-        <Caret Line="47" Column="62" TopLine="19"/>
-      </Position17>
-      <Position18>
         <Filename Value="ucomdevice.pas"/>
         <Caret Line="46" Column="32" TopLine="27"/>
+      </Position1>
+      <Position2>
+        <Filename Value="ucomdevice.pas"/>
+        <Caret Line="209" Column="24" TopLine="175"/>
+      </Position2>
+      <Position3>
+        <Filename Value="uluacmddevice.pas"/>
+        <Caret Line="123" Column="22" TopLine="92"/>
+      </Position3>
+      <Position4>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="29" Column="25" TopLine="10"/>
+      </Position4>
+      <Position5>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="140" Column="34" TopLine="109"/>
+      </Position5>
+      <Position6>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="29" Column="25" TopLine="10"/>
+      </Position6>
+      <Position7>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="33" Column="17" TopLine="11"/>
+      </Position7>
+      <Position8>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="170" Column="15" TopLine="133"/>
+      </Position8>
+      <Position9>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
+      </Position9>
+      <Position10>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="173" Column="24" TopLine="137"/>
+      </Position10>
+      <Position11>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="172" Column="12" TopLine="140"/>
+      </Position11>
+      <Position12>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="41" Column="32" TopLine="17"/>
+      </Position12>
+      <Position13>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="177" Column="1" TopLine="140"/>
+      </Position13>
+      <Position14>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="102" Column="29" TopLine="83"/>
+      </Position14>
+      <Position15>
+        <Filename Value="uluacmddevice.pas"/>
+        <Caret Line="110" Column="54" TopLine="91"/>
+      </Position15>
+      <Position16>
+        <Filename Value="udeviceservice.pas"/>
+        <Caret Line="161" Column="3" TopLine="140"/>
+      </Position16>
+      <Position17>
+        <Filename Value="ucomdeviceservice.pas"/>
+        <Caret Line="70" Column="53" TopLine="56"/>
+      </Position17>
+      <Position18>
+        <Filename Value="ucomdeviceservice.pas"/>
+        <Caret Line="77" Column="30" TopLine="47"/>
       </Position18>
       <Position19>
         <Filename Value="ucomdevice.pas"/>
-        <Caret Line="209" Column="24" TopLine="175"/>
+        <Caret Line="42" Column="16" TopLine="24"/>
       </Position19>
       <Position20>
-        <Filename Value="uluacmddevice.pas"/>
-        <Caret Line="123" Column="22" TopLine="92"/>
+        <Filename Value="ucomdevice.pas"/>
+        <Caret Line="117" Column="3" TopLine="113"/>
       </Position20>
       <Position21>
-        <Filename Value="udeviceservice.pas"/>
-        <Caret Line="29" Column="25" TopLine="10"/>
+        <Filename Value="ucomdeviceservice.pas"/>
+        <Caret Line="52" Column="17" TopLine="47"/>
       </Position21>
       <Position22>
-        <Filename Value="udeviceservice.pas"/>
-        <Caret Line="140" Column="34" TopLine="109"/>
+        <Filename Value="ucomdeviceservice.pas"/>
+        <Caret Line="79" Column="24" TopLine="59"/>
       </Position22>
       <Position23>
-        <Filename Value="udeviceservice.pas"/>
-        <Caret Line="29" Column="25" TopLine="10"/>
+        <Filename Value="ucomdevice.pas"/>
+        <Caret Line="24" Column="32" TopLine="24"/>
       </Position23>
       <Position24>
-        <Filename Value="udeviceservice.pas"/>
-        <Caret Line="33" Column="17" TopLine="11"/>
+        <Filename Value="ucomdevice.pas"/>
+        <Caret Line="30" Column="16" TopLine="5"/>
       </Position24>
       <Position25>
-        <Filename Value="udeviceservice.pas"/>
-        <Caret Line="170" Column="15" TopLine="133"/>
+        <Filename Value="ucomdeviceservice.pas"/>
+        <Caret Line="57" Column="23" TopLine="41"/>
       </Position25>
       <Position26>
-        <Filename Value="udeviceservice.pas"/>
-        <Caret Line="1" Column="1" TopLine="1"/>
+        <Filename Value="ucomdevice.pas"/>
+        <Caret Line="39" Column="17" TopLine="12"/>
       </Position26>
       <Position27>
-        <Filename Value="udeviceservice.pas"/>
-        <Caret Line="173" Column="24" TopLine="137"/>
+        <Filename Value="ucomdevice.pas"/>
+        <Caret Line="106" Column="3" TopLine="95"/>
       </Position27>
       <Position28>
-        <Filename Value="udeviceservice.pas"/>
-        <Caret Line="172" Column="12" TopLine="140"/>
+        <Filename Value="udxdevice.pas"/>
+        <Caret Line="62" Column="20" TopLine="54"/>
       </Position28>
       <Position29>
-        <Filename Value="udeviceservice.pas"/>
-        <Caret Line="41" Column="32" TopLine="17"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="277" Column="9" TopLine="253"/>
       </Position29>
       <Position30>
-        <Filename Value="udeviceservice.pas"/>
-        <Caret Line="177" Column="1" TopLine="140"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="31" Column="78" TopLine="10"/>
       </Position30>
     </JumpHistory>
   </ProjectSession>

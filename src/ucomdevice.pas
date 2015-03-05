@@ -21,13 +21,13 @@ type
       fCustomValues: Boolean;
       function GetActive: Boolean;
       function GetDataBits: Integer;
-      function GetParity: char;
+      function GetParity: String;
       function GetSpeed: Integer;
       function GetStopBits: Integer;
       procedure OnRxData(Sender: TObject);
       procedure SetActive(AValue: Boolean);
       procedure SetDataBits(AValue: Integer);
-      procedure SetParity(AValue: char);
+      procedure SetParity(AValue: String);
       procedure SetSpeed(AValue: Integer);
       procedure SetStopBits(AValue: Integer);
     public
@@ -38,7 +38,7 @@ type
       procedure SendData(pData: String);
       property Active: Boolean read GetActive write SetActive;
       property Speed:Integer read GetSpeed write SetSpeed;
-      property Parity:char read GetParity write SetParity;
+      property Parity:String read GetParity write SetParity;
       property DataBits:Integer read GetDataBits write SetDataBits;
       property StopBits:Integer read GetStopBits write SetStopBits;
   end;
@@ -78,7 +78,7 @@ begin
   Result := ConstsBits[fDataBits];
 end;
 
-function TComDevice.GetParity: char;
+function TComDevice.GetParity: String;
 begin
   if (fComPort <> nil) then
     fParity:=fComPort.Parity;
@@ -103,7 +103,7 @@ end;
 
 procedure TComDevice.SetActive(AValue: Boolean);
 begin
-  Glb.DebugLog('Setting port '+Name+' active ' + BoolToStr(AValue), cComLoggerName);
+  Glb.DebugLog('Setting port '+Name+' active ' + BoolToStr(AValue, 'TRUE', 'FALSE'), cComLoggerName);
   if (fComPort = nil) then
     Init;
   if (fComPort <> nil) then
@@ -124,7 +124,7 @@ begin
   raise TWrongSerialConfigurationException.CreateFmt('Wrong data bits value %d', [AValue]);
 end;
 
-procedure TComDevice.SetParity(AValue: char);
+procedure TComDevice.SetParity(AValue: String);
 var
   lVal: TParity;
 begin

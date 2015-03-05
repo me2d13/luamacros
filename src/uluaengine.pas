@@ -28,6 +28,7 @@ type
       procedure RegisterFunctions;
       procedure CallFunctionByRef(pRef: Integer);overload;
       procedure CallFunctionByRef(pRef: Integer; pData: String);overload;
+      procedure CallFunctionByRef(pRef: Integer; pKey: Integer; pDirection: Integer);overload;
     public
       constructor Create;
       destructor Destroy;override;
@@ -130,6 +131,17 @@ begin
   lua_rawgeti(fLua.LuaInstance, LUA_REGISTRYINDEX, pRef);
   lua_pushstring(fLua.LuaInstance, pChar(pData));
   lua_pcall(fLua.LuaInstance, 1, 0, LUA_MULTRET);
+end;
+
+procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pKey: Integer;
+  pDirection: Integer);
+begin
+  if (fLua = nil) then
+    exit;
+  lua_rawgeti(fLua.LuaInstance, LUA_REGISTRYINDEX, pRef);
+  lua_pushinteger(fLua.LuaInstance, pKey);
+  lua_pushinteger(fLua.LuaInstance, pDirection);
+  lua_pcall(fLua.LuaInstance, 2, 0, LUA_MULTRET);
 end;
 
 constructor TLuaEngine.Create;
@@ -260,12 +272,22 @@ var
 begin
   for lTrigger in fTriggers do
   begin
-    if (pDevice = lTrigger.Device) and (pButton = lTrigger.KeyNumber) and
-      (pDirection = lTrigger.Direction) then
+    if (pDevice = lTrigger.Device) then
     begin
-      Glb.DebugLog(Format('Calling handler %d for device %s, key %d, direction %d',
-          [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), 'LUA');
-      CallFunctionByRef(lTrigger.LuaRef);
+      // callbacks with specific button and direction
+      if (not lTrigger.WholeDevice) and (pButton = lTrigger.KeyNumber) and
+      (pDirection = lTrigger.Direction) then
+      begin
+        Glb.DebugLog(Format('Calling handler %d for device %s, key %d, direction %d',
+            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), 'LUA');
+        CallFunctionByRef(lTrigger.LuaRef);
+      end;
+      if (lTrigger.WholeDevice) then
+      begin
+        Glb.DebugLog(Format('Calling handler %d for device %s with params key %d, direction %d',
+            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), 'LUA');
+        CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection);
+      end;
     end;
   end;
 end;
