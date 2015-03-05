@@ -32,7 +32,7 @@ handler()
 -- 2nd param: button number
 -- 3rd param: direction, 0=down, 1=up
 -- 4th param: callback function
---lmc_set_handler('LB',2,0,handler)
+lmc_set_handler('LB',2,0,handler)
 -- now callback is active
 
 -- another type of device callback - assigned to whole device
@@ -43,6 +43,9 @@ handler()
 -- 2nd param: direction, 0=down, 1=up
 lmc_set_handler('LB',function(button, direction)
   print('Callback for whole joystick: button ' .. button .. ', direction '..direction)
+  if (button == 3) then
+    lmc_xpl_command('sim/view/still_spot')
+  end
 end)
 
 -- add COM port (with default config values) as device
