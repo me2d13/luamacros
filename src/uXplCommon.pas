@@ -4,7 +4,6 @@ interface
 
 uses XPLMDataAccess, XPLMUtilities;
 
-
 const
   XPL_MEM_FILE = 'XPL_HIDMACROS_MEMORY_FILE';
   XPL_MAX_STRING_SIZE = 1024;
@@ -15,11 +14,18 @@ const
   HDMC_COMMAND_BEGIN = 5;
   HDMC_COMMAND_END = 6;
   HDMC_SET_POSINTERVAL = 4;
+  HDMC_TOGGLE_NEXT = 7;
+  HDMC_TOGGLE_PREVIOUS = 8;
+  HDMC_SWITCH_NEXT = 9;
+  HDMC_SWITCH_PREVIOUS = 10;
+  HDMC_SHOW_TEXT = 11;
+
   COM_SLOTS_COUNT = 8;
 
 type
   Pointer8b = Int64;
 
+  PXplValue = ^TXplValue;
   TXplValue = packed record
     case Integer of
     0: (intData : Integer);
@@ -31,6 +37,8 @@ type
   TXplComSlot = packed record
     XplRequestFlag: byte;
     HDMcommand: byte;
+    //DataRef: XPLMDataRef;
+    //CommandRef: XPLMCommandRef;
     DataRef: Pointer8b;
     CommandRef: Pointer8b;
     DataType: XPLMDataTypeID;
@@ -77,7 +85,6 @@ type
 implementation
 
 uses SysUtils;
-
 
 function Pointer2Pointer8b(Input: Pointer) : Pointer8b;
 begin

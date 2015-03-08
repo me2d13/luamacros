@@ -12,6 +12,7 @@ function CheckDeviceNameWithAsk(luaState : TLuaState) : integer;
 function AssignDeviceNameByRegexp(luaState : TLuaState) : integer;
 function LuaCmdSetCallback(luaState : TLuaState) : integer;
 function AddCom(luaState : TLuaState) : integer;
+function SetComSplitter(luaState : TLuaState) : integer;
 function SendCom(luaState : TLuaState) : integer;
 
 implementation
@@ -111,6 +112,17 @@ begin
   end
   else
     Glb.DeviceService.AddCom(lDevName, lComName);
+  Result := 0;
+end;
+
+function SetComSplitter(luaState: TLuaState): integer;
+var
+  lName : PAnsiChar;
+  lSplitter : PAnsiChar;
+begin
+  lName := lua_tostring(luaState, 1);
+  lSplitter := lua_tostring(luaState, 2);
+  Glb.DeviceService.SetComSplitter(lName, lSplitter);
   Result := 0;
 end;
 

@@ -17,7 +17,7 @@ type
     fActiveDuringCompilation: Boolean;
     procedure DebugLog(Value: String);
     function GetCustomXplVariable(pName: String; pIndex: Integer; isArray: Boolean): Variant;
-    procedure SetCustomXplVariable(pName: String; pIndex: Integer; pValue: Variant; isArray: Boolean);
+    procedure SetCustomXplVariable(pName: String; pIndex: Integer; pValue: Variant; isArray: Boolean; pToggleCommand: Integer);
     procedure WaitForXplane(mSec: Integer = 500);
     procedure WaitForXplaneSlot(pSlot: Integer; mSec: Integer = 500);
     function GetFreeComSlot: Integer;
@@ -33,6 +33,8 @@ type
     procedure SetXplVariable(pName: String; pValue: Variant);
     procedure SetXplArrayItem(pName: String; pIndex: Integer; pValue: Variant);
     procedure ExecuteCommand(pCmdName: String; pMode: Byte = HDMC_EXEC_COMMAND);
+    procedure ToggleDataRef(pName: String; pValues: String; pCommand: Integer);
+    procedure DrawText(pText: String; pPos: Single = 0; pSec: Integer = 5);
   end;
 
   TXPLRefHolder = class
@@ -171,6 +173,42 @@ begin
   end;
 end;
 
+procedure TXPLcontrol.ToggleDataRef(pName: String; pValues: String;
+  pCommand: Integer);
+begin
+  SetCustomXplVariable(pName, 0, pValues, False, pCommand);
+end;
+
+procedure TXPLcontrol.DrawText(pText: String; pPos: Single; pSec: Integer);
+var
+  lSlot: Integer;
+begin
+  if (fMM.Memory = nil) or (not isXplaneConnected) then
+    exit;
+  lSlot := GetFreeComSlot;
+  if lSlot < 0 then
+  begin
+    WaitForXplane;
+    lSlot := GetFreeComSlot;
+    if lSlot < 0 then
+    begin
+      DebugLog('Can''t draw text, Xplane not listening.');
+      exit;
+    end;
+  end;
+  if Glb.IsModuleLogged('XPL') then
+    pBuffer^.Debug := True;
+
+  // find out first
+  StrPCopy(pBuffer^.ComSlots[lSlot].StringBuffer, pText);
+  pBuffer^.ComSlots[lSlot].HDMcommand := HDMC_SHOW_TEXT;
+  pBuffer^.ComSlots[lSlot].Value.floatData := pPos;
+  pBuffer^.ComSlots[lSlot].Length := pSec;
+  DebugLog(Format('Sending DrawText command for text %s at pos %f.', [pText, pPos]));
+  pBuffer^.ComSlots[lSlot].XplRequestFlag := 1; // trigger xpl
+  pBuffer^.XplRequestFlag := 1;
+end;
+
 function TXPLcontrol.GetCustomXplVariable(pName: String; pIndex: Integer;
   isArray: Boolean): Variant;
 var
@@ -297,94 +335,97 @@ begin
 end;
 
 procedure TXPLcontrol.SetCustomXplVariable(pName: String; pIndex: Integer;
-  pValue: Variant; isArray: Boolean);
+  pValue: Variant; isArray: Boolean; pToggleCommand: Integer);
 var
-  lVarIndex: Integer;
-  lVar: TXplVariable;
-  lSecCounter: Integer;
-  lEndMsec: Cardinal;
-  lIsString: Boolean;
-  lStr: String;
-  lUnregistered: Boolean;
-  lSlot: Integer;
+lVarIndex: Integer;
+lVar: TXplVariable;
+lSecCounter: Integer;
+lEndMsec: Cardinal;
+lIsString: Boolean;
+lStr: String;
+lUnregistered: Boolean;
+lSlot: Integer;
 begin
-  if (fMM.Memory = nil) or (not isXplaneConnected) then
-    exit;
+if (fMM.Memory = nil) or (not isXplaneConnected) then
+  exit;
+lSlot := GetFreeComSlot;
+if lSlot < 0 then
+begin
+  WaitForXplane;
   lSlot := GetFreeComSlot;
   if lSlot < 0 then
   begin
-    WaitForXplane;
-    lSlot := GetFreeComSlot;
-    if lSlot < 0 then
-    begin
-      DebugLog('Can''t set variable '+pName+', Xplane not listening.');
-      exit;
-    end;
+    DebugLog('Can''t set variable '+pName+', Xplane not listening.');
+    exit;
   end;
-  if Glb.IsModuleLogged('XPL') then
-    pBuffer^.Debug := True;
-  lIsString := VarType(pValue) = varOleStr;
-  lVarIndex := fVars.IndexOf(pName);
-  if lVarIndex > -1 then
-  begin
-    lVar := fVars.Objects[lVarIndex] as TXplVariable;
-    pBuffer^.ComSlots[lSlot].DataRef := lVar.DataRef;
-    pBuffer^.ComSlots[lSlot].DataType := lVar.DataType;
-    lIsString := pBuffer^.ComSlots[lSlot].DataType = xplmType_Data;
-    lUnregistered := False;
-  end
-  else
-  begin
-    // find out first
-    StrPCopy(pBuffer^.ComSlots[lSlot].ValueName, pName);
-    pBuffer^.ComSlots[lSlot].DataRef := 0;
-    lUnregistered := True;
-  end;
-  if isArray then
-    pBuffer^.ComSlots[lSlot].Index := pIndex;
-  lStr := pValue;
-  if lIsString then
-  begin
-    StrLCopy(pBuffer^.ComSlots[lSlot].StringBuffer, PChar(lStr), XPL_MAX_STRING_SIZE);
-    //pBuffer^.Length := Length(lStr); // keep always value from Xplane
-    DebugLog('Setting string variable to ' + lStr);
-  end
-  else
-    //pBuffer^.ComSlots[lSlot].Value := Variant2VariantBuffer(pValue);
-    StrLCopy(pBuffer^.ComSlots[lSlot].ValueUntyped, PChar(lStr), 255);
+end;
+if Glb.IsModuleLogged('XPL') then
+  pBuffer^.Debug := True;
+lIsString := VarType(pValue) = varOleStr;
+lVarIndex := fVars.IndexOf(pName);
+if lVarIndex > -1 then
+begin
+  lVar := fVars.Objects[lVarIndex] as TXplVariable;
+  pBuffer^.ComSlots[lSlot].DataRef := lVar.DataRef;
+  pBuffer^.ComSlots[lSlot].DataType := lVar.DataType;
+  lIsString := pBuffer^.ComSlots[lSlot].DataType = xplmType_Data;
+  lUnregistered := False;
+end
+else
+begin
+  // find out first
+  StrPCopy(pBuffer^.ComSlots[lSlot].ValueName, pName);
+  pBuffer^.ComSlots[lSlot].DataRef := 0;
+  lUnregistered := True;
+end;
+if isArray then
+  pBuffer^.ComSlots[lSlot].Index := pIndex;
+lStr := pValue;
+if lIsString then
+begin
+  StrLCopy(pBuffer^.ComSlots[lSlot].StringBuffer, PChar(lStr), XPL_MAX_STRING_SIZE);
+  //pBuffer^.Length := Length(lStr); // keep always value from Xplane
+  DebugLog('Setting string variable to ' + lStr);
+end
+else
+  //pBuffer^.ComSlots[lSlot].Value := Variant2VariantBuffer(pValue);
+  StrLCopy(pBuffer^.ComSlots[lSlot].ValueUntyped, PChar(lStr), 255);
+if pToggleCommand > 0 then
+  pBuffer^.ComSlots[lSlot].HDMcommand := pToggleCommand
+else
   pBuffer^.ComSlots[lSlot].HDMcommand := HDMC_SET_VAR;
-  pBuffer^.ComSlots[lSlot].XplRequestFlag := 1;
-  pBuffer^.XplRequestFlag := 1; // trigger xpl
-  // if unregistered, wait for result and note down the address
-  if lUnregistered then
+pBuffer^.ComSlots[lSlot].XplRequestFlag := 1;
+pBuffer^.XplRequestFlag := 1; // trigger xpl
+// if unregistered, wait for result and note down the address
+if lUnregistered then
+begin
+  WaitForXplaneSlot(lSlot);
+  if pBuffer^.ComSlots[lSlot].XplRequestFlag = 0 then
   begin
-    WaitForXplaneSlot(lSlot);
-    if pBuffer^.ComSlots[lSlot].XplRequestFlag = 0 then
-    begin
-      lVar := TXplVariable.Create;
-      lVar.Name := pName;
-      lVar.DataRef := pBuffer^.ComSlots[lSlot].DataRef;
-      lVar.DataType := pBuffer^.ComSlots[lSlot].DataType;
-      lVar.Writable := pBuffer^.ComSlots[lSlot].Writable;
-      if lVar.IsArray or lVar.IsString then
-        lVar.Length := pBuffer^.ComSlots[lSlot].Length
-      else
-        lVar.Length := 0;
-      fVars.AddObject(pName, lVar);
-      DebugLog(Format('Registered var %s at address %x.', [pName, pBuffer^.ComSlots[lSlot].DataRef]))
-    end;
+    lVar := TXplVariable.Create;
+    lVar.Name := pName;
+    lVar.DataRef := pBuffer^.ComSlots[lSlot].DataRef;
+    lVar.DataType := pBuffer^.ComSlots[lSlot].DataType;
+    lVar.Writable := pBuffer^.ComSlots[lSlot].Writable;
+    if lVar.IsArray or lVar.IsString then
+      lVar.Length := pBuffer^.ComSlots[lSlot].Length
+    else
+      lVar.Length := 0;
+    fVars.AddObject(pName, lVar);
+    DebugLog(Format('Registered var %s at address %x.', [pName, pBuffer^.ComSlots[lSlot].DataRef]))
   end;
+end;
 end;
 
 procedure TXPLcontrol.SetXplArrayItem(pName: String; pIndex: Integer;
   pValue: Variant);
 begin
-  SetCustomXplVariable(pName, pIndex, pValue, True);
+  SetCustomXplVariable(pName, pIndex, pValue, True, 0);
 end;
 
 procedure TXPLcontrol.SetXplVariable(pName: String; pValue: Variant);
 begin
-  SetCustomXplVariable(pName, 0, pValue, False);
+  SetCustomXplVariable(pName, 0, pValue, False, 0);
 end;
 
 procedure TXPLcontrol.WaitForXplane(mSec: Integer = 500);

@@ -31,6 +31,7 @@ type
       procedure AddCom(pName:String; pPortName: String; pSpeed: Integer; pDataBits: Integer;
         pParity: String; pStopBits: Integer);overload;
       procedure SendToCom(pDevName: String; pData: String);
+      procedure SetComSplitter(pDevName: String; pSpliter: String);
 
       property Devices:TDeviceList read fDevices;
   end;
@@ -171,6 +172,18 @@ begin
   if not (lDev is TComDevice) then
     raise TDeviceException.CreateFmt('Device %s is not serial device, can not send data.', [pDevName]);
   (lDev as TComDevice).SendData(pData);
+end;
+
+procedure TDeviceService.SetComSplitter(pDevName: String; pSpliter: String);
+var
+  lDev: TDevice;
+begin
+  lDev := GetByName(pDevName);
+  if (lDev = nil) then
+    raise TDeviceException.CreateFmt('Device %s not found.', [pDevName]);
+  if not (lDev is TComDevice) then
+    raise TDeviceException.CreateFmt('Device %s is not serial device, can not set splitter.', [pDevName]);
+  (lDev as TComDevice).Separator:=pSpliter;
 end;
 
 end.

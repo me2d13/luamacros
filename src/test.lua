@@ -71,5 +71,21 @@ lmc_set_handler('C3',function(comVal)
   print(comVal)
 end)
 
+-- set rc com splitter - get data buffered and separated by specific string
+-- use '' to cancel seprating feature
+lmc_set_com_splitter('C3', 'a')
+
 -- send data to COM port
 --lmc_send_to_com('C3', 'ahoj')
+
+--Xplane commands
+--print(lmc_get_xpl_variable('sim/aircraft/view/acf_tailnum'))
+--lmc_set_xpl_variable('sim/cockpit/radios/nav1_freq_hz', 11130)
+
+-- Display text in Xplane
+-- 1st param: text to display
+-- 2nd param (optional): y-postion between 0.0 and 1.0 (default 0.3)
+-- 3rd param (optional): time to display in sec (default 5)
+--lmc_xpl_text('From LUA macros')
+--lmc_xpl_text('From LUA macros', 0.5)
+--lmc_xpl_text('From LUA macros', 0.7, 10)

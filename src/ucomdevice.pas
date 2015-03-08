@@ -19,6 +19,8 @@ type
       fDataBits: TDataBits;
       fStopBits: TStopBits;
       fCustomValues: Boolean;
+      fSeparator: String;
+      fBuffer: String;
       function GetActive: Boolean;
       function GetDataBits: Integer;
       function GetParity: String;
@@ -28,8 +30,11 @@ type
       procedure SetActive(AValue: Boolean);
       procedure SetDataBits(AValue: Integer);
       procedure SetParity(AValue: String);
+      procedure SetSeparator(AValue: String);
       procedure SetSpeed(AValue: Integer);
       procedure SetStopBits(AValue: Integer);
+      procedure SplitBuffer;
+      procedure FlushBuffer;
     public
       constructor Create;
       destructor Destroy;override;
@@ -41,6 +46,7 @@ type
       property Parity:String read GetParity write SetParity;
       property DataBits:Integer read GetDataBits write SetDataBits;
       property StopBits:Integer read GetStopBits write SetStopBits;
+      property Separator:String read fSeparator write SetSeparator;
   end;
 
   TSerialException = class (Exception);
@@ -55,6 +61,9 @@ implementation
 uses
   uMainFrm, uGlobals;
 
+const
+  cBufferMaxSize = 2048;
+
 { TComDevice }
 
 procedure TComDevice.OnRxData(Sender: TObject);
@@ -63,7 +72,20 @@ var
 begin
   lData := fComPort.ReadData;
   Glb.DebugLog('Received data from COM port ' + SystemId + ': ' + lData, cComLoggerName);
-  Glb.LuaEngine.OnDeviceEvent(self, lData);
+  if (fSeparator = '') then
+  begin
+    Glb.LuaEngine.OnDeviceEvent(self, lData);
+  end
+  else
+  begin
+    if (Length(fBuffer) + Length(lData) > cBufferMaxSize) then
+    begin
+      Glb.DebugLogFmt('Rx buffer %s overflow, can''t split.', [Name], cComLoggerName);
+      FlushBuffer;
+    end;
+    fBuffer:=fBuffer + lData;
+    SplitBuffer;
+  end;
 end;
 
 function TComDevice.GetActive: Boolean;
@@ -138,6 +160,21 @@ begin
   raise TWrongSerialConfigurationException.CreateFmt('Wrong parity value %s', [AValue]);
 end;
 
+procedure TComDevice.SetSeparator(AValue: String);
+begin
+  if fSeparator=AValue then Exit;
+  fSeparator:=AValue;
+  if (fSeparator = '') then
+  begin
+    // turning separator feature off, clear buffer
+    FlushBuffer;
+  end
+  else
+  begin
+    Glb.DebugLogFmt('Setting separator of port %s to "%s"', [Name, fSeparator], cComLoggerName);
+  end;
+end;
+
 procedure TComDevice.SetSpeed(AValue: Integer);
 var
   lVal: TBaudRate;
@@ -168,10 +205,41 @@ begin
     raise TWrongSerialConfigurationException.CreateFmt('Wrong stop bits value %d', [AValue]);
 end;
 
+procedure TComDevice.SplitBuffer;
+var
+  lPos: Integer;
+  lChunk: String;
+begin
+  if (fSeparator = '') or (fBuffer = '') then
+    exit;
+  lPos := Pos(fSeparator, fBuffer);
+  while (lPos > 0) do
+  begin
+    lChunk:=Copy(fBuffer, 1, lPos - 1);
+    Glb.DebugLogFmt('Callback with COM data "%s" separated by splitter.', [lChunk], cComLoggerName);
+    Glb.LuaEngine.OnDeviceEvent(self, lChunk);
+    fBuffer:=Copy(fBuffer, lPos + Length(fSeparator), cBufferMaxSize);
+    lPos := Pos(fSeparator, fBuffer);
+  end;
+  if Length(fBuffer) > 0 then
+    Glb.DebugLogFmt('Received data kept in buffer of COM %s. Buffer content: "%s"', [Name, fBuffer], cComLoggerName);
+end;
+
+procedure TComDevice.FlushBuffer;
+begin
+  if (Length(fBuffer) > 0) then
+  begin
+    Glb.DebugLogFmt('Flushing buffer of port %s with data: %s.', [Name, fBuffer], cComLoggerName);
+    Glb.LuaEngine.OnDeviceEvent(self, fBuffer);
+    fBuffer:='';
+  end;
+end;
+
 constructor TComDevice.Create;
 begin
   fComPort := nil;
   fCustomValues := False; // can handle all 4 as they can not be set separately
+  fSeparator := '';
 end;
 
 destructor TComDevice.Destroy;

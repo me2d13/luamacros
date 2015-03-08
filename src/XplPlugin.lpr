@@ -23,8 +23,6 @@ uses
 
   // Default directive to include any RESOURCE files our project may have
 
-  {DEFINE DEBUG}
-
   var
    //gLatitutde : XPLMDataRef;
    gEng: TXplEngine;
@@ -34,6 +32,9 @@ uses
                                 inElapsedTimeSinceLastFlightLoop : Single;
                                 inCounter : LongInt;
                                 inRefcon   : pointer ) : Single; cdecl;
+var
+ lBuff: PChar;
+ lMessage: String;
   begin
     //* If any data refs are missing, do not proceed.
     if (gEng = nil) or (gEng.pBuffer = nil) then
@@ -42,7 +43,55 @@ uses
       exit;
     end;
 
+  try
     gEng.XplTick;
+  except
+    on E: Exception do
+    begin
+      lMessage:=Format('HIDMACROS exception: %s', [e.Message]);
+      GetMem(lBuff, Length(lMessage) + 1);
+      try
+        StrPCopy(lBuff, lMessage);
+        XPLMDebugString(lBuff);
+      finally
+        FreeMem(lBuff);
+      end;
+    end;
+  end;
+
+    result := -1;
+  end;
+
+
+function MyDrawCallbackFunc(inPhase             : XPLMDrawingPhase;
+                                    inIsBefore          : integer;
+                                    inRefcon            : pointer) : Integer; cdecl;
+  var
+   lBuff: PChar;
+   lMessage: String;
+  begin
+    //* If any data refs are missing, do not proceed.
+    if (gEng = nil) or (gEng.pBuffer = nil) then
+    begin
+      result := 1;
+      exit;
+    end;
+
+    try
+      gEng.DrawText();
+    except
+      on E: Exception do
+      begin
+        lMessage:=Format('HIDMACROS exception: %s', [e.Message]);
+        GetMem(lBuff, Length(lMessage) + 1);
+        try
+          StrPCopy(lBuff, lMessage);
+          XPLMDebugString(lBuff);
+        finally
+          FreeMem(lBuff);
+        end;
+      end;
+    end;
 
     result := -1;
   end;
@@ -73,7 +122,10 @@ uses
   	//gLatitutde := XPLMFindDataRef('sim/flightmodel/position/latitude');
 
     if gEng.pBuffer <> nil then
-    	XPLMRegisterFlightLoopCallback(@MyFlightLoopCallbackFunc, -1.0, nil);
+    begin
+      XPLMRegisterFlightLoopCallback(@MyFlightLoopCallbackFunc, -1, nil);
+      XPLMRegisterDrawCallback(@MyDrawCallbackFunc, xplm_Phase_Window, 1, nil);
+    end;
 
     result := 1
   end;
@@ -87,6 +139,7 @@ uses
   procedure XPluginStop; cdecl;
   begin
   	{/* Unregister the callback */}
+    XPLMUnregisterDrawCallback(@MyDrawCallbackFunc, xplm_Phase_Window, 1, nil);
   	XPLMUnregisterFlightLoopCallback(@MyFlightLoopCallbackFunc, nil);
     gEng.Free;
     gEng := nil;

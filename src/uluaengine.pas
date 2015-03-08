@@ -102,18 +102,27 @@ begin
     Glb.LogError('Can''t register Lua functions, LUA init failed.', 'LUA');
     exit;
   end;
-  fLua.RegisterFunction('lmc_xpl_command','lmc_xpl_command',nil,@XplCommand);
-  fLua.RegisterFunction('print','lmc_print',nil,@FormPrint);
-  fLua.RegisterFunction('clear','lmc_clear',nil,@FormClear);
-  fLua.RegisterFunction('lmc_log_module','lmc_log_module',nil,@LogModule);
-  fLua.RegisterFunction('lmc_log_all','lmc_log_all',nil,@LogAll);
-  fLua.RegisterFunction('lmc_print_devices','lmc_print_devices',nil,@PrintDevices);
-  fLua.RegisterFunction('lmc_device_name_check_ask','lmc_device_name_check_ask',nil,@CheckDeviceNameWithAsk);
-  fLua.RegisterFunction('lmc_device_set_name','lmc_device_set_name',nil,@AssignDeviceNameByRegexp);
-  fLua.RegisterFunction('lmc_set_handler','lmc_set_handler',nil,@LuaCmdSetCallback);
-  //fLua.RegisterFunction('lmc_set_handler','lmc_set_handler',nil,@SetDeviceCallback);
-  fLua.RegisterFunction('lmc_add_com','lmc_add_com',nil,@AddCom);
-  fLua.RegisterFunction('lmc_send_to_com','lmc_send_to_com',nil,@SendCom);
+  // general
+  fLua.RegisterFunction('print','',nil,@FormPrint);
+  fLua.RegisterFunction('clear','',nil,@FormClear);
+  fLua.RegisterFunction('lmc_log_module','',nil,@LogModule);
+  fLua.RegisterFunction('lmc_log_all','',nil,@LogAll);
+  // devices
+  fLua.RegisterFunction('lmc_print_devices','',nil,@PrintDevices);
+  fLua.RegisterFunction('lmc_device_name_check_ask','',nil,@CheckDeviceNameWithAsk);
+  fLua.RegisterFunction('lmc_device_set_name','',nil,@AssignDeviceNameByRegexp);
+  fLua.RegisterFunction('lmc_set_handler','',nil,@LuaCmdSetCallback);
+  // seral
+  fLua.RegisterFunction('lmc_add_com','',nil,@AddCom);
+  fLua.RegisterFunction('lmc_send_to_com','',nil,@SendCom);
+  fLua.RegisterFunction('lmc_set_com_splitter','',nil,@SetComSplitter);
+  // xpl
+  fLua.RegisterFunction('lmc_xpl_command','',nil,@XplCommand);
+  fLua.RegisterFunction('lmc_get_xpl_variable','',nil,@GetXplVariable);
+  fLua.RegisterFunction('lmc_set_xpl_variable','',nil,@SetXplVariable);
+  fLua.RegisterFunction('lmc_xpl_text','',nil,@XplDrawText);
+  fLua.RegisterFunction('lmc_xpl_command_begin','',nil,@XplCommandBegin);
+  fLua.RegisterFunction('lmc_xpl_command_end','',nil,@XplCommandEnd);
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer);
