@@ -813,6 +813,7 @@ object MainForm: TMainForm
     top = 129
   end
   object SynLuaSyn1: TSynLuaSyn
+    Enabled = False
     CommentAttri.FrameEdges = sfeAround
     FunctionAttri.FrameEdges = sfeAround
     IdentifierAttri.FrameEdges = sfeAround

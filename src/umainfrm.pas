@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynEdit, Forms, Controls, Graphics, Dialogs,
   PairSplitter, ExtCtrls, ComCtrls, StdCtrls, ActnList, SynHighlighterLua,
-  uLuaEngine;
+  uLuaEngine, Windows;
 
 type
 
@@ -56,10 +56,15 @@ type
     function CheckDirtyTrueCanContinue: boolean;
     function SaveTrueCanContinue: boolean;
     function SaveAsTrueCanContinue: boolean;
+    procedure OrderRawInputMessagesToBeReceived;
   public
     { public declarations }
     procedure print(what: String);
     procedure ClearLog;
+    procedure Init;
+    // message listeners
+    procedure WmInputMessage(var Message: TMessage);
+
     property EditorDirty: boolean read fEditorDirty write SetEditorDirty;
     property FileName: String read fFileName write SetFileName;
   end;
@@ -76,6 +81,23 @@ uses
 
 const
   cUntitled = 'Untitled';
+
+var
+  PrevWndProc: WNDPROC;
+
+function WndCallback(Ahwnd: HWND; uMsg: UINT; wParam: WParam; lParam: LParam):LRESULT; stdcall;
+var
+  lMessage : TMessage;
+begin
+  if uMsg=WM_INPUT then
+  begin
+    lMessage.lParam:=lParam;
+    lMessage.wParam:=wParam;
+    lMessage.msg:=uMsg;
+    MainForm.WmInputMessage(lMessage);
+  end;
+  result:=CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
+end;
 
 { TMainForm }
 
@@ -107,6 +129,11 @@ end;
 procedure TMainForm.Timer1Timer(Sender: TObject);
 begin
   Glb.TickMe;
+end;
+
+procedure TMainForm.WmInputMessage(var Message: TMessage);
+begin
+  Glb.DeviceService.KbdDeviceService.OnRawMessage(Message);
 end;
 
 
@@ -197,6 +224,11 @@ begin
     Result := False;
 end;
 
+procedure TMainForm.OrderRawInputMessagesToBeReceived;
+begin
+  Glb.DeviceService.KbdDeviceService.OrderRawInputMessagesToBeReceived(Handle);
+end;
+
 procedure TMainForm.print(what: String);
 begin
   Memo1.Lines.Add(what);
@@ -205,6 +237,12 @@ end;
 procedure TMainForm.ClearLog;
 begin
   Memo1.Clear;
+end;
+
+procedure TMainForm.Init;
+begin
+  // here Glb is alreadu created & initialized
+  OrderRawInputMessagesToBeReceived;
 end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
@@ -217,6 +255,7 @@ begin
     fFileName:=cUntitled;
     EditorDirty:=false;
   end;
+  PrevWndProc:=Windows.WNDPROC(SetWindowLongPtr(Self.Handle,GWL_WNDPROC,PtrInt(@WndCallback)));
 end;
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);

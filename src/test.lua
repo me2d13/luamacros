@@ -15,6 +15,7 @@ lmc_print_devices();
 -- 2nd arg: regexp applied on DirectX name
 -- returns: Found directX name
 print(lmc_device_set_name('LB', 'BU0836A'));
+print(lmc_device_set_name('KBD1', '826BD90'));
 
 -- now logical name is assigned to game device
 lmc_print_devices();
@@ -59,7 +60,7 @@ end)
 -- 4th param: data bits (8, 7 , 6, 5)
 -- 5th param: parity ('N', 'O', 'E', 'M', 'S')
 -- 6th param: stop bits (1,2)
-lmc_add_com('C3', 'COM3', 1200, 6, 'E', 2)
+--lmc_add_com('C3', 'COM3', 1200, 6, 'E', 2)
 
 -- check device was added
 lmc_print_devices()
@@ -67,13 +68,14 @@ lmc_print_devices()
 -- define callback for whole device using inline function
 -- 1st param: logical name
 -- 2nd param: callback
-lmc_set_handler('C3',function(comVal)
+--[[lmc_set_handler('C3',function(comVal)
   print(comVal)
 end)
+]]--
 
 -- set rc com splitter - get data buffered and separated by specific string
 -- use '' to cancel seprating feature
-lmc_set_com_splitter('C3', 'a')
+--lmc_set_com_splitter('C3', 'a')
 
 -- send data to COM port
 --lmc_send_to_com('C3', 'ahoj')
@@ -89,3 +91,9 @@ lmc_set_com_splitter('C3', 'a')
 --lmc_xpl_text('From LUA macros')
 --lmc_xpl_text('From LUA macros', 0.5)
 --lmc_xpl_text('From LUA macros', 0.7, 10)
+
+-- keyboard handler
+lmc_set_handler('KBD1',function(button, direction)
+  print('Callback for whole keyboard: button ' .. button .. ', direction '..direction)
+end)
+

@@ -15,11 +15,13 @@ type
     private
       fName: String;
       fSystemId: String;
+      fHandle: THandle;
     protected
       function LogIdent: String;
     public
       property Name:String read fName write fName;
       property SystemId: String read fSystemId write fSystemId;
+      property Handle: THandle read fHandle write fHandle;
       function TypeCaption: String; virtual;
   end;
 
