@@ -10,7 +10,7 @@ uses
   Forms, LazSerialPort, uMainFrm, MemMap, uXplCommon, uXplControl, uGlobals,
   uLuaCmdXpl, uDxDeviceService, uDevice, uDxDevice, udeviceservice,
   uLuaCmdDevice, uLuaEngine, uComDevice, uComDeviceService, uKbdDevice, 
-uKbdDeviceService, uRawInput;
+uKbdDeviceService, uRawInput, uHookService, uHookCommon;
 
 {$R *.res}
 

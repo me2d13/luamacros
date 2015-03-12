@@ -77,7 +77,7 @@ implementation
 {$R *.lfm}
 
 uses
-  uGlobals;
+  uGlobals, uHookCommon;
 
 const
   cUntitled = 'Untitled';
@@ -89,14 +89,20 @@ function WndCallback(Ahwnd: HWND; uMsg: UINT; wParam: WParam; lParam: LParam):LR
 var
   lMessage : TMessage;
 begin
+  lMessage.lParam:=lParam;
+  lMessage.wParam:=wParam;
+  lMessage.msg:=uMsg;
   if uMsg=WM_INPUT then
   begin
-    lMessage.lParam:=lParam;
-    lMessage.wParam:=wParam;
-    lMessage.msg:=uMsg;
     MainForm.WmInputMessage(lMessage);
-  end;
-  result:=CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
+    result:=CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
+  end else
+  if uMsg=WM_ASKLMCFORM then
+  begin
+    Glb.HookService.OnHookMessage(lMessage);
+    Result := lMessage.Result;
+  end else
+    result:=CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
 end;
 
 { TMainForm }
@@ -243,6 +249,7 @@ procedure TMainForm.Init;
 begin
   // here Glb is alreadu created & initialized
   OrderRawInputMessagesToBeReceived;
+  Glb.HookService.Init(Handle);
 end;
 
 procedure TMainForm.FormCreate(Sender: TObject);

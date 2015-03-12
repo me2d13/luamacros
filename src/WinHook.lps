@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="9"/>
+    <BuildModes Active="Default"/>
+    <Units Count="5">
+      <Unit0>
+        <Filename Value="WinHook.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="WinHook"/>
+        <EditorIndex Value="0"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="20" Y="11"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="uHookCommon.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uHookCommon"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="35" Y="1"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="uWHookInt.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uWHookInt"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="69"/>
+        <CursorPos X="38" Y="88"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\wininc\ascdef.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="10"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\wininc\base.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="644"/>
+        <CursorPos X="1" Y="663"/>
+        <UsageCount Value="10"/>
+      </Unit4>
+    </Units>
+    <General>
+      <ActiveWindowIndexAtStart Value="0"/>
+    </General>
+    <JumpHistory Count="23" HistoryIndex="22">
+      <Position1>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="1" Column="7" TopLine="1"/>
+      </Position1>
+      <Position2>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="88" Column="45" TopLine="69"/>
+      </Position2>
+      <Position3>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="10" Column="10" TopLine="1"/>
+      </Position3>
+      <Position4>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="177" Column="11" TopLine="143"/>
+      </Position4>
+      <Position5>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="70" Column="45" TopLine="51"/>
+      </Position5>
+      <Position6>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="112" Column="3" TopLine="105"/>
+      </Position6>
+      <Position7>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="67" Column="10" TopLine="48"/>
+      </Position7>
+      <Position8>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="67" Column="10" TopLine="48"/>
+      </Position8>
+      <Position9>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="11" Column="1" TopLine="1"/>
+      </Position9>
+      <Position10>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="106" Column="10" TopLine="87"/>
+      </Position10>
+      <Position11>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="29" Column="1" TopLine="29"/>
+      </Position11>
+      <Position12>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="128" Column="21" TopLine="91"/>
+      </Position12>
+      <Position13>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="51" Column="10" TopLine="32"/>
+      </Position13>
+      <Position14>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="52" Column="8" TopLine="32"/>
+      </Position14>
+      <Position15>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="53" Column="5" TopLine="33"/>
+      </Position15>
+      <Position16>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="54" Column="7" TopLine="34"/>
+      </Position16>
+      <Position17>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="172" Column="16" TopLine="138"/>
+      </Position17>
+      <Position18>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="154" Column="11" TopLine="124"/>
+      </Position18>
+      <Position19>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="21" Column="1" TopLine="3"/>
+      </Position19>
+      <Position20>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="98" Column="5" TopLine="61"/>
+      </Position20>
+      <Position21>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="6" Column="50" TopLine="1"/>
+      </Position21>
+      <Position22>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="27" Column="27" TopLine="1"/>
+      </Position22>
+      <Position23>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="88" Column="17" TopLine="69"/>
+      </Position23>
+    </JumpHistory>
+  </ProjectSession>
+  <EditorMacros Count="0"/>
+</CONFIG>
