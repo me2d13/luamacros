@@ -5,7 +5,8 @@ unit uGlobals;
 interface
 
 uses
-  Classes, SysUtils, uXplControl, uLuaEngine, uDeviceService, uDevice, uHookService;
+  Classes, SysUtils, uXplControl, uLuaEngine, uDeviceService, uDevice, uHookService,
+  uKeyLogService;
 
 type
 
@@ -22,6 +23,7 @@ type
       fLogAll: boolean;
       fDeviceService: TDeviceService;
       fHookService: THookService;
+      fKeyLogService: TKeyLogService;
     public
       constructor Create;
       destructor Destroy; Override;
@@ -41,6 +43,7 @@ type
       property LuaEngine:TLuaEngine read fLuaEngine;
       property DeviceService: TDeviceService read fDeviceService;
       property HookService: THookService read fHookService;
+      property KeyLogService: TKeyLogService read fKeyLogService;
   end;
 
 var
@@ -51,7 +54,7 @@ const
 
 implementation
 
-{$Define HARD_LOG}
+{$Define offHARD_LOG}
 
 const
   cLogFileName = 'LmcApp.log';
@@ -65,6 +68,7 @@ begin
   fLuaEngine := TLuaEngine.Create;
   fDeviceService := TDeviceService.Create;
   fHookService := THookService.Create;
+  fKeyLogService := TKeyLogService.Create;
 end;
 
 destructor TGlobals.Destroy;
@@ -74,6 +78,7 @@ begin
   fLuaEngine.Free;
   fDeviceService.Free;
   fHookService.Free;
+  fKeyLogService.Free;
   inherited Destroy;
 end;
 

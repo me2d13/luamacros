@@ -143,8 +143,6 @@ function MsgFilterFuncKbd(Code: longint; wParam: WPARAM; lParam: LPARAM): LRESUL
 var
   Kill: boolean;
   what2do : Integer;
-  MessageId: Word;
-//  ext_code: Cardinal;
 begin
   if (Code < 0) or (Code <> HC_ACTION) or (gSharedPtr = nil) then
   begin
@@ -153,11 +151,7 @@ begin
   end;
   Result := 0;
   Kill := False;
-  if (lParam and $80000000 > 0) then
-    MessageId := WM_KEYUP
-  else
-    MessageId := WM_KEYDOWN;
-  what2do := SendMessage(gSharedPtr^.MainWinHandle, WM_ASKLMCFORM, MessageId , wParam);
+  what2do := SendMessage(gSharedPtr^.MainWinHandle, WM_ASKLMCFORM, wParam , lParam);
   if (what2do = -1) then
     Kill := True;
   if Kill then

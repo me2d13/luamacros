@@ -5,7 +5,7 @@ unit uKbdDeviceService;
 interface
 
 uses
-  Classes, Windows, SysUtils, uKbdDevice, fgl;
+  uRawInput, Classes, Windows, SysUtils, uKbdDevice, fgl;
 
 type
   TKbdDeviceList = TFPGObjectList<TKbdDevice>;
@@ -16,6 +16,7 @@ type
     private
       fDevices: TKbdDeviceList;
       function GetMessageId(Message: Word): String;
+      function DescribeRawMessage(rawdata: PRAWINPUT): String;
     public
       constructor Create;
       destructor Destroy; virtual;
@@ -23,12 +24,14 @@ type
       function DetectDevices: Integer;
       procedure OrderRawInputMessagesToBeReceived(pForHandle: HWND);
       procedure OnRawMessage(var Message: TMessage);
+      function GetCharFromVirtualKey(Key: Word): String;
+      function ProcessWaitingRawMessages: Integer;
   end;
 
 implementation
 
 uses
-  uRawInput, uGlobals, uDevice;
+  uGlobals, uDevice, uMainFrm;
 
 { TKbdDeviceService }
 
@@ -128,6 +131,7 @@ var
   buff: PRAWINPUT;
   lDev: TKbdDevice;
   lDirection: Integer;
+  lKeyStrokePtr: TKeyStrokePtr;
 begin
   GetRawInputData(Message.LParam, RID_INPUT, nil, pcbSize, sizeOf(RAWINPUTHEADER));
   GetMem(buff, pcbSize);
@@ -141,33 +145,14 @@ begin
           WM_KEYDOWN, WM_SYSKEYDOWN: lDirection:=cDirectionDown;
           WM_KEYUP, WM_SYSKEYUP: lDirection:=cDirectionUp;
         end;
-
-        {ValidEntry := True;
-        New(NewEvent);
-        NewEvent^.DeviceHandle := buff^.header.hDevice;
-        NewEvent^.Time := GetMessageTime;
-        NewEvent^.EventType := etKeyboard;
-        case buff^.keyboard.Message of
-          WM_KEYDOWN, WM_SYSKEYDOWN: NewEvent^.Direction := edDown;
-          WM_KEYUP, WM_SYSKEYUP: NewEvent^.Direction := edUp;
-          else
-            ValidEntry := False;
-        end;
-        NewEvent^.Code := buff^.keyboard.VKey;
-        NewEvent^.MessageId := buff^.keyboard.Message;
-        if (ValidEntry) then
-          eb.Add(NewEvent)
-        else
-          Dispose(NewEvent);
-        }
-        Glb.DebugLog('WM_INPUT KEYBOARD message ' + GetMessageId(buff^.keyboard.Message) +
-            '. Key code: ' + IntToStr(buff^.keyboard.VKey) +
-            '. Dev handle: ' + IntToStr(buff^.header.hDevice) + ', ext info:' + IntToStr(buff^.keyboard.ExtraInformation), cKbdLoggerName);
+        Glb.DebugLog('RAW message: ' + DescribeRawMessage(buff), cKbdLoggerName);
+        lKeyStrokePtr := Glb.KeyLogService.AddRaw(buff);
         // search device
         for lDev in fDevices do
         begin
           if (lDev.Name <> '') and (lDev.Handle = buff^.header.hDevice) then
           begin
+            lKeyStrokePtr^.Device:=lDev;
             Glb.LuaEngine.OnDeviceEvent(lDev, buff^.keyboard.VKey, lDirection);
           end;
         end;
@@ -175,6 +160,40 @@ begin
     end;
   finally
     FreeMem(buff);
+  end;
+end;
+
+function TKbdDeviceService.GetCharFromVirtualKey(Key: Word): String;
+var
+  keyboardState: TKeyboardState;
+  asciiResult: Integer;
+begin
+  GetKeyboardState(keyboardState) ;
+
+  SetLength(Result, 2) ;
+  asciiResult := ToAscii(key, MapVirtualKey(key, 0), keyboardState, @Result[1], 0) ;
+  case asciiResult of
+    0: Result := '';
+    1: SetLength(Result, 1) ;
+    2:;
+    else
+      Result := '';
+  end;
+end;
+
+function TKbdDeviceService.ProcessWaitingRawMessages: Integer;
+var
+  lMsg: TMSG;
+  lMessage: TMessage;
+begin
+  Result := 0;
+  while PeekMessage(lMsg, MainForm.Handle, WM_INPUT, WM_INPUT, PM_REMOVE) do
+  begin
+    lMessage.msg:=lMsg.message;
+    lMessage.wParam:=lMsg.wParam;
+    lMessage.lParam:=lMsg.lParam;
+    OnRawMessage(lMessage);
+    Inc(Result);
   end;
 end;
 
@@ -194,6 +213,20 @@ begin
     WM_MOUSEWHEEL:      Result := 'WM_MOUSEWHEEL';
     else Result := IntToHex(Message, 4);
   end;
+end;
+
+function TKbdDeviceService.DescribeRawMessage(rawdata: PRAWINPUT): String;
+var
+  lDirection: String;
+begin
+  case rawdata^.keyboard.Message of
+    WM_KEYDOWN, WM_SYSKEYDOWN: lDirection:='UP';
+    WM_KEYUP, WM_SYSKEYUP: lDirection:='DOWN';
+  end;
+  Result := Format('message %s, key code %d [%s], extended %d, direction %s, keyboard handle %d',
+    [GetMessageId(rawdata^.keyboard.Message), rawdata^.keyboard.VKey,
+     GetCharFromVirtualKey(rawdata^.keyboard.VKey), rawdata^.keyboard.ExtraInformation,
+     lDirection, rawdata^.header.hDevice]);
 end;
 
 

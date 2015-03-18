@@ -1,4 +1,4 @@
-object MainForm: TMainForm
+object LmcMainForm: TLmcMainForm
   Left = 272
   Height = 701
   Top = 147
@@ -824,5 +824,10 @@ object MainForm: TMainForm
     SymbolAttri.FrameEdges = sfeAround
     left = 369
     top = 147
+  end
+  object UniqueInstance1: TUniqueInstance
+    Enabled = True
+    left = 465
+    top = 159
   end
 end

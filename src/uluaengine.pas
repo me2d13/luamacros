@@ -3,7 +3,7 @@ unit uLuaEngine;
 interface
 
 uses
-  Classes, SysUtils, Lua, uDevice, fgl;
+  Classes, SysUtils, Lua, uDevice, fgl, uKbdDevice;
 
 type
 
@@ -35,17 +35,19 @@ type
       procedure runCode(pSource: String);
       procedure Init;
       procedure UnInit;
+      procedure Reset;
       procedure SetCallback(pDeviceName: String; pButton: Integer; pDirection: Integer; pHandlerRef: Integer);
       procedure SetDeviceCallback(pDeviceName: String; pHandlerRef: Integer);
       procedure OnDeviceEvent(pDevice: TDevice; pButton: Integer; pDirection: Integer);overload;
       procedure OnDeviceEvent(pDevice: TDevice; pData: String);overload;
+      function IsKeyHandled(pKsPtr: TKeyStrokePtr): boolean;
   end;
 
 
 implementation
 
 uses uMainFrm, uGlobals,
-  uLuaCmdXpl, uLuaCmdDevice, uComDevice;
+  uLuaCmdXpl, uLuaCmdDevice, uComDevice, uSendKeys;
 
 const
 {$IFDEF UNIX}
@@ -87,11 +89,24 @@ begin
 end;
 
 function LogAll(luaState : TLuaState) : integer;
-var arg : PAnsiChar;
 begin
      Glb.LogAll:=true;
      Result := 0;
 end;
+
+function SendKeys(luaState : TLuaState) : integer;
+var
+  arg : PAnsiChar;
+  lSndKey: TKeySequence;
+begin
+  arg := lua_tostring(luaState, 1);
+  lSndKey := TKeySequence.Create;
+  lSndKey.Sequence := arg;
+  lSndKey.Resume;
+  Lua_Pop(luaState, Lua_GetTop(luaState));
+  Result := 0;
+end;
+
 
 { TLuaEngine }
 
@@ -107,12 +122,13 @@ begin
   fLua.RegisterFunction('clear','',nil,@FormClear);
   fLua.RegisterFunction('lmc_log_module','',nil,@LogModule);
   fLua.RegisterFunction('lmc_log_all','',nil,@LogAll);
+  fLua.RegisterFunction('lmc_send_keys','',nil,@SendKeys);
   // devices
   fLua.RegisterFunction('lmc_print_devices','',nil,@PrintDevices);
   fLua.RegisterFunction('lmc_device_name_check_ask','',nil,@CheckDeviceNameWithAsk);
   fLua.RegisterFunction('lmc_device_set_name','',nil,@AssignDeviceNameByRegexp);
   fLua.RegisterFunction('lmc_set_handler','',nil,@LuaCmdSetCallback);
-  // seral
+  // serial
   fLua.RegisterFunction('lmc_add_com','',nil,@AddCom);
   fLua.RegisterFunction('lmc_send_to_com','',nil,@SendCom);
   fLua.RegisterFunction('lmc_set_com_splitter','',nil,@SetComSplitter);
@@ -232,6 +248,15 @@ begin
   end;
 end;
 
+procedure TLuaEngine.Reset;
+begin
+  UnInit;
+  fLua.Free;
+  fLua := TLua.Create();
+  fTriggers.Clear;
+  Init;
+end;
+
 procedure TLuaEngine.SetCallback(pDeviceName: String; pButton: Integer;
   pDirection: Integer; pHandlerRef: Integer);
 var
@@ -312,6 +337,30 @@ begin
       Glb.DebugLog(Format('Calling handler %d for device %s with data %s',
           [lTrigger.LuaRef, pDevice.Name, pData]), 'LUA');
       CallFunctionByRef(lTrigger.LuaRef, pData);
+    end;
+  end;
+end;
+
+function TLuaEngine.IsKeyHandled(pKsPtr: TKeyStrokePtr): boolean;
+var
+  lTrigger: TTrigger;
+begin
+  Result := False;
+  if (pKsPtr <> nil) and (pKsPtr^.Device <> nil) and (pKsPtr^.Device.Name <> '') then
+  begin
+    for lTrigger in fTriggers do
+    begin
+      // ignore direction on purpose
+      // this function is called to determine whether key press should be blocked
+      // in active application
+      // for this decision we don't care if macro is defined for key press/release
+      // for both event we block message to active application
+      if (pKsPtr^.Device = lTrigger.Device) and
+        (lTrigger.WholeDevice or (pKsPtr^.VKeyCode = lTrigger.KeyNumber)) then
+      begin
+        Result := True;
+        break;
+      end;
     end;
   end;
 end;

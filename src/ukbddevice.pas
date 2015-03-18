@@ -20,6 +20,14 @@ type
 
   end;
 
+  TKeyStrokePtr = ^TKeyStroke;
+  TKeyStroke = record
+    Device: TKbdDevice;
+    DeviceHandle: Integer;
+    VKeyCode: Integer;
+    Direction: Integer;
+  end;
+
 const
   cKbdLoggerName = 'KBD';
 

@@ -28,6 +28,7 @@ type
       procedure CheckNameAsk(pName: String);
       function AssignNameByRegexp(pName: String; pRegexp: String): String;
       function GetByName(pDeviceName:String): TDevice;
+      function GetByHandle(pDeviceHandle:Integer): TDevice;
       procedure AddCom(pName:String; pPortName: String);overload;
       procedure AddCom(pName:String; pPortName: String; pSpeed: Integer; pDataBits: Integer;
         pParity: String; pStopBits: Integer);overload;
@@ -73,7 +74,7 @@ begin
       lName := cUnassigned
     else
       lName := lItem.Name;
-    Glb.Print(Format('%s  :  %s  :  %s', [lName, lItem.SystemId, lItem.TypeCaption]));
+    Glb.Print(Format('%s  :  %s [%d] :  %s', [lName, lItem.SystemId, lItem.Handle, lItem.TypeCaption]));
   end;
   Glb.Print('Total number of devices: ' + IntToStr(fDevices.Count));
 end;
@@ -90,6 +91,7 @@ begin
   fDevices.Clear;
   fDxService.DetectDevices;
   fKbdService.DetectDevices;
+  fComService.ClearDevices;
   Result := fDevices.Count;
 end;
 
@@ -151,6 +153,19 @@ begin
   Result := nil;
   for lItem in fDevices do
     if (UpperCase(pDeviceName) = UpperCase(lItem.Name)) then
+    begin
+      Result := lItem;
+      break;
+    end;
+end;
+
+function TDeviceService.GetByHandle(pDeviceHandle: Integer): TDevice;
+var
+  lItem: TDevice;
+begin
+  Result := nil;
+  for lItem in fDevices do
+    if (pDeviceHandle = lItem.Handle) then
     begin
       Result := lItem;
       break;

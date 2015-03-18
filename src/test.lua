@@ -16,6 +16,9 @@ lmc_print_devices();
 -- returns: Found directX name
 print(lmc_device_set_name('LB', 'BU0836A'));
 print(lmc_device_set_name('KBD1', '826BD90'));
+print(lmc_device_set_name('KBD2', '1BDC3055'));
+-- remember 2nd param is regexp, so any unique part from that ugly keyboard system id works
+
 
 -- now logical name is assigned to game device
 lmc_print_devices();
@@ -93,7 +96,12 @@ end)
 --lmc_xpl_text('From LUA macros', 0.7, 10)
 
 -- keyboard handler
-lmc_set_handler('KBD1',function(button, direction)
-  print('Callback for whole keyboard: button ' .. button .. ', direction '..direction)
+lmc_set_handler('KBD2',function(button, direction)
+  print('Callback for whole keyboard 2: button ' .. button .. ', direction '..direction)
+end)
+
+lmc_set_handler('KBD1',65, 1, function()
+  print('Callback for keyboard 1 key "a" up')
+  lmc_send_keys('It rocks!')
 end)
 

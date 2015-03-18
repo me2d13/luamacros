@@ -34,16 +34,16 @@
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="69"/>
-        <CursorPos X="38" Y="88"/>
+        <TopLine Value="126"/>
+        <CursorPos X="78" Y="154"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\wininc\ascdef.inc"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="1" Y="1"/>
+        <TopLine Value="164"/>
+        <CursorPos X="10" Y="183"/>
         <UsageCount Value="10"/>
       </Unit3>
       <Unit4>
@@ -57,7 +57,7 @@
     <General>
       <ActiveWindowIndexAtStart Value="0"/>
     </General>
-    <JumpHistory Count="23" HistoryIndex="22">
+    <JumpHistory Count="25" HistoryIndex="24">
       <Position1>
         <Filename Value="uWHookInt.pas"/>
         <Caret Line="1" Column="7" TopLine="1"/>
@@ -150,6 +150,14 @@
         <Filename Value="uWHookInt.pas"/>
         <Caret Line="88" Column="17" TopLine="69"/>
       </Position23>
+      <Position24>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="150" Column="32" TopLine="126"/>
+      </Position24>
+      <Position25>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="154" Column="23" TopLine="126"/>
+      </Position25>
     </JumpHistory>
   </ProjectSession>
   <EditorMacros Count="0"/>

@@ -7,17 +7,18 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, LazSerialPort, uMainFrm, MemMap, uXplCommon, uXplControl, uGlobals,
-  uLuaCmdXpl, uDxDeviceService, uDevice, uDxDevice, udeviceservice,
-  uLuaCmdDevice, uLuaEngine, uComDevice, uComDeviceService, uKbdDevice, 
-uKbdDeviceService, uRawInput, uHookService, uHookCommon;
+  Forms, uniqueinstance_package, LazSerialPort, uMainFrm, MemMap, uXplCommon,
+  uXplControl, uGlobals, uLuaCmdXpl, uDxDeviceService, uDevice, uDxDevice,
+  udeviceservice, uLuaCmdDevice, uLuaEngine, uComDevice, uComDeviceService,
+  uKbdDevice, uKbdDeviceService, uRawInput, uHookService, uHookCommon,
+  uKeyLogService, uSendKeys;
 
 {$R *.res}
 
 begin
   RequireDerivedFormResource := True;
   Application.Initialize;
-  Application.CreateForm(TMainForm, MainForm);
+  Application.CreateForm(TLmcMainForm, MainForm);
   Glb.Init;
   MainForm.Init;
   Application.Run;

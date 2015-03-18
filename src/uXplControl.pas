@@ -49,7 +49,7 @@ type
 implementation
 
 uses SysUtils, Windows, Forms, XPLMDataAccess, Variants,
-  XPLMUtilities, uGlobals;
+  uGlobals;
 
 { TXPLcontrol }
 
@@ -106,7 +106,6 @@ var
   lCommandIndex: Integer;
   //lCommand: XPLMCommandRef;
   lCommand: Pointer8b;
-  lStr: String;
   lUnregistered: Boolean;
   lSlot: Integer;
   lRef: TXPLRefHolder;
@@ -214,10 +213,8 @@ function TXPLcontrol.GetCustomXplVariable(pName: String; pIndex: Integer;
 var
   lVarIndex: Integer;
   lVar: TXplVariable;
-  lSecCounter: Integer;
   lRes: String;
   lSlot: Integer;
-  lVariant: Variant;
 begin
   Result := 0;
   if (fMM.Memory = nil) or (not isXplaneConnected) then
@@ -339,8 +336,6 @@ procedure TXPLcontrol.SetCustomXplVariable(pName: String; pIndex: Integer;
 var
 lVarIndex: Integer;
 lVar: TXplVariable;
-lSecCounter: Integer;
-lEndMsec: Cardinal;
 lIsString: Boolean;
 lStr: String;
 lUnregistered: Boolean;

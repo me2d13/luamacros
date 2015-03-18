@@ -29,21 +29,24 @@
         <CommandLineParams Value="..\src\test.lua"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="4">
+    <RequiredPackages Count="5">
       <Item1>
-        <PackageName Value="ExtraHighlighters_RT"/>
+        <PackageName Value="uniqueinstance_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="LazSerialPort"/>
+        <PackageName Value="ExtraHighlighters_RT"/>
       </Item2>
       <Item3>
-        <PackageName Value="SynEdit"/>
+        <PackageName Value="LazSerialPort"/>
       </Item3>
       <Item4>
-        <PackageName Value="LCL"/>
+        <PackageName Value="SynEdit"/>
       </Item4>
+      <Item5>
+        <PackageName Value="LCL"/>
+      </Item5>
     </RequiredPackages>
-    <Units Count="20">
+    <Units Count="22">
       <Unit0>
         <Filename Value="LuaMacros.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -52,7 +55,7 @@
       <Unit1>
         <Filename Value="umainfrm.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="MainForm"/>
+        <ComponentName Value="LmcMainForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uMainFrm"/>
@@ -147,6 +150,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uHookCommon"/>
       </Unit19>
+      <Unit20>
+        <Filename Value="ukeylogservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uKeyLogService"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="uSendKeys.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uSendKeys"/>
+      </Unit21>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -166,6 +179,9 @@
       </SyntaxOptions>
     </Parsing>
     <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+      </Debugging>
       <Options>
         <Win32>
           <GraphicApplication Value="True"/>

@@ -24,6 +24,7 @@ type
         pParity: String; pStopBits: Integer);overload;
       procedure Init;
       procedure TickMe;
+      procedure ClearDevices;
   end;
 
 
@@ -90,6 +91,11 @@ end;
 procedure TComDeviceService.TickMe;
 begin
 
+end;
+
+procedure TComDeviceService.ClearDevices;
+begin
+  fDevices.Clear;
 end;
 
 end.

@@ -7,13 +7,16 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynEdit, Forms, Controls, Graphics, Dialogs,
   PairSplitter, ExtCtrls, ComCtrls, StdCtrls, ActnList, SynHighlighterLua,
-  uLuaEngine, Windows;
+  UniqueInstance, uLuaEngine, Windows;
+
+const
+  WM_LUA_RUN_CHANGE = WM_USER + 310;
 
 type
 
-  { TMainForm }
+  { TLmcMainForm }
 
-  TMainForm = class(TForm)
+  TLmcMainForm = class(TForm)
     OpenDialog1: TOpenDialog;
     OpenFileAction: TAction;
     SaveAsAction: TAction;
@@ -36,6 +39,7 @@ type
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
     ToolButton5: TToolButton;
+    UniqueInstance1: TUniqueInstance;
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
     procedure OpenFileActionExecute(Sender: TObject);
@@ -64,13 +68,14 @@ type
     procedure Init;
     // message listeners
     procedure WmInputMessage(var Message: TMessage);
+    procedure WmLuaRunChange(var Message: TMessage);
 
     property EditorDirty: boolean read fEditorDirty write SetEditorDirty;
     property FileName: String read fFileName write SetFileName;
   end;
 
 var
-  MainForm: TMainForm;
+  MainForm: TLmcMainForm;
 
 implementation
 
@@ -95,69 +100,82 @@ begin
   if uMsg=WM_INPUT then
   begin
     MainForm.WmInputMessage(lMessage);
-    result:=CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
-  end else
-  if uMsg=WM_ASKLMCFORM then
+    Result := lMessage.Result;
+    //result:=CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
+  end else if uMsg=WM_ASKLMCFORM then
   begin
     Glb.HookService.OnHookMessage(lMessage);
+    Result := lMessage.Result;
+  end else if uMsg=WM_LUA_RUN_CHANGE then
+  begin
+    MainForm.WmLuaRunChange(lMessage);
     Result := lMessage.Result;
   end else
     result:=CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
 end;
 
-{ TMainForm }
+{ TLmcMainForm }
 
-procedure TMainForm.RunScriptActionExecute(Sender: TObject);
+procedure TLmcMainForm.RunScriptActionExecute(Sender: TObject);
 var lSel: String;
 begin
   lSel := SynEdit1.SelText;
   if (Length(Trim(lSel)) > 0) then
       Glb.LuaEngine.runCode(lSel)
   else
-      Glb.LuaEngine.runCode(SynEdit1.Lines.GetText);
+  begin
+    Glb.LuaEngine.Reset;
+    Glb.DeviceService.DetectDevices; // clears device table
+    Glb.LuaEngine.runCode(SynEdit1.Lines.GetText);
+  end;
 end;
 
-procedure TMainForm.SaveActionExecute(Sender: TObject);
+procedure TLmcMainForm.SaveActionExecute(Sender: TObject);
 begin
   SaveTrueCanContinue;
 end;
 
-procedure TMainForm.SaveAsActionExecute(Sender: TObject);
+procedure TLmcMainForm.SaveAsActionExecute(Sender: TObject);
 begin
   SaveAsTrueCanContinue;
 end;
 
-procedure TMainForm.SynEdit1Change(Sender: TObject);
+procedure TLmcMainForm.SynEdit1Change(Sender: TObject);
 begin
   EditorDirty:=true;
 end;
 
-procedure TMainForm.Timer1Timer(Sender: TObject);
+procedure TLmcMainForm.Timer1Timer(Sender: TObject);
 begin
   Glb.TickMe;
 end;
 
-procedure TMainForm.WmInputMessage(var Message: TMessage);
+procedure TLmcMainForm.WmInputMessage(var Message: TMessage);
 begin
   Glb.DeviceService.KbdDeviceService.OnRawMessage(Message);
 end;
 
+procedure TLmcMainForm.WmLuaRunChange(var Message: TMessage);
+begin
+  // refresh lua running indicators
+end;
 
-procedure TMainForm.SetEditorDirty(AValue: boolean);
+
+procedure TLmcMainForm.SetEditorDirty(AValue: boolean);
 begin
   if fEditorDirty=AValue then Exit;
   fEditorDirty:=AValue;
   BuildFormCaption;
 end;
 
-procedure TMainForm.SetFileName(AValue: String);
+procedure TLmcMainForm.SetFileName(AValue: String);
 begin
   if fFileName=AValue then Exit;
   fFileName:=AValue;
   BuildFormCaption;
 end;
 
-procedure TMainForm.BuildFormCaption;
+procedure TLmcMainForm.BuildFormCaption;
 var
   lDirtyFlag: String;
 begin
@@ -168,7 +186,7 @@ begin
   Caption:=Format('LuaMacros - %s%s', [fFileName, lDirtyFlag]);
 end;
 
-procedure TMainForm.ProcesApplicationParams;
+procedure TLmcMainForm.ProcesApplicationParams;
 begin
   if FileExists(Application.Params[1]) then
   begin
@@ -176,7 +194,7 @@ begin
   end;
 end;
 
-procedure TMainForm.LoadFile(const pFileName: String);
+procedure TLmcMainForm.LoadFile(const pFileName: String);
 begin
   if not FileExists(pFileName) then
     exit;
@@ -185,7 +203,7 @@ begin
   FileName:=pFileName;
 end;
 
-function TMainForm.CheckDirtyTrueCanContinue: boolean;
+function TLmcMainForm.CheckDirtyTrueCanContinue: boolean;
 var
   lResult: TModalResult;
 begin
@@ -204,7 +222,7 @@ begin
   end;
 end;
 
-function TMainForm.SaveTrueCanContinue: boolean;
+function TLmcMainForm.SaveTrueCanContinue: boolean;
 begin
   if (FileName = cUntitled) then
     Result := SaveAsTrueCanContinue
@@ -215,7 +233,7 @@ begin
   end;
 end;
 
-function TMainForm.SaveAsTrueCanContinue: boolean;
+function TLmcMainForm.SaveAsTrueCanContinue: boolean;
 begin
   if (FileName <> cUntitled) then
     SaveDialog1.FileName:=FileName;
@@ -230,29 +248,29 @@ begin
     Result := False;
 end;
 
-procedure TMainForm.OrderRawInputMessagesToBeReceived;
+procedure TLmcMainForm.OrderRawInputMessagesToBeReceived;
 begin
   Glb.DeviceService.KbdDeviceService.OrderRawInputMessagesToBeReceived(Handle);
 end;
 
-procedure TMainForm.print(what: String);
+procedure TLmcMainForm.print(what: String);
 begin
   Memo1.Lines.Add(what);
 end;
 
-procedure TMainForm.ClearLog;
+procedure TLmcMainForm.ClearLog;
 begin
   Memo1.Clear;
 end;
 
-procedure TMainForm.Init;
+procedure TLmcMainForm.Init;
 begin
   // here Glb is alreadu created & initialized
   OrderRawInputMessagesToBeReceived;
   Glb.HookService.Init(Handle);
 end;
 
-procedure TMainForm.FormCreate(Sender: TObject);
+procedure TLmcMainForm.FormCreate(Sender: TObject);
 begin
   Glb.LogFunction:=@print;
   if (Application.ParamCount > 0) then
@@ -265,12 +283,12 @@ begin
   PrevWndProc:=Windows.WNDPROC(SetWindowLongPtr(Self.Handle,GWL_WNDPROC,PtrInt(@WndCallback)));
 end;
 
-procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);
+procedure TLmcMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);
 begin
   CanClose:=CheckDirtyTrueCanContinue;
 end;
 
-procedure TMainForm.OpenFileActionExecute(Sender: TObject);
+procedure TLmcMainForm.OpenFileActionExecute(Sender: TObject);
 begin
   if (EditorDirty) then
   begin

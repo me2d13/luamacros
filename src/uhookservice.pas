@@ -5,7 +5,7 @@ unit uHookService;
 interface
 
 uses
-  Classes, SysUtils, Windows, uHookCommon, MemMap;
+  Classes, SysUtils, Windows, uHookCommon, MemMap, uKbdDevice;
 
 type
 
@@ -17,6 +17,8 @@ type
       fSMPtr: PMMFData;
       fHookSet: Boolean;
       procedure InitSharedMemory(pMainFormHandle: THandle);
+      function DescribeHookMessage(pMessage: TMessage): String;
+      function ConvertHookMessageToKeyStroke(pMessage: TMessage): TKeyStroke;
     public
       constructor Create;
       destructor Destroy; virtual;
@@ -36,7 +38,7 @@ const
 implementation
 
 uses
-  uGlobals;
+  uGlobals, uDevice;
 
 { THookService }
 
@@ -61,6 +63,37 @@ begin
   end;
 end;
 
+function THookService.DescribeHookMessage(pMessage: TMessage): String;
+var
+  lPrevious, lDirection: String;
+begin
+  if (pMessage.lParam and $80000000 shr 31 > 0) then
+    lDirection:='UP'
+  else
+    lDirection:='DOWN';
+  if (pMessage.lParam and $40000000 shr 30 > 0) then
+    lPrevious:='DOWN'
+  else
+    lPrevious:='UP';
+  Result := Format('key code %d [%s], repeat %d, scan code %d, extended %d, alt %d, previous %s, direction %s',
+    [pMessage.wParam, Glb.DeviceService.KbdDeviceService.GetCharFromVirtualKey(pMessage.wParam),
+    pMessage.lParam and $FFFF, pMessage.lParam and $FF0000 shr 16,
+    pMessage.lParam and $1000000 shr 24, pMessage.lParam and $20000000 shr 29,
+    lPrevious, lDirection]);
+end;
+
+function THookService.ConvertHookMessageToKeyStroke(pMessage: TMessage
+  ): TKeyStroke;
+begin
+  Result.DeviceHandle:=0;  // unknown yet
+  Result.Device:=nil;  // unknown yet
+  Result.VKeyCode:=pMessage.wParam;
+  if (pMessage.lParam and $80000000 shr 31 > 0) then
+    Result.Direction:=cDirectionUp
+  else
+    Result.Direction:=cDirectionDown;
+end;
+
 constructor THookService.Create;
 begin
   fHookSet:=False;
@@ -82,10 +115,22 @@ begin
 end;
 
 procedure THookService.OnHookMessage(var pMessage: TMessage);
+var
+  lKS: TKeyStroke;
+  lLogKS: TKeyStrokePtr;
 begin
-  Glb.DebugLog('Hook message received in LmcApp', cHookLoggerName);
+  Glb.DebugLog('Hook message: ' + DescribeHookMessage(pMessage), cHookLoggerName);
+  lKS := ConvertHookMessageToKeyStroke(pMessage);
+  lLogKS := Glb.KeyLogService.AssignDevice(lKS);
   pMessage.Result:=0; // do not block
-  //pMessage.Result:=-1; // block
+  if (lKS.DeviceHandle <> 0) then
+  begin
+    lKS.Device := Glb.DeviceService.GetByHandle(lKS.DeviceHandle) as TKbdDevice;
+    if (Glb.LuaEngine.IsKeyHandled(@lKS)) then
+    begin
+      pMessage.Result:=-1; // block
+    end;
+  end;
 end;
 
 end.

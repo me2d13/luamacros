@@ -32,7 +32,7 @@ type
 implementation
 
 uses
-  uGlobals, ActiveX, uMainFrm, Windows;
+  uGlobals, uMainFrm, Windows;
 
 function EnumJoysticksCallback(const lpddi: TDIDeviceInstanceA;
   pvRef: Pointer): HRESULT; stdcall;
@@ -72,8 +72,6 @@ var
   caps: DIDEVCAPS;
   newDevice: TDxDevice;
   hr: HRESULT;
-  I, newIndex : Integer;
-  lNameOK: Boolean;
 begin
   caps.dwSize := SizeOf(DIDEVCAPS);
   hr := Data.GetCapabilities(caps);
