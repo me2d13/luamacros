@@ -42,6 +42,7 @@ type
     UniqueInstance1: TUniqueInstance;
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure OpenFileActionExecute(Sender: TObject);
     procedure RunScriptActionExecute(Sender: TObject);
     procedure SaveActionExecute(Sender: TObject);
@@ -52,6 +53,7 @@ type
     { private declarations }
     fEditorDirty: boolean;
     fFileName: String;
+    fPrintCs: TRTLCriticalSection;
     procedure SetEditorDirty(AValue: boolean);
     procedure SetFileName(AValue: String);
     procedure BuildFormCaption;
@@ -156,8 +158,19 @@ begin
 end;
 
 procedure TLmcMainForm.WmLuaRunChange(var Message: TMessage);
+var
+  lCaption: String;
 begin
+  if (Glb.LuaEngine.IsRunning) then
+  begin
+    lCaption:=Format('Running 1 script, %d queued', [Glb.LuaEngine.GetExecutionQueueSize]);
+    RunScriptAction.Enabled:=False;
+  end else begin
+    RunScriptAction.Enabled:=True;
+    lCaption:='Not running';
+  end;
   // refresh lua running indicators
+  StatusBar1.Panels.Items[0].Text:=lCaption;
 end;
 
 
@@ -255,7 +268,12 @@ end;
 
 procedure TLmcMainForm.print(what: String);
 begin
-  Memo1.Lines.Add(what);
+  EnterCriticalSection(fPrintCs);
+  try
+    Memo1.Lines.Add(what);
+  finally
+    LeaveCriticalSection(fPrintCs);
+  end;
 end;
 
 procedure TLmcMainForm.ClearLog;
@@ -268,10 +286,12 @@ begin
   // here Glb is alreadu created & initialized
   OrderRawInputMessagesToBeReceived;
   Glb.HookService.Init(Handle);
+  // maybe resume LUA execution thread here to have panel update
 end;
 
 procedure TLmcMainForm.FormCreate(Sender: TObject);
 begin
+  InitCriticalSection(fPrintCs);
   Glb.LogFunction:=@print;
   if (Application.ParamCount > 0) then
     ProcesApplicationParams
@@ -281,6 +301,11 @@ begin
     EditorDirty:=false;
   end;
   PrevWndProc:=Windows.WNDPROC(SetWindowLongPtr(Self.Handle,GWL_WNDPROC,PtrInt(@WndCallback)));
+end;
+
+procedure TLmcMainForm.FormDestroy(Sender: TObject);
+begin
+  DoneCriticalsection(fPrintCs);
 end;
 
 procedure TLmcMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);

@@ -46,6 +46,10 @@ type
       property KeyLogService: TKeyLogService read fKeyLogService;
   end;
 
+  LmcException = class (Exception)
+
+  end;
+
 var
   Glb : TGlobals;
 

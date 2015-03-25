@@ -8,6 +8,7 @@ object LmcMainForm: TLmcMainForm
   ClientWidth = 918
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   LCLVersion = '1.2.6.0'
   object PairSplitter1: TPairSplitter
     Cursor = crVSplit
@@ -561,7 +562,11 @@ object LmcMainForm: TLmcMainForm
     Height = 23
     Top = 678
     Width = 918
-    Panels = <>
+    Panels = <    
+      item
+        Width = 50
+      end>
+    SimplePanel = False
   end
   object ToolBar1: TToolBar
     Left = 0

@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="48">
+    <Units Count="52">
       <Unit0>
         <Filename Value="LuaMacros.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -12,7 +12,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="1" Y="23"/>
-        <UsageCount Value="92"/>
+        <UsageCount Value="108"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
       <Unit1>
@@ -24,9 +24,9 @@
         <UnitName Value="uMainFrm"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="15" Y="19"/>
-        <UsageCount Value="92"/>
+        <TopLine Value="159"/>
+        <CursorPos X="27" Y="169"/>
+        <UsageCount Value="108"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -38,7 +38,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="12" Y="17"/>
-        <UsageCount Value="92"/>
+        <UsageCount Value="108"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit2>
       <Unit3>
@@ -48,18 +48,19 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="20" Y="14"/>
-        <UsageCount Value="92"/>
+        <UsageCount Value="108"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit3>
       <Unit4>
         <Filename Value="uXplControl.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplControl"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="10"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="90"/>
-        <CursorPos X="1" Y="109"/>
-        <UsageCount Value="92"/>
+        <TopLine Value="414"/>
+        <CursorPos X="5" Y="444"/>
+        <UsageCount Value="108"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit4>
@@ -69,9 +70,9 @@
         <UnitName Value="uGlobals"/>
         <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="26"/>
-        <CursorPos X="16" Y="44"/>
-        <UsageCount Value="91"/>
+        <TopLine Value="93"/>
+        <CursorPos X="38" Y="100"/>
+        <UsageCount Value="107"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit5>
@@ -82,18 +83,21 @@
         <WindowIndex Value="0"/>
         <TopLine Value="77"/>
         <CursorPos X="20" Y="92"/>
-        <UsageCount Value="81"/>
+        <UsageCount Value="97"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit6>
       <Unit7>
         <Filename Value="uluaengine.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uLuaEngine"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="8"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="73"/>
-        <CursorPos X="1" Y="92"/>
-        <UsageCount Value="72"/>
+        <TopLine Value="240"/>
+        <CursorPos X="17" Y="258"/>
+        <UsageCount Value="88"/>
+        <Bookmarks Count="1">
+          <Item0 X="7" Y="196" ID="1"/>
+        </Bookmarks>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit7>
@@ -101,11 +105,11 @@
         <Filename Value="udxdeviceservice.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uDxDeviceService"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="7"/>
         <WindowIndex Value="0"/>
         <TopLine Value="56"/>
         <CursorPos X="1" Y="75"/>
-        <UsageCount Value="79"/>
+        <UsageCount Value="95"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit8>
@@ -116,7 +120,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="13"/>
         <CursorPos X="3" Y="32"/>
-        <UsageCount Value="79"/>
+        <UsageCount Value="95"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit9>
       <Unit10>
@@ -126,7 +130,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="20" Y="39"/>
-        <UsageCount Value="78"/>
+        <UsageCount Value="94"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit10>
       <Unit11>
@@ -137,7 +141,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="89"/>
         <CursorPos X="26" Y="94"/>
-        <UsageCount Value="77"/>
+        <UsageCount Value="93"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit11>
@@ -149,7 +153,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="23"/>
         <CursorPos X="6" Y="25"/>
-        <UsageCount Value="77"/>
+        <UsageCount Value="93"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit12>
@@ -157,15 +161,13 @@
         <Filename Value="ucomdevice.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uComDevice"/>
-        <EditorIndex Value="7"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="238"/>
-        <CursorPos X="3" Y="240"/>
-        <UsageCount Value="67"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="83"/>
         <Bookmarks Count="1">
           <Item0 X="3" Y="219" ID="2"/>
         </Bookmarks>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit13>
       <Unit14>
@@ -176,7 +178,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="65"/>
         <CursorPos X="17" Y="98"/>
-        <UsageCount Value="62"/>
+        <UsageCount Value="78"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit14>
@@ -187,7 +189,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="1" Y="24"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="55"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit15>
       <Unit16>
@@ -198,7 +200,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="171"/>
         <CursorPos X="25" Y="190"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="55"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit16>
@@ -209,7 +211,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="268"/>
         <CursorPos X="12" Y="287"/>
-        <UsageCount Value="38"/>
+        <UsageCount Value="54"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit17>
       <Unit18>
@@ -220,10 +222,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="22"/>
         <CursorPos X="20" Y="41"/>
-        <UsageCount Value="35"/>
-        <Bookmarks Count="1">
-          <Item0 X="20" Y="90" ID="1"/>
-        </Bookmarks>
+        <UsageCount Value="51"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit18>
@@ -231,12 +230,11 @@
         <Filename Value="uHookCommon.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uHookCommon"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
-        <CursorPos X="36" Y="13"/>
-        <UsageCount Value="34"/>
+        <CursorPos X="16" Y="17"/>
+        <UsageCount Value="50"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit19>
@@ -248,210 +246,11 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="30" Y="10"/>
-        <UsageCount Value="32"/>
+        <UsageCount Value="48"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit20>
       <Unit21>
-        <Filename Value="..\inc\lua\lua.pas"/>
-        <UnitName Value="Lua"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="947"/>
-        <CursorPos X="44" Y="978"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit21>
-      <Unit22>
-        <Filename Value="C:\Apps\lazarus126\packager\registration\registerfcl.pas"/>
-        <UnitName Value="RegisterFCL"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="24"/>
-        <CursorPos X="3" Y="43"/>
-        <UsageCount Value="5"/>
-      </Unit22>
-      <Unit23>
-        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\inc\variants.pp"/>
-        <UnitName Value="variants"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="47"/>
-        <CursorPos X="10" Y="66"/>
-        <UsageCount Value="22"/>
-      </Unit23>
-      <Unit24>
-        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\objpas.pp"/>
-        <UnitName Value="objpas"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="12"/>
-        <CursorPos X="8" Y="28"/>
-        <UsageCount Value="5"/>
-      </Unit24>
-      <Unit25>
-        <Filename Value="C:\Apps\lazarus126\packager\registration\fcllaz.pas"/>
-        <UnitName Value="fcllaz"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="1" Y="1"/>
-        <UsageCount Value="5"/>
-      </Unit25>
-      <Unit26>
-        <Filename Value="C:\Apps\lazarus126\components\synedit\synedit.pp"/>
-        <UnitName Value="SynEdit"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="866"/>
-        <CursorPos X="14" Y="883"/>
-        <UsageCount Value="6"/>
-      </Unit26>
-      <Unit27>
-        <Filename Value="..\inc\DirectX_Borland_D9-10\DirectInput.pas"/>
-        <UnitName Value="DirectInput"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="3240"/>
-        <CursorPos X="14" Y="3259"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit27>
-      <Unit28>
-        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\wininc\base.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="80"/>
-        <CursorPos X="6" Y="99"/>
-        <UsageCount Value="9"/>
-      </Unit28>
-      <Unit29>
-        <Filename Value="..\inc\AsyncFree104\AfComPort.pas"/>
-        <UnitName Value="AfComPort"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="9"/>
-        <CursorPos X="22" Y="27"/>
-        <UsageCount Value="7"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit29>
-      <Unit30>
-        <Filename Value="..\inc\AsyncFree104\AfSafeSync.pas"/>
-        <UnitName Value="AfSafeSync"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="197"/>
-        <CursorPos X="38" Y="212"/>
-        <UsageCount Value="7"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit30>
-      <Unit31>
-        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\wininc\struct.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="7295"/>
-        <CursorPos X="64" Y="7312"/>
-        <UsageCount Value="7"/>
-      </Unit31>
-      <Unit32>
-        <Filename Value="C:\Apps\lazarus126\components\LazSerial\lazserial.pas"/>
-        <UnitName Value="LazSerial"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="64"/>
-        <CursorPos X="63" Y="84"/>
-        <UsageCount Value="14"/>
-      </Unit32>
-      <Unit33>
-        <Filename Value="C:\Apps\lazarus126\lcl\include\control.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="3626"/>
-        <CursorPos X="47" Y="3643"/>
-        <UsageCount Value="7"/>
-      </Unit33>
-      <Unit34>
-        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\classes\classesh.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="102"/>
-        <CursorPos X="43" Y="120"/>
-        <UsageCount Value="8"/>
-      </Unit34>
-      <Unit35>
-        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\sysutils\sysstrh.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="43"/>
-        <CursorPos X="46" Y="58"/>
-        <UsageCount Value="8"/>
-      </Unit35>
-      <Unit36>
-        <Filename Value="C:\Apps\lazarus126\components\LazSerial\synaser.pas"/>
-        <UnitName Value="synaser"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="148"/>
-        <CursorPos X="3" Y="167"/>
-        <UsageCount Value="8"/>
-      </Unit36>
-      <Unit37>
-        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\sysutils\sysstr.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1807"/>
-        <CursorPos X="38" Y="1817"/>
-        <UsageCount Value="8"/>
-      </Unit37>
-      <Unit38>
-        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\wininc\redef.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="703"/>
-        <CursorPos X="10" Y="722"/>
-        <UsageCount Value="10"/>
-      </Unit38>
-      <Unit39>
-        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\sysosh.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="3"/>
-        <CursorPos X="3" Y="22"/>
-        <UsageCount Value="9"/>
-      </Unit39>
-      <Unit40>
-        <Filename Value="C:\Apps\lazarus126\lcl\include\wincontrol.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="6336"/>
-        <CursorPos X="6" Y="6338"/>
-        <UsageCount Value="9"/>
-      </Unit40>
-      <Unit41>
-        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\inc\objpas.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="16" Y="15"/>
-        <UsageCount Value="9"/>
-      </Unit41>
-      <Unit42>
-        <Filename Value="uWHookInt.pas"/>
-        <UnitName Value="uWHookInt"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="20" Y="15"/>
-        <UsageCount Value="14"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit42>
-      <Unit43>
-        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\inc\objpash.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="184"/>
-        <CursorPos X="21" Y="203"/>
-        <UsageCount Value="9"/>
-      </Unit43>
-      <Unit44>
-        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\wininc\ascdef.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="255"/>
-        <CursorPos X="103" Y="274"/>
-        <UsageCount Value="10"/>
-      </Unit44>
-      <Unit45>
-        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\wininc\messages.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1297"/>
-        <CursorPos X="6" Y="1316"/>
-        <UsageCount Value="10"/>
-      </Unit45>
-      <Unit46>
-        <Filename Value="C:\Apps\lazarus126\lcl\include\customform.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1935"/>
-        <CursorPos X="1" Y="1954"/>
-        <UsageCount Value="10"/>
-      </Unit46>
-      <Unit47>
         <Filename Value="uSendKeys.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uSendKeys"/>
@@ -459,131 +258,365 @@
         <WindowIndex Value="0"/>
         <TopLine Value="356"/>
         <CursorPos X="35" Y="375"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="36"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="..\inc\lua\lua.pas"/>
+        <UnitName Value="Lua"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="947"/>
+        <CursorPos X="44" Y="978"/>
+        <UsageCount Value="8"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="C:\Apps\lazarus126\packager\registration\registerfcl.pas"/>
+        <UnitName Value="RegisterFCL"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="24"/>
+        <CursorPos X="3" Y="43"/>
+        <UsageCount Value="3"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\inc\variants.pp"/>
+        <UnitName Value="variants"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="47"/>
+        <CursorPos X="10" Y="66"/>
+        <UsageCount Value="20"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\objpas.pp"/>
+        <UnitName Value="objpas"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="12"/>
+        <CursorPos X="8" Y="28"/>
+        <UsageCount Value="3"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="C:\Apps\lazarus126\packager\registration\fcllaz.pas"/>
+        <UnitName Value="fcllaz"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="3"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="C:\Apps\lazarus126\components\synedit\synedit.pp"/>
+        <UnitName Value="SynEdit"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="866"/>
+        <CursorPos X="14" Y="883"/>
+        <UsageCount Value="4"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="..\inc\DirectX_Borland_D9-10\DirectInput.pas"/>
+        <UnitName Value="DirectInput"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="3240"/>
+        <CursorPos X="14" Y="3259"/>
+        <UsageCount Value="8"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\wininc\base.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="80"/>
+        <CursorPos X="6" Y="99"/>
+        <UsageCount Value="7"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="..\inc\AsyncFree104\AfComPort.pas"/>
+        <UnitName Value="AfComPort"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="9"/>
+        <CursorPos X="22" Y="27"/>
+        <UsageCount Value="5"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="..\inc\AsyncFree104\AfSafeSync.pas"/>
+        <UnitName Value="AfSafeSync"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="197"/>
+        <CursorPos X="38" Y="212"/>
+        <UsageCount Value="5"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\wininc\struct.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="7295"/>
+        <CursorPos X="64" Y="7312"/>
+        <UsageCount Value="5"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="C:\Apps\lazarus126\components\LazSerial\lazserial.pas"/>
+        <UnitName Value="LazSerial"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="64"/>
+        <CursorPos X="63" Y="84"/>
+        <UsageCount Value="12"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="C:\Apps\lazarus126\lcl\include\control.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="3626"/>
+        <CursorPos X="47" Y="3643"/>
+        <UsageCount Value="5"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\classes\classesh.inc"/>
+        <EditorIndex Value="9"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1543"/>
+        <CursorPos X="15" Y="1562"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\sysutils\sysstrh.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="43"/>
+        <CursorPos X="46" Y="58"/>
+        <UsageCount Value="6"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="C:\Apps\lazarus126\components\LazSerial\synaser.pas"/>
+        <UnitName Value="synaser"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="148"/>
+        <CursorPos X="3" Y="167"/>
+        <UsageCount Value="6"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\sysutils\sysstr.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1807"/>
+        <CursorPos X="38" Y="1817"/>
+        <UsageCount Value="6"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\wininc\redef.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="703"/>
+        <CursorPos X="10" Y="722"/>
+        <UsageCount Value="8"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\sysosh.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="3"/>
+        <CursorPos X="3" Y="22"/>
+        <UsageCount Value="7"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="C:\Apps\lazarus126\lcl\include\wincontrol.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="6336"/>
+        <CursorPos X="6" Y="6338"/>
+        <UsageCount Value="7"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\inc\objpas.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="16" Y="15"/>
+        <UsageCount Value="7"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="uWHookInt.pas"/>
+        <UnitName Value="uWHookInt"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="20" Y="15"/>
+        <UsageCount Value="12"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit43>
+      <Unit44>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\inc\objpash.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="184"/>
+        <CursorPos X="21" Y="203"/>
+        <UsageCount Value="7"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\wininc\ascdef.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="255"/>
+        <CursorPos X="103" Y="274"/>
+        <UsageCount Value="8"/>
+      </Unit45>
+      <Unit46>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\wininc\messages.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1297"/>
+        <CursorPos X="6" Y="1316"/>
+        <UsageCount Value="8"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="C:\Apps\lazarus126\lcl\include\customform.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1935"/>
+        <CursorPos X="1" Y="1954"/>
+        <UsageCount Value="8"/>
       </Unit47>
+      <Unit48>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\sysutils\systhrdh.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="13"/>
+        <CursorPos X="16" Y="46"/>
+        <UsageCount Value="10"/>
+      </Unit48>
+      <Unit49>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\sysutils\sysuthrd.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="70"/>
+        <CursorPos X="42" Y="83"/>
+        <UsageCount Value="9"/>
+      </Unit49>
+      <Unit50>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\fgl.pp"/>
+        <UnitName Value="fgl"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="409"/>
+        <CursorPos X="3" Y="411"/>
+        <UsageCount Value="9"/>
+      </Unit50>
+      <Unit51>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\win\tthread.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="78"/>
+        <CursorPos X="3" Y="80"/>
+        <UsageCount Value="10"/>
+      </Unit51>
     </Units>
     <General>
       <ActiveWindowIndexAtStart Value="0"/>
     </General>
-    <JumpHistory Count="29" HistoryIndex="28">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="uhookservice.pas"/>
-        <Caret Line="26" Column="22" TopLine="1"/>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="135" Column="19" TopLine="121"/>
       </Position1>
       <Position2>
-        <Filename Value="uhookservice.pas"/>
-        <Caret Line="15" Column="36" TopLine="1"/>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="113" Column="23" TopLine="91"/>
       </Position2>
       <Position3>
-        <Filename Value="uhookservice.pas"/>
-        <Caret Line="49" Column="33" TopLine="18"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="189" Column="18" TopLine="183"/>
       </Position3>
       <Position4>
-        <Filename Value="umainfrm.pas"/>
-        <Caret Line="19" Column="15" TopLine="1"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="119" Column="60" TopLine="93"/>
       </Position4>
       <Position5>
-        <Filename Value="uSendKeys.pas"/>
-        <Caret Line="13" Column="43" TopLine="1"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="192" Column="40" TopLine="174"/>
       </Position5>
       <Position6>
-        <Filename Value="uSendKeys.pas"/>
-        <Caret Line="183" Column="29" TopLine="164"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="187" Column="13" TopLine="174"/>
       </Position6>
       <Position7>
-        <Filename Value="uSendKeys.pas"/>
-        <Caret Line="13" Column="12" TopLine="1"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="193" Column="7" TopLine="183"/>
       </Position7>
       <Position8>
-        <Filename Value="uSendKeys.pas"/>
-        <Caret Line="184" Column="41" TopLine="165"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="76" Column="7" TopLine="57"/>
       </Position8>
       <Position9>
-        <Filename Value="uSendKeys.pas"/>
-        <Caret Line="293" Column="60" TopLine="274"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="60" Column="36" TopLine="48"/>
       </Position9>
       <Position10>
-        <Filename Value="uSendKeys.pas"/>
-        <Caret Line="330" Column="65" TopLine="312"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="195" Column="48" TopLine="170"/>
       </Position10>
       <Position11>
-        <Filename Value="uSendKeys.pas"/>
-        <Caret Line="364" Column="1" TopLine="346"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="245" Column="57" TopLine="227"/>
       </Position11>
       <Position12>
-        <Filename Value="uXplControl.pas"/>
-        <Caret Line="192" Column="20" TopLine="182"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="195" Column="35" TopLine="170"/>
       </Position12>
       <Position13>
-        <Filename Value="uXplControl.pas"/>
-        <Caret Line="52" Column="3" TopLine="33"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="230" Column="21" TopLine="227"/>
       </Position13>
       <Position14>
-        <Filename Value="uXplControl.pas"/>
-        <Caret Line="449" Column="28" TopLine="419"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="194" Column="39" TopLine="176"/>
       </Position14>
       <Position15>
-        <Filename Value="uXplControl.pas"/>
-        <Caret Line="343" Column="1" TopLine="324"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="392" Column="21" TopLine="373"/>
       </Position15>
       <Position16>
-        <Filename Value="uXplControl.pas"/>
-        <Caret Line="342" Column="1" TopLine="323"/>
+        <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\classes\classesh.inc"/>
+        <Caret Line="1598" Column="15" TopLine="1579"/>
       </Position16>
       <Position17>
-        <Filename Value="uXplControl.pas"/>
-        <Caret Line="220" Column="1" TopLine="201"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="392" Column="54" TopLine="373"/>
       </Position17>
       <Position18>
-        <Filename Value="uXplControl.pas"/>
-        <Caret Line="217" Column="1" TopLine="198"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="590" Column="66" TopLine="555"/>
       </Position18>
       <Position19>
         <Filename Value="uluaengine.pas"/>
-        <Caret Line="48" Column="29" TopLine="36"/>
+        <Caret Line="354" Column="40" TopLine="321"/>
       </Position19>
       <Position20>
         <Filename Value="uluaengine.pas"/>
-        <Caret Line="106" Column="17" TopLine="87"/>
+        <Caret Line="159" Column="12" TopLine="136"/>
       </Position20>
       <Position21>
         <Filename Value="uluaengine.pas"/>
-        <Caret Line="91" Column="1" TopLine="72"/>
+        <Caret Line="384" Column="15" TopLine="373"/>
       </Position21>
       <Position22>
-        <Filename Value="uSendKeys.pas"/>
-        <Caret Line="1" Column="1" TopLine="1"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="246" Column="68" TopLine="235"/>
       </Position22>
       <Position23>
-        <Filename Value="uSendKeys.pas"/>
-        <Caret Line="141" Column="3" TopLine="122"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="35" Column="25" TopLine="2"/>
       </Position23>
       <Position24>
-        <Filename Value="udxdeviceservice.pas"/>
-        <Caret Line="139" Column="3" TopLine="107"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="24" Column="16" TopLine="16"/>
       </Position24>
       <Position25>
-        <Filename Value="udxdeviceservice.pas"/>
-        <Caret Line="35" Column="13" TopLine="16"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="46" Column="41" TopLine="16"/>
       </Position25>
       <Position26>
-        <Filename Value="udxdeviceservice.pas"/>
-        <Caret Line="76" Column="1" TopLine="57"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="57" Column="41" TopLine="39"/>
       </Position26>
       <Position27>
-        <Filename Value="udxdeviceservice.pas"/>
-        <Caret Line="75" Column="6" TopLine="56"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="69" Column="16" TopLine="38"/>
       </Position27>
       <Position28>
-        <Filename Value="ukbddeviceservice.pas"/>
-        <Caret Line="24" Column="16" TopLine="5"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="408" Column="3" TopLine="406"/>
       </Position28>
       <Position29>
-        <Filename Value="uhookservice.pas"/>
-        <Caret Line="49" Column="33" TopLine="18"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="494" Column="3" TopLine="492"/>
       </Position29>
+      <Position30>
+        <Filename Value="uXplControl.pas"/>
+        <Caret Line="121" Column="9" TopLine="103"/>
+      </Position30>
     </JumpHistory>
   </ProjectSession>
   <EditorMacros Count="0"/>

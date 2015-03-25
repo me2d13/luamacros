@@ -16,13 +16,85 @@ type
       WholeDevice: Boolean;
   end;
 
+  { TRunItem }
+
+  TRunItem = class
+    public
+      procedure Execute(pLua: TLua); virtual;
+      function Describe: String; virtual;
+  end;
+
+  { TRiCode }
+
+  TRiCode = class (TRunItem)
+    private
+      fCode: String;
+    public
+      constructor Create(pCode: String);
+      procedure Execute(pLua: TLua); override;
+      function Describe: String; override;
+  end;
+
+  { TRiRef }
+
+  TRiRef = class (TRunItem)
+    protected
+      fRef: Integer;
+    public
+      constructor Create(pRef: Integer);
+      procedure Execute(pLua: TLua); override;
+      function Describe: String; override;
+  end;
+
+  { TRiRefString }
+
+  TRiRefString = class (TRiRef)
+    protected
+      fPar1: String;
+    public
+      constructor Create(pRef: Integer; p1: String);
+      procedure Execute(pLua: TLua); override;
+      function Describe: String; override;
+  end;
+
+  { TRiRefIntegerInteger }
+
+  TRiRefIntegerInteger = class (TRiRef)
+    protected
+      fPar1: Integer;
+      fPar2: Integer;
+    public
+      constructor Create(pRef: Integer; p1, p2: Integer);
+      procedure Execute(pLua: TLua); override;
+      function Describe: String; override;
+  end;
+
+  TRunItemList = TFPGObjectList<TRunItem>;
+
   TTriggerList = TFPGObjectList<TTrigger>;
+
+  { TLuaExecutor }
+
+  TLuaExecutor = class (TThread)
+    private
+      fLua: TLua;
+      fRunList: TRunItemList;
+      fRlSynchronizer: TMultiReadExclusiveWriteSynchronizer;
+    protected
+      procedure Execute; override;
+    public
+      constructor Create(CreateSuspended: Boolean; pLua: TLua);
+      destructor Destroy;override;
+      function GetQueueSize: Integer;
+      function Run(pItem: TRunItem): Integer;
+  end;
 
   { TLuaEngine }
 
-  TLuaEngine = class
+  TLuaEngine = class (TThread)
     private
       fLua: TLua;
+      fExecutor: TLuaExecutor;
       fInitOk: boolean;
       fTriggers: TTriggerList;
       procedure RegisterFunctions;
@@ -32,22 +104,24 @@ type
     public
       constructor Create;
       destructor Destroy;override;
-      procedure runCode(pSource: String);
       procedure Init;
       procedure UnInit;
       procedure Reset;
+      procedure RunCode(pSource: String);
       procedure SetCallback(pDeviceName: String; pButton: Integer; pDirection: Integer; pHandlerRef: Integer);
       procedure SetDeviceCallback(pDeviceName: String; pHandlerRef: Integer);
       procedure OnDeviceEvent(pDevice: TDevice; pButton: Integer; pDirection: Integer);overload;
       procedure OnDeviceEvent(pDevice: TDevice; pData: String);overload;
       function IsKeyHandled(pKsPtr: TKeyStrokePtr): boolean;
+      function GetQueueSize: Integer;
+      function GetExecutionQueueSize: Integer;
+      function IsRunning: Boolean;
   end;
-
 
 implementation
 
 uses uMainFrm, uGlobals,
-  uLuaCmdXpl, uLuaCmdDevice, uComDevice, uSendKeys;
+  uLuaCmdXpl, uLuaCmdDevice, uComDevice, uSendKeys, windows;
 
 const
 {$IFDEF UNIX}
@@ -63,6 +137,10 @@ const
      LUALIBRARY = 'lua52-32.dll';
 {$ENDIF}
 {$ENDIF}
+
+  cMaxQueueSize = 30;
+
+  cLuaLoggerName = 'LUA';
 
 function FormPrint(luaState : TLuaState) : integer;
 var arg : PAnsiChar;
@@ -107,6 +185,190 @@ begin
   Result := 0;
 end;
 
+{ TLuaExecutor }
+
+procedure TLuaExecutor.Execute;
+begin
+  while (not Terminated) do
+  begin
+    if (GetQueueSize = 0) then
+    begin
+      PostMessage(MainForm.Handle, WM_LUA_RUN_CHANGE, 0, 0);
+      Suspend;
+      PostMessage(MainForm.Handle, WM_LUA_RUN_CHANGE, 0, 0);
+    end;
+    if (GetQueueSize > 0) then
+    begin
+      try
+        fRunList.Items[0].Execute(fLua);
+      except
+        on E: Exception do
+          Glb.LogError('Exception in LUA code: ' + E.Message, cLuaLoggerName);
+      end;
+      fRlSynchronizer.Beginwrite;
+      try
+        fRunList.Delete(0);
+      finally
+        fRlSynchronizer.Endwrite;
+      end;
+    end;
+  end;
+end;
+
+constructor TLuaExecutor.Create(CreateSuspended: Boolean; pLua: TLua);
+begin
+  inherited Create(CreateSuspended);
+  fLua := pLua;
+  fRunList := TRunItemList.Create();
+  fRlSynchronizer := TMultiReadExclusiveWriteSynchronizer.Create;
+end;
+
+destructor TLuaExecutor.Destroy;
+begin
+  fRunList.Free;
+  fRlSynchronizer.Free;
+  inherited Destroy;
+end;
+
+function TLuaExecutor.GetQueueSize: Integer;
+begin
+  fRlSynchronizer.Beginread;
+  Result := fRunList.Count;
+  fRlSynchronizer.Endread;
+end;
+
+function TLuaExecutor.Run(pItem: TRunItem): Integer;
+begin
+  if GetQueueSize > cMaxQueueSize then
+    raise LmcException.Create('Maximum execution queue size reached. Make scripts faster or triggers slower.');
+  fRlSynchronizer.Beginwrite;
+  try
+    fRunList.Add(pItem);
+    Result := fRunList.Count;
+  finally
+    fRlSynchronizer.Endwrite;
+  end;
+  Glb.DebugLog('Scheduled run of ' + pItem.Describe, cLuaLoggerName);
+end;
+
+{ TRiRefIntegerInteger }
+
+constructor TRiRefIntegerInteger.Create(pRef: Integer; p1, p2: Integer);
+begin
+  inherited Create(pRef);
+  fPar1:=p1;
+  fPar2:=p2;
+end;
+
+procedure TRiRefIntegerInteger.Execute(pLua: TLua);
+begin
+  if (pLua = nil) then
+    raise LmcException.Create('LUA not initialized');
+  lua_rawgeti(pLua.LuaInstance, LUA_REGISTRYINDEX, fRef);
+  lua_pushinteger(pLua.LuaInstance, fPar1);
+  lua_pushinteger(pLua.LuaInstance, fPar2);
+  lua_pcall(pLua.LuaInstance, 2, 0, LUA_MULTRET);
+end;
+
+function TRiRefIntegerInteger.Describe: String;
+begin
+  Result:=Format('callback id %d, int params %d, %d', [fRef, fPar1, fPar2]);
+end;
+
+{ TRiRefString }
+
+constructor TRiRefString.Create(pRef: Integer; p1: String);
+begin
+  inherited Create(pRef);
+  fPar1:=p1;
+end;
+
+procedure TRiRefString.Execute(pLua: TLua);
+begin
+  if (pLua = nil) then
+    raise LmcException.Create('LUA not initialized');
+  lua_rawgeti(pLua.LuaInstance, LUA_REGISTRYINDEX, fRef);
+  lua_pushstring(pLua.LuaInstance, pChar(fPar1));
+  lua_pcall(pLua.LuaInstance, 1, 0, LUA_MULTRET);
+end;
+
+function TRiRefString.Describe: String;
+begin
+  Result:=Format('callback id %d, string param %s', [fRef, fPar1]);
+end;
+
+{ TRunItem }
+
+procedure TRunItem.Execute(pLua: TLua);
+begin
+  if (pLua = nil) then
+    raise LmcException.Create('LUA not initialized');
+end;
+
+function TRunItem.Describe: String;
+begin
+  Result := '[no info]';
+end;
+
+{ TRiRef }
+
+constructor TRiRef.Create(pRef: Integer);
+begin
+  fRef:=pRef;
+end;
+
+procedure TRiRef.Execute(pLua: TLua);
+begin
+  inherited;
+  lua_rawgeti(pLua.LuaInstance, LUA_REGISTRYINDEX, fRef);
+  lua_pcall(pLua.LuaInstance, 0, 0, LUA_MULTRET);
+end;
+
+function TRiRef.Describe: String;
+begin
+  Result:=Format('callback id %d', [fRef]);
+end;
+
+{ TRiCode }
+
+constructor TRiCode.Create(pCode: String);
+begin
+  fCode:=pCode;
+end;
+
+procedure TRiCode.Execute(pLua: TLua);
+var
+  lMes: String;
+  lRes: Integer;
+begin
+  inherited;
+  try
+    lRes := luaL_loadbuffer(pLua.LuaInstance,PAnsiChar(fCode), Length(fCode), 'LuaMacros script');
+    if lRes <> 0 then
+      raise Exception.Create('Cannot load buffer.');
+
+    lRes := lua_pcall(pLua.LuaInstance, 0, LUA_MULTRET, 0);
+    case lRes of
+      LUA_ERRRUN    : raise Exception.Create('Runtime error');
+      LUA_ERRMEM    : raise Exception.Create('Memory allocation error');
+      LUA_ERRSYNTAX : raise Exception.Create('Syntax error');
+      LUA_ERRERR    : raise Exception.Create('Error handling function failed');
+    end;
+  except
+    on E:Exception do
+    begin
+      lMes := E.Message;
+      lMes := lMes + #10 + #09 + lua_tostring(pLua.LuaInstance, -1);
+      Glb.LogError(lMes, cLuaLoggerName);
+    end;
+  end;
+end;
+
+function TRiCode.Describe: String;
+begin
+  Result:=Format('simple code, length %d', [Length(fCode)]);
+end;
+
 
 { TLuaEngine }
 
@@ -114,7 +376,7 @@ procedure TLuaEngine.RegisterFunctions;
 begin
   if (fLua = nil) then
   begin
-    Glb.LogError('Can''t register Lua functions, LUA init failed.', 'LUA');
+    Glb.LogError('Can''t register Lua functions, LUA init failed.', cLuaLoggerName);
     exit;
   end;
   // general
@@ -143,30 +405,24 @@ end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer);
 begin
-  if (fLua = nil) then
-    exit;
-  lua_rawgeti(fLua.LuaInstance, LUA_REGISTRYINDEX, pRef);
-  lua_pcall(fLua.LuaInstance, 0, 0, LUA_MULTRET);
+  fExecutor.Run(TRiRef.Create(pRef));
+  if (fExecutor.Suspended) then
+    fExecutor.Resume;
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pData: String);
 begin
-  if (fLua = nil) then
-    exit;
-  lua_rawgeti(fLua.LuaInstance, LUA_REGISTRYINDEX, pRef);
-  lua_pushstring(fLua.LuaInstance, pChar(pData));
-  lua_pcall(fLua.LuaInstance, 1, 0, LUA_MULTRET);
+  fExecutor.Run(TRiRefString.Create(pRef, pData));
+  if (fExecutor.Suspended) then
+    fExecutor.Resume;
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pKey: Integer;
   pDirection: Integer);
 begin
-  if (fLua = nil) then
-    exit;
-  lua_rawgeti(fLua.LuaInstance, LUA_REGISTRYINDEX, pRef);
-  lua_pushinteger(fLua.LuaInstance, pKey);
-  lua_pushinteger(fLua.LuaInstance, pDirection);
-  lua_pcall(fLua.LuaInstance, 2, 0, LUA_MULTRET);
+  fExecutor.Run(TRiRefIntegerInteger.Create(pRef, pKey, pDirection));
+  if (fExecutor.Suspended) then
+    fExecutor.Resume;
 end;
 
 constructor TLuaEngine.Create;
@@ -177,7 +433,7 @@ begin
   begin
     if not Lua.LoadLuaLibrary(LUALIBRARY) then
     begin
-      Glb.LogError('Lua library could not load : ' + Lua.errorString, 'LUA');
+      Glb.LogError('Lua library could not load : ' + Lua.errorString, cLuaLoggerName);
       fInitOk:=false;
     end;
   end;
@@ -188,6 +444,7 @@ begin
   begin
     fLua := nil;
   end;
+  fExecutor := TLuaExecutor.Create(True, fLua);
   fTriggers := TTriggerList.Create();
 end;
 
@@ -196,36 +453,11 @@ begin
   if Assigned(fLua) then
     fLua.Free;
   fTriggers.Free;
+  fExecutor.Terminate;
+  if (fExecutor.Suspended) then
+    fExecutor.Resume;
+  fExecutor.Free;
   inherited Destroy;
-end;
-
-procedure TLuaEngine.runCode(pSource: String);
-var
-  lMes: String;
-  lRes: Integer;
-begin
-  try
-    lRes := luaL_loadbuffer(fLua.LuaInstance,PAnsiChar(pSource), Length(pSource), 'LuaMacros script');
-    if lRes <> 0 then
-      raise Exception.Create('Cannot load buffer.');
-
-    lRes := lua_pcall(fLua.LuaInstance, 0, LUA_MULTRET, 0);
-    case lRes of
-      LUA_ERRRUN    : raise Exception.Create('Runtime error');
-      LUA_ERRMEM    : raise Exception.Create('Memory allocation error');
-      LUA_ERRSYNTAX : raise Exception.Create('Syntax error');
-      LUA_ERRERR    : raise Exception.Create('Error handling function failed');
-    end;
-  except
-    on E:Exception do
-    begin
-      lMes := E.Message;
-      if Assigned(fLua) then
-        lMes := lMes + #10 + #09 + lua_tostring(fLua.LuaInstance, -1);
-      Glb.LogError(lMes, 'LUA');
-    end;
-  end;
-  //  fLua.RunFromMem(PAnsiChar(pSource), Length(pSource), 'LuaMacros script');
 end;
 
 procedure TLuaEngine.Init;
@@ -257,6 +489,13 @@ begin
   Init;
 end;
 
+procedure TLuaEngine.RunCode(pSource: String);
+begin
+  fExecutor.Run(TRiCode.Create(pSource));
+  if (fExecutor.Suspended) then
+    fExecutor.Resume;
+end;
+
 procedure TLuaEngine.SetCallback(pDeviceName: String; pButton: Integer;
   pDirection: Integer; pHandlerRef: Integer);
 var
@@ -274,7 +513,7 @@ begin
   lTrigger.WholeDevice:=False;
   fTriggers.Add(lTrigger);
   Glb.DebugLog(Format('Added handler %d for device %s, key %d, direction %d',
-      [pHandlerRef, lDevice.Name, pButton, pDirection]), 'LUA');
+      [pHandlerRef, lDevice.Name, pButton, pDirection]), cLuaLoggerName);
 end;
 
 procedure TLuaEngine.SetDeviceCallback(pDeviceName: String; pHandlerRef: Integer
@@ -296,7 +535,7 @@ begin
   lTrigger.LuaRef:=pHandlerRef;
   fTriggers.Add(lTrigger);
   Glb.DebugLog(Format('Added handler %d for whole device %s',
-      [pHandlerRef, lDevice.Name]), 'LUA');
+      [pHandlerRef, lDevice.Name]), cLuaLoggerName);
 end;
 
 procedure TLuaEngine.OnDeviceEvent(pDevice: TDevice; pButton: Integer;
@@ -313,13 +552,13 @@ begin
       (pDirection = lTrigger.Direction) then
       begin
         Glb.DebugLog(Format('Calling handler %d for device %s, key %d, direction %d',
-            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), 'LUA');
+            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), cLuaLoggerName);
         CallFunctionByRef(lTrigger.LuaRef);
       end;
       if (lTrigger.WholeDevice) then
       begin
         Glb.DebugLog(Format('Calling handler %d for device %s with params key %d, direction %d',
-            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), 'LUA');
+            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), cLuaLoggerName);
         CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection);
       end;
     end;
@@ -335,7 +574,7 @@ begin
     if (pDevice = lTrigger.Device) and (lTrigger.WholeDevice) then
     begin
       Glb.DebugLog(Format('Calling handler %d for device %s with data %s',
-          [lTrigger.LuaRef, pDevice.Name, pData]), 'LUA');
+          [lTrigger.LuaRef, pDevice.Name, pData]), cLuaLoggerName);
       CallFunctionByRef(lTrigger.LuaRef, pData);
     end;
   end;
@@ -363,6 +602,21 @@ begin
       end;
     end;
   end;
+end;
+
+function TLuaEngine.GetQueueSize: Integer;
+begin
+  Result := fExecutor.GetQueueSize;
+end;
+
+function TLuaEngine.GetExecutionQueueSize: Integer;
+begin
+  Result := fExecutor.GetQueueSize;
+end;
+
+function TLuaEngine.IsRunning: Boolean;
+begin
+  Result := not fExecutor.Suspended;
 end;
 
 end.

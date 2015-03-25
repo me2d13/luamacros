@@ -431,8 +431,8 @@ begin
     exit;
   lEndMsec := GetTickCount + mSec;
   while (GetTickCount < lEndMsec) and (pBuffer^.XplRequestFlag = 1) do
-    Application.ProcessMessages;
-    //Sleep(10);
+    //Application.ProcessMessages; -- only from main thread
+    Sleep(10);
 end;
 
 procedure TXPLcontrol.WaitForXplaneSlot(pSlot: Integer; mSec: Integer);
@@ -443,8 +443,8 @@ begin
     exit;
   lEndMsec := GetTickCount + mSec;
   while (GetTickCount < lEndMsec) and (pBuffer^.ComSlots[pSlot].XplRequestFlag = 1) do
-    Application.ProcessMessages;
-    //Sleep(10);
+    //Application.ProcessMessages;
+    Sleep(10);
 end;
 
 

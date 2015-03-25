@@ -2,7 +2,8 @@
 clear();
 
 -- log all modules, very verbose
-lmc_log_all();
+--lmc_log_all();
+lmc_log_module('LUA')
 
 -- common LUA statement
 print('This is LuaMacros. Listing detected devices...');
@@ -49,6 +50,7 @@ lmc_set_handler('LB',function(button, direction)
   print('Callback for whole joystick: button ' .. button .. ', direction '..direction)
   if (button == 3) then
     lmc_xpl_command('sim/view/still_spot')
+    --lmc_xpl_command('sim/view/3d_cockpit_cmnd_look')
   end
 end)
 
@@ -104,4 +106,3 @@ lmc_set_handler('KBD1',65, 1, function()
   print('Callback for keyboard 1 key "a" up')
   lmc_send_keys('It rocks!')
 end)
-
