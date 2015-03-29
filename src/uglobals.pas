@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, uXplControl, uLuaEngine, uDeviceService, uDevice, uHookService,
-  uKeyLogService;
+  uKeyLogService, windows;
 
 type
 
@@ -24,11 +24,18 @@ type
       fDeviceService: TDeviceService;
       fHookService: THookService;
       fKeyLogService: TKeyLogService;
+      fSpoolFileName: String;
+      fLogCs: TRTLCriticalSection;
+      fMainFormHandle: LongInt;
+      fPrintBuffer: TStrings;
+      procedure SetSpoolFileName(AValue: String);
+      procedure AskMainFormToFlushPrintBuffer;
     public
       constructor Create;
       destructor Destroy; Override;
       procedure Init;
       procedure DebugLog(pMessage: String; pLogger: String);
+      procedure DebugLogFile(pMessage: String; pLogger: String; pFileName: String);
       procedure DebugLogFmt(pMessage: String; const Args : Array of const; pLogger: String);
       procedure LogError(pMessage: String; pLogger: String);
       procedure LogModule(pLogger: String);
@@ -36,6 +43,7 @@ type
       function IsModuleLogged(pLogger: String) : boolean;
       procedure TickMe;
       function ScanDevice: TDevice;
+      procedure FlushBuffer;
 
       property XplControl: TXPLcontrol read fXplCLcontrol;
       property LogFunction: TLogFunction read fLogFunction write fLogFunction;
@@ -44,6 +52,8 @@ type
       property DeviceService: TDeviceService read fDeviceService;
       property HookService: THookService read fHookService;
       property KeyLogService: TKeyLogService read fKeyLogService;
+      property SpoolFileName: String read fSpoolFileName write SetSpoolFileName;
+      property MainFormHandle: LongInt read fMainFormHandle write fMainFormHandle;
   end;
 
   LmcException = class (Exception)
@@ -55,6 +65,7 @@ var
 
 const
   cUnassigned = '<unassigned>';
+  WM_FLUSH_PRINT_BUFFER = WM_USER + 320;
 
 implementation
 
@@ -65,8 +76,25 @@ const
 
 { TGlobals }
 
+procedure TGlobals.SetSpoolFileName(AValue: String);
+begin
+  if fSpoolFileName=AValue then Exit;
+  fSpoolFileName:=AValue;
+  if fSpoolFileName = '' then Exit; // spool cancelled
+  if FileExists(fSpoolFileName) then
+    SysUtils.DeleteFile(fSpoolFileName);
+end;
+
+procedure TGlobals.AskMainFormToFlushPrintBuffer;
+begin
+  if (fMainFormHandle > 0) then
+    PostMessage(fMainFormHandle, WM_FLUSH_PRINT_BUFFER, 0, 0);
+end;
+
 constructor TGlobals.Create;
 begin
+  InitCriticalSection(fLogCs);
+  fPrintBuffer := TStringList.Create;
   fXplCLcontrol:=TXPLcontrol.Create;
   fLoggedModules := TStringList.Create;
   fLuaEngine := TLuaEngine.Create;
@@ -83,6 +111,8 @@ begin
   fDeviceService.Free;
   fHookService.Free;
   fKeyLogService.Free;
+  fPrintBuffer.Free;
+  DoneCriticalsection(fLogCs);
   inherited Destroy;
 end;
 
@@ -94,23 +124,40 @@ begin
 end;
 
 procedure TGlobals.DebugLog(pMessage: String; pLogger: String);
+begin
+  if IsModuleLogged(pLogger) then
+  begin
+    EnterCriticalSection(fLogCs);
+    try
+      if (fSpoolFileName > '') then
+      begin
+        DebugLogFile(pMessage, pLogger, fSpoolFileName);
+      end else if Assigned(fLogFunction) then
+        //fLogFunction(Format('%s [%s]: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), pLogger, pMessage]));
+        fPrintBuffer.Add(Format('%s [%s]: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), pLogger, pMessage]));
+    finally
+      LeaveCriticalSection(fLogCs);
+    end;
+  end;
+  AskMainFormToFlushPrintBuffer;
+end;
+
+procedure TGlobals.DebugLogFile(pMessage: String; pLogger: String;
+  pFileName: String);
 var
   lFile: TextFile;
 begin
-  if Assigned(fLogFunction) and IsModuleLogged(pLogger) then
+  if IsModuleLogged(pLogger) then
   begin
-    fLogFunction(Format('%s [%s]: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), pLogger, pMessage]));
-  end;
-  {$IfDef HARD_LOG}
-    AssignFile(lFile, cLogFileName);
-    if FileExists(cLogFileName) then
+    AssignFile(lFile, pFileName);
+    if FileExists(pFileName) then
       Append(lFile)
     else
       Rewrite(lFile);
     Write(lFile, Format('%s [%s]: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), pLogger, pMessage]));
     WriteLn(lFile);
     CloseFile(lFile);
-  {$EndIf}
+  end;
 end;
 
 procedure TGlobals.DebugLogFmt(pMessage: String; const Args: array of const;
@@ -123,8 +170,15 @@ procedure TGlobals.LogError(pMessage: String; pLogger: String);
 begin
   if Assigned(fLogFunction) then
   begin
-    fLogFunction(Format('%s [%s] ERROR: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), pLogger, pMessage]));
+    EnterCriticalSection(fLogCs);
+    try
+      //fLogFunction(Format('%s [%s] ERROR: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), pLogger, pMessage]));
+      fPrintBuffer.Add(Format('%s [%s] ERROR: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), pLogger, pMessage]));
+    finally
+      LeaveCriticalSection(fLogCs);
+    end;
   end;
+  AskMainFormToFlushPrintBuffer;
 end;
 
 procedure TGlobals.LogModule(pLogger: String);
@@ -137,8 +191,15 @@ procedure TGlobals.Print(pMessage: String);
 begin
   if Assigned(fLogFunction) then
   begin
-    fLogFunction(pMessage);
+    EnterCriticalSection(fLogCs);
+    try
+      //fLogFunction(pMessage);
+      fPrintBuffer.Add(pMessage);
+    finally
+      LeaveCriticalSection(fLogCs);
+    end;
   end;
+  AskMainFormToFlushPrintBuffer;
 end;
 
 function TGlobals.IsModuleLogged(pLogger: String): boolean;
@@ -154,6 +215,24 @@ end;
 function TGlobals.ScanDevice: TDevice;
 begin
 
+end;
+
+procedure TGlobals.FlushBuffer;
+var
+  lItem: String;
+begin
+  // THIS MUST BE CALLED ONLY FROM MAIN APP THREAD
+  if Assigned(fLogFunction) then
+  begin
+    EnterCriticalSection(fLogCs);
+    try
+      for lItem in fPrintBuffer do
+        fLogFunction(lItem);
+      fPrintBuffer.Clear;
+    finally
+      LeaveCriticalSection(fLogCs);
+    end;
+  end;
 end;
 
 initialization

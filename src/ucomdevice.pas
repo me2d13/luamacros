@@ -256,7 +256,7 @@ end;
 
 procedure TComDevice.Init;
 begin
-  fComPort := TLazSerial.Create(MainForm);
+  fComPort := TLazSerial.Create(gMainForm);
   fComPort.Device:=SystemId;
   if (fCustomValues) then
   begin

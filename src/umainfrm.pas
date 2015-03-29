@@ -53,7 +53,6 @@ type
     { private declarations }
     fEditorDirty: boolean;
     fFileName: String;
-    fPrintCs: TRTLCriticalSection;
     procedure SetEditorDirty(AValue: boolean);
     procedure SetFileName(AValue: String);
     procedure BuildFormCaption;
@@ -77,7 +76,8 @@ type
   end;
 
 var
-  MainForm: TLmcMainForm;
+  gMainForm: TLmcMainForm;
+  gMainFormThreadId: DWORD;
 
 implementation
 
@@ -101,7 +101,7 @@ begin
   lMessage.msg:=uMsg;
   if uMsg=WM_INPUT then
   begin
-    MainForm.WmInputMessage(lMessage);
+    gMainForm.WmInputMessage(lMessage);
     Result := lMessage.Result;
     //result:=CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
   end else if uMsg=WM_ASKLMCFORM then
@@ -110,7 +110,11 @@ begin
     Result := lMessage.Result;
   end else if uMsg=WM_LUA_RUN_CHANGE then
   begin
-    MainForm.WmLuaRunChange(lMessage);
+    gMainForm.WmLuaRunChange(lMessage);
+    Result := lMessage.Result;
+  end else if uMsg=WM_FLUSH_PRINT_BUFFER then
+  begin
+    Glb.FlushBuffer;
     Result := lMessage.Result;
   end else
     result:=CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
@@ -268,12 +272,7 @@ end;
 
 procedure TLmcMainForm.print(what: String);
 begin
-  EnterCriticalSection(fPrintCs);
-  try
-    Memo1.Lines.Add(what);
-  finally
-    LeaveCriticalSection(fPrintCs);
-  end;
+  Memo1.Lines.Add(what);
 end;
 
 procedure TLmcMainForm.ClearLog;
@@ -291,8 +290,9 @@ end;
 
 procedure TLmcMainForm.FormCreate(Sender: TObject);
 begin
-  InitCriticalSection(fPrintCs);
+  gMainFormThreadId := GetCurrentThreadID;
   Glb.LogFunction:=@print;
+  Glb.MainFormHandle:=handle;
   if (Application.ParamCount > 0) then
     ProcesApplicationParams
   else
@@ -305,7 +305,6 @@ end;
 
 procedure TLmcMainForm.FormDestroy(Sender: TObject);
 begin
-  DoneCriticalsection(fPrintCs);
 end;
 
 procedure TLmcMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);

@@ -139,6 +139,7 @@ begin
   begin
     // find out first
     StrPLCopy(pBuffer^.ComSlots[lSlot].ValueName, pCmdName, High(pBuffer^.ComSlots[lSlot].ValueName));
+    pBuffer^.ComSlots[lSlot].CommandRef := 0; // clear some old value
     //pSlot := @(pBuffer^.ComSlots[lSlot]);
     lUnregistered := True;
     //DebugLog('Looking for command ' + pCmdName + ' using slot ' + IntToStr(lSlot));

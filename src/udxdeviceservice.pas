@@ -49,7 +49,7 @@ begin
       hr := DI_JoyDevice.SetDataFormat(c_dfDIJoystick2);
       if (not FAILED(hr)) then
       begin
-        hr := DI_JoyDevice.SetCooperativeLevel(MainForm.Handle, DISCL_NONEXCLUSIVE or DISCL_BACKGROUND);
+        hr := DI_JoyDevice.SetCooperativeLevel(Glb.MainFormHandle, DISCL_NONEXCLUSIVE or DISCL_BACKGROUND);
         if (not FAILED(hr)) then
         begin
           logStr := lpddi.tszInstanceName;

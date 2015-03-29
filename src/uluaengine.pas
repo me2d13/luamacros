@@ -3,7 +3,7 @@ unit uLuaEngine;
 interface
 
 uses
-  Classes, SysUtils, Lua, uDevice, fgl, uKbdDevice;
+  Classes, SysUtils, Lua, uDevice, fgl, uKbdDevice, syncobjs, windows;
 
 type
 
@@ -80,6 +80,7 @@ type
       fLua: TLua;
       fRunList: TRunItemList;
       fRlSynchronizer: TMultiReadExclusiveWriteSynchronizer;
+      fEvent: TEventObject;
     protected
       procedure Execute; override;
     public
@@ -87,6 +88,8 @@ type
       destructor Destroy;override;
       function GetQueueSize: Integer;
       function Run(pItem: TRunItem): Integer;
+      procedure Terminate;
+      function IsRunning: Boolean;
   end;
 
   { TLuaEngine }
@@ -121,7 +124,7 @@ type
 implementation
 
 uses uMainFrm, uGlobals,
-  uLuaCmdXpl, uLuaCmdDevice, uComDevice, uSendKeys, windows;
+  uLuaCmdXpl, uLuaCmdDevice, uComDevice, uSendKeys;
 
 const
 {$IFDEF UNIX}
@@ -146,14 +149,14 @@ function FormPrint(luaState : TLuaState) : integer;
 var arg : PAnsiChar;
 begin
      arg := lua_tostring(luaState, 1);
-     MainForm.print(arg);
+     Glb.print(arg); // glb version is thread safe
      Lua_Pop(luaState, Lua_GetTop(luaState));
      Result := 0;
 end;
 
 function FormClear(luaState : TLuaState) : integer;
 begin
-     MainForm.ClearLog;
+     gMainForm.ClearLog;
      Result := 0;
 end;
 
@@ -169,6 +172,15 @@ end;
 function LogAll(luaState : TLuaState) : integer;
 begin
      Glb.LogAll:=true;
+     Result := 0;
+end;
+
+function LogSpool(luaState : TLuaState) : integer;
+var arg : PAnsiChar;
+begin
+     arg := lua_tostring(luaState, 1);
+     Glb.SpoolFileName := arg;
+     Lua_Pop(luaState, Lua_GetTop(luaState));
      Result := 0;
 end;
 
@@ -188,22 +200,41 @@ end;
 { TLuaExecutor }
 
 procedure TLuaExecutor.Execute;
+var
+  lQSize: Integer;
+  lStart, lStop: LongInt;
 begin
   while (not Terminated) do
   begin
-    if (GetQueueSize = 0) then
+    lQSize:=GetQueueSize;
+    if (lQSize = 0) then
     begin
-      PostMessage(MainForm.Handle, WM_LUA_RUN_CHANGE, 0, 0);
-      Suspend;
-      PostMessage(MainForm.Handle, WM_LUA_RUN_CHANGE, 0, 0);
+      Glb.DebugLog('Lua worker: queue size is 0, suspending thread...', cLuaLoggerName);
+      if (Glb.MainFormHandle <> 0) then // first start handle is not yet ready
+        PostMessage(Glb.MainFormHandle, WM_LUA_RUN_CHANGE, 0, 0);
+      fEvent.WaitFor(INFINITE);
+      fEvent.ResetEvent;
+      Glb.DebugLog('Lua worker: resumed...', cLuaLoggerName);
+      PostMessage(Glb.MainFormHandle, WM_LUA_RUN_CHANGE, 0, 0);
     end;
-    if (GetQueueSize > 0) then
+    if (lQSize > 0) then
     begin
+      Glb.DebugLogFmt('Lua worker: starting %s, queue size is %d',
+          [fRunList.Items[0].Describe, lQSize], cLuaLoggerName);
       try
+        lStart:=Round(Now * 24*60*60*1000);
         fRunList.Items[0].Execute(fLua);
+        lStop:=Round(Now * 24*60*60*1000);
+        Glb.DebugLogFmt('Lua worker: finished %s, execution time: %d ms',
+            [fRunList.Items[0].Describe, lStop - lStart], cLuaLoggerName);
       except
         on E: Exception do
+        begin
+          lStop:=Round(Now * 24*60*60*1000);
+          Glb.DebugLogFmt('Lua worker: finished %s with error, execution time: %d ms',
+              [fRunList.Items[0].Describe, lStop - lStart], cLuaLoggerName);
           Glb.LogError('Exception in LUA code: ' + E.Message, cLuaLoggerName);
+        end;
       end;
       fRlSynchronizer.Beginwrite;
       try
@@ -221,6 +252,7 @@ begin
   fLua := pLua;
   fRunList := TRunItemList.Create();
   fRlSynchronizer := TMultiReadExclusiveWriteSynchronizer.Create;
+  fEvent:=TEventObject.Create(nil, true, false, 'LuaExe');
 end;
 
 destructor TLuaExecutor.Destroy;
@@ -248,7 +280,21 @@ begin
   finally
     fRlSynchronizer.Endwrite;
   end;
-  Glb.DebugLog('Scheduled run of ' + pItem.Describe, cLuaLoggerName);
+  Glb.DebugLogFmt('Item %s added to queue making it %d items big.', [pItem.Describe, Result], cLuaLoggerName);
+  fEvent.SetEvent; // even if it runs already
+end;
+
+procedure TLuaExecutor.Terminate;
+begin
+  // Base Terminate method (to set Terminated=true)
+   TThread(self).Terminate;
+   // Signal event to wake up the thread
+   fEvent.SetEvent;
+end;
+
+function TLuaExecutor.IsRunning: Boolean;
+begin
+  Result := GetQueueSize > 0;
 end;
 
 { TRiRefIntegerInteger }
@@ -383,6 +429,7 @@ begin
   fLua.RegisterFunction('print','',nil,@FormPrint);
   fLua.RegisterFunction('clear','',nil,@FormClear);
   fLua.RegisterFunction('lmc_log_module','',nil,@LogModule);
+  fLua.RegisterFunction('lmc_log_spool','',nil,@LogSpool);
   fLua.RegisterFunction('lmc_log_all','',nil,@LogAll);
   fLua.RegisterFunction('lmc_send_keys','',nil,@SendKeys);
   // devices
@@ -406,23 +453,17 @@ end;
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer);
 begin
   fExecutor.Run(TRiRef.Create(pRef));
-  if (fExecutor.Suspended) then
-    fExecutor.Resume;
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pData: String);
 begin
   fExecutor.Run(TRiRefString.Create(pRef, pData));
-  if (fExecutor.Suspended) then
-    fExecutor.Resume;
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pKey: Integer;
   pDirection: Integer);
 begin
   fExecutor.Run(TRiRefIntegerInteger.Create(pRef, pKey, pDirection));
-  if (fExecutor.Suspended) then
-    fExecutor.Resume;
 end;
 
 constructor TLuaEngine.Create;
@@ -446,6 +487,7 @@ begin
   end;
   fExecutor := TLuaExecutor.Create(True, fLua);
   fTriggers := TTriggerList.Create();
+  fExecutor.Start;
 end;
 
 destructor TLuaEngine.Destroy;
@@ -454,8 +496,6 @@ begin
     fLua.Free;
   fTriggers.Free;
   fExecutor.Terminate;
-  if (fExecutor.Suspended) then
-    fExecutor.Resume;
   fExecutor.Free;
   inherited Destroy;
 end;
@@ -492,8 +532,6 @@ end;
 procedure TLuaEngine.RunCode(pSource: String);
 begin
   fExecutor.Run(TRiCode.Create(pSource));
-  if (fExecutor.Suspended) then
-    fExecutor.Resume;
 end;
 
 procedure TLuaEngine.SetCallback(pDeviceName: String; pButton: Integer;
@@ -616,7 +654,7 @@ end;
 
 function TLuaEngine.IsRunning: Boolean;
 begin
-  Result := not fExecutor.Suspended;
+  Result := fExecutor.IsRunning;
 end;
 
 end.

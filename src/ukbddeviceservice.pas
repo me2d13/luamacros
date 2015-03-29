@@ -187,7 +187,7 @@ var
   lMessage: TMessage;
 begin
   Result := 0;
-  while PeekMessage(lMsg, MainForm.Handle, WM_INPUT, WM_INPUT, PM_REMOVE) do
+  while PeekMessage(lMsg, Glb.MainFormHandle, WM_INPUT, WM_INPUT, PM_REMOVE) do
   begin
     lMessage.msg:=lMsg.message;
     lMessage.wParam:=lMsg.wParam;

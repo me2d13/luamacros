@@ -64,16 +64,26 @@ var
   lDirection : Integer;
   lHandlerRef: Integer;
   lNumOfParams: Integer;
+  lButtonStr: String;
 begin
   // Device name
   // Button number
-  // 0 = down, 1 = up
+  // 1 = down, 0 = up
   // handler
   lNumOfParams:=lua_gettop(luaState);
   lDeviceName := lua_tostring(luaState, 1);
   if (lNumOfParams = 4) then
   begin
-    lButton:= Trunc(lua_tonumber(luaState, 2));
+    if lua_isnumber(luaState, 2) = 1 then
+      lButton:= Trunc(lua_tonumber(luaState, 2))
+    else if lua_isstring(luaState, 2) = 1 then
+    begin
+      lButtonStr := lua_tostring(luaState, 2);
+      if (Length(lButtonStr) <> 1) then
+        raise LmcException.Create('Wrong length of 2nd parameter. It must be 1 char');
+      lButton:=Ord(lButtonStr[1]);
+    end else
+      raise LmcException.Create('Wrong type of 2nd parameter. Provide int or char.');
     lDirection:= Trunc(lua_tonumber(luaState, 3));
     if (lDirection <> cDirectionUp) then
       lDirection:=cDirectionDown;

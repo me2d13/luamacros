@@ -18,9 +18,9 @@ uses
 begin
   RequireDerivedFormResource := True;
   Application.Initialize;
-  Application.CreateForm(TLmcMainForm, MainForm);
+  Application.CreateForm(TLmcMainForm, gMainForm);
   Glb.Init;
-  MainForm.Init;
+  gMainForm.Init;
   Application.Run;
 end.
 

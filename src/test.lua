@@ -2,8 +2,9 @@
 clear();
 
 -- log all modules, very verbose
---lmc_log_all();
-lmc_log_module('LUA')
+lmc_log_all();
+--lmc_log_module('LUA')
+--lmc_log_spool('lmc_spool.log')
 
 -- common LUA statement
 print('This is LuaMacros. Listing detected devices...');
@@ -35,7 +36,7 @@ handler()
 -- assign callback to game device, button no 2, press event
 -- 1st param: logical name
 -- 2nd param: button number
--- 3rd param: direction, 0=down, 1=up
+-- 3rd param: direction, 1=down, 0=up
 -- 4th param: callback function
 lmc_set_handler('LB',2,0,handler)
 -- now callback is active
@@ -45,7 +46,7 @@ lmc_set_handler('LB',2,0,handler)
 -- 2nd param: callback function
 -- then callback function has 2 parameters and logic is in the function
 -- 1st param: button number
--- 2nd param: direction, 0=down, 1=up
+-- 2nd param: direction, 1=down, 0=up
 lmc_set_handler('LB',function(button, direction)
   print('Callback for whole joystick: button ' .. button .. ', direction '..direction)
   if (button == 3) then
@@ -103,6 +104,6 @@ lmc_set_handler('KBD2',function(button, direction)
 end)
 
 lmc_set_handler('KBD1',65, 1, function()
-  print('Callback for keyboard 1 key "a" up')
+  print('Callback for keyboard 1 key "a" down')
   lmc_send_keys('It rocks!')
 end)

@@ -29,8 +29,8 @@ type
 
 const
   cDeviceLoggerName = 'DEV';
-  cDirectionDown = 0;
-  cDirectionUp = 1;
+  cDirectionDown = 1;
+  cDirectionUp = 0;
 
 
 implementation
