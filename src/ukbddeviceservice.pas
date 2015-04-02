@@ -150,10 +150,20 @@ begin
         // search device
         for lDev in fDevices do
         begin
-          if (lDev.Name <> '') and (lDev.Handle = buff^.header.hDevice) then
+          if (lDev.Handle = buff^.header.hDevice) then
           begin
-            lKeyStrokePtr^.Device:=lDev;
-            Glb.LuaEngine.OnDeviceEvent(lDev, buff^.keyboard.VKey, lDirection);
+            if (lDev.Name <> '') then
+            begin
+              lKeyStrokePtr^.Device:=lDev;
+              Glb.LuaEngine.OnDeviceEvent(lDev, buff^.keyboard.VKey, lDirection);
+            end;
+            // for scanning consider only key down messages
+            // key ups usually come when Ctrl+Enter is released to execute script
+            if (Glb.Scanning) and (lDirection = cDirectionDown) then
+            begin
+              Glb.ScannedDevice := lDev;
+              break;
+            end;
           end;
         end;
       end;

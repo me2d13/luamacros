@@ -17,8 +17,10 @@ type
   { TLmcMainForm }
 
   TLmcMainForm = class(TForm)
+    ScanCancelButton: TButton;
     OpenDialog1: TOpenDialog;
     OpenFileAction: TAction;
+    ScanPanel: TPanel;
     SaveAsAction: TAction;
     SaveAction: TAction;
     ImageList1: TImageList;
@@ -47,8 +49,10 @@ type
     procedure RunScriptActionExecute(Sender: TObject);
     procedure SaveActionExecute(Sender: TObject);
     procedure SaveAsActionExecute(Sender: TObject);
+    procedure ScanCancelButtonClick(Sender: TObject);
     procedure SynEdit1Change(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
+    procedure ScanningChange;
   private
     { private declarations }
     fEditorDirty: boolean;
@@ -78,6 +82,10 @@ type
 var
   gMainForm: TLmcMainForm;
   gMainFormThreadId: DWORD;
+
+const
+  cGuiLoggerName = 'GUI';
+
 
 implementation
 
@@ -116,6 +124,10 @@ begin
   begin
     Glb.FlushBuffer;
     Result := lMessage.Result;
+  end else if uMsg=WM_SCANNING_STATUS_CHANGE then
+  begin
+    gMainForm.ScanningChange;
+    Result := lMessage.Result;
   end else
     result:=CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
 end;
@@ -146,6 +158,14 @@ begin
   SaveAsTrueCanContinue;
 end;
 
+procedure TLmcMainForm.ScanCancelButtonClick(Sender: TObject);
+begin
+  ScanPanel.Visible:=False;
+  Glb.ScannedDevice := nil;
+  Glb.ScanEvent.SetEvent;
+  Glb.DebugLog('Keyboard scan cancelled.', cGuiLoggerName);
+end;
+
 procedure TLmcMainForm.SynEdit1Change(Sender: TObject);
 begin
   EditorDirty:=true;
@@ -154,6 +174,15 @@ end;
 procedure TLmcMainForm.Timer1Timer(Sender: TObject);
 begin
   Glb.TickMe;
+end;
+
+procedure TLmcMainForm.ScanningChange;
+begin
+  if (Glb.Scanning) then
+  begin
+    ScanPanel.Align := alClient;
+  end;
+  ScanPanel.Visible:=Glb.Scanning;
 end;
 
 procedure TLmcMainForm.WmInputMessage(var Message: TMessage);

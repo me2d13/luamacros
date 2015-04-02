@@ -117,18 +117,37 @@ end;
 procedure THookService.OnHookMessage(var pMessage: TMessage);
 var
   lKS: TKeyStroke;
-  lLogKS: TKeyStrokePtr;
 begin
   Glb.DebugLog('Hook message: ' + DescribeHookMessage(pMessage), cHookLoggerName);
   lKS := ConvertHookMessageToKeyStroke(pMessage);
-  lLogKS := Glb.KeyLogService.AssignDevice(lKS);
-  pMessage.Result:=0; // do not block
-  if (lKS.DeviceHandle <> 0) then
+  Glb.KeyLogService.AssignDevice(lKS);
+  // scanning ends on key down message (ups are ignored during scan - see raw handling)
+  // this scanning trigger needs to be blocked to not affect active application
+  // however just after this key down arrives key up and scanning flag in Glb is already false
+  // thus we need to store key-down KeyStroke into temporary buffer here during scanning
+  // and if this buffer is set we ignore appropriate up message
+  if (Glb.KeyLogService.JustScannedKs.DeviceHandle > 0) // if raw message set scanned key
+      and (Glb.KeyLogService.JustScannedKs.DeviceHandle = lKS.DeviceHandle) // which is from this device
+      and (Glb.KeyLogService.JustScannedKs.VKeyCode = lKS.VKeyCode) // and is the same key
+  then
   begin
-    lKS.Device := Glb.DeviceService.GetByHandle(lKS.DeviceHandle) as TKbdDevice;
-    if (Glb.LuaEngine.IsKeyHandled(@lKS)) then
+    pMessage.Result:=-1; // block
+    if (lKS.Direction = cDirectionDown) then
     begin
-      pMessage.Result:=-1; // block
+      Glb.DebugLog('Scanning, message DOWN is blocked', cHookLoggerName);
+    end else begin
+      Glb.DebugLog('Scanning, message UP is blocked', cHookLoggerName);
+      Glb.KeyLogService.ResetScanned;
+    end;
+  end else begin
+    pMessage.Result:=0; // do not block
+    if (lKS.DeviceHandle <> 0) then
+    begin
+      lKS.Device := Glb.DeviceService.GetByHandle(lKS.DeviceHandle) as TKbdDevice;
+      if (Glb.LuaEngine.IsKeyHandled(@lKS)) then
+      begin
+        pMessage.Result:=-1; // block
+      end;
     end;
   end;
 end;

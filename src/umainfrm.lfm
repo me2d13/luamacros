@@ -604,6 +604,34 @@ object LmcMainForm: TLmcMainForm
       Style = tbsSeparator
     end
   end
+  object ScanPanel: TPanel
+    Left = 505
+    Height = 116
+    Top = 68
+    Width = 170
+    Caption = 'Hit a key'
+    ClientHeight = 116
+    ClientWidth = 170
+    TabOrder = 3
+    Visible = False
+    object ScanCancelButton: TButton
+      AnchorSideLeft.Control = ScanPanel
+      AnchorSideLeft.Side = asrCenter
+      AnchorSideTop.Control = ScanPanel
+      AnchorSideBottom.Control = ScanPanel
+      AnchorSideBottom.Side = asrBottom
+      Left = 48
+      Height = 32
+      Top = 65
+      Width = 75
+      Anchors = [akLeft, akBottom]
+      BorderSpacing.Top = 71
+      BorderSpacing.Bottom = 18
+      Caption = 'Cancel'
+      OnClick = ScanCancelButtonClick
+      TabOrder = 0
+    end
+  end
   object ActionList1: TActionList
     Images = ImageList1
     left = 16

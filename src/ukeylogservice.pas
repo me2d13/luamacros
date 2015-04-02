@@ -23,15 +23,17 @@ type
     private
       fLog: Array[0..cLogArrayLength] of TKeyLogItem;
       fIndex: Integer; // points to first free block
-      function AssignDeviceInLogRange(var pKS: TKeyStroke; pSearchCount: Integer
-        ): TKeyStrokePtr;
+      fJustScannedKs: TKeyStroke;
+      procedure AssignDeviceInLogRange(var pKS: TKeyStroke; pSearchCount: Integer);
       function KeyStrokeEqual(p1, p2: TKeyStroke): boolean;
     public
       constructor Create;
       function AddRaw(pRawdata: PRAWINPUT): TKeyStrokePtr;
-      function AssignDevice(var pKS: TKeyStroke): TKeyStrokePtr;
+      procedure AssignDevice(var pKS: TKeyStroke);
       function UnixTimestampMs: LongInt;
       procedure RemoveOldItems;
+      procedure ResetScanned;
+      property JustScannedKs: TKeyStroke read fJustScannedKs;
   end;
 
 implementation
@@ -62,19 +64,22 @@ begin
   fLog[fIndex].KeyStroke.DeviceHandle:=pRawdata^.header.hDevice;
   fLog[fIndex].KeyStroke.VKeyCode:=pRawdata^.keyboard.VKey;
   Result := @(fLog[fIndex].KeyStroke);
+  if (Glb.Scanning) and (fLog[fIndex].KeyStroke.Direction=cDirectionDown) then
+  begin
+    fJustScannedKs := fLog[fIndex].KeyStroke;
+    Glb.DebugLog('Recorder scanned keystroke', cHookLoggerName);
+  end;
   fIndex:=(fIndex+1) mod cLogArrayLength;
 end;
 
-function TKeyLogService.AssignDevice(var pKS: TKeyStroke): TKeyStrokePtr;
+procedure TKeyLogService.AssignDevice(var pKS: TKeyStroke);
 var
   lNewItemsCount: Integer;
-  lLogKeyStroke: TKeyStrokePtr;
 begin
   // first search in log - already arrived raw messages
-  lLogKeyStroke:=AssignDeviceInLogRange(pKS, cLogArrayLength);
-  if (lLogKeyStroke <> nil) then
+  AssignDeviceInLogRange(pKS, cLogArrayLength);
+  if (pKS.DeviceHandle > 0) then
   begin
-    Result:= lLogKeyStroke;
     exit;
   end;
   Glb.DebugLogFmt('Raw message not yet arrived for key %d direction %d, trying PeekMessage.',
@@ -84,19 +89,17 @@ begin
   if (lNewItemsCount > 0) then
   begin
     Glb.DebugLogFmt('PeekMessage got %d messages.', [lNewItemsCount], cHookLoggerName);
-    lLogKeyStroke:=AssignDeviceInLogRange(pKS, lNewItemsCount);
-    if lLogKeyStroke <> nil then
+    AssignDeviceInLogRange(pKS, lNewItemsCount);
+    if (pKS.DeviceHandle > 0) then
     begin
-      Result := lLogKeyStroke;
       exit;
     end;
   end;
   Glb.DebugLogFmt('Key NOT FOUND in key log for key %d direction %d.',
     [pKS.VKeyCode,pKS.Direction], cHookLoggerName);
-  Result := nil;
 end;
 
-function TKeyLogService.AssignDeviceInLogRange(var pKS: TKeyStroke; pSearchCount: Integer): TKeyStrokePtr;
+procedure TKeyLogService.AssignDeviceInLogRange(var pKS: TKeyStroke; pSearchCount: Integer);
 var
   I: Integer;
   lIndex: Integer;
@@ -107,7 +110,6 @@ begin
   // search log of received low level messages (with specific keyboard id)
   // and match it to received key via hook message (from active window)
   // add keybaord id into the param
-  Result := nil;
   for I := 1 to pSearchCount do
   begin
     lIndex:=(fIndex + cLogArrayLength - I) mod cLogArrayLength;
@@ -121,7 +123,6 @@ begin
         pKS.DeviceHandle:=fLog[lIndex].KeyStroke.DeviceHandle;
         // reset buffer pos
         ZeroMemory(@fLog[lIndex], SizeOf(TKeyLogItem));
-        Result := @(fLog[lIndex].KeyStroke);
         break;
       end;
     end;
@@ -156,6 +157,11 @@ begin
       ZeroMemory(@fLog[lIndex], SizeOf(TKeyLogItem));
     end;
   end;
+end;
+
+procedure TKeyLogService.ResetScanned;
+begin
+  ZeroMemory(@fJustScannedKs, SizeOf(TKeyStroke));
 end;
 
 end.

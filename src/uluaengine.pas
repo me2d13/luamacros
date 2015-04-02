@@ -259,6 +259,7 @@ destructor TLuaExecutor.Destroy;
 begin
   fRunList.Free;
   fRlSynchronizer.Free;
+  //fEvent.Free; execute.reset can be called on freed object
   inherited Destroy;
 end;
 
@@ -434,7 +435,7 @@ begin
   fLua.RegisterFunction('lmc_send_keys','',nil,@SendKeys);
   // devices
   fLua.RegisterFunction('lmc_print_devices','',nil,@PrintDevices);
-  fLua.RegisterFunction('lmc_device_name_check_ask','',nil,@CheckDeviceNameWithAsk);
+  fLua.RegisterFunction('lmc_assign_keyboard','',nil,@CheckDeviceNameWithAsk);
   fLua.RegisterFunction('lmc_device_set_name','',nil,@AssignDeviceNameByRegexp);
   fLua.RegisterFunction('lmc_set_handler','',nil,@LuaCmdSetCallback);
   // serial

@@ -18,7 +18,8 @@ lmc_print_devices();
 -- returns: Found directX name
 print(lmc_device_set_name('LB', 'BU0836A'));
 print(lmc_device_set_name('KBD1', '826BD90'));
-print(lmc_device_set_name('KBD2', '1BDC3055'));
+--print(lmc_device_set_name('KBD2', '1BDC3055'));
+lmc_assign_keyboard('KBD2');
 -- remember 2nd param is regexp, so any unique part from that ugly keyboard system id works
 
 
