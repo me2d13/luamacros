@@ -159,9 +159,9 @@ begin
             end;
             // for scanning consider only key down messages
             // key ups usually come when Ctrl+Enter is released to execute script
-            if (Glb.Scanning) and (lDirection = cDirectionDown) then
+            if (Glb.ScanService.Scanning) and (lDirection = cDirectionDown) then
             begin
-              Glb.ScannedDevice := lDev;
+              Glb.ScanService.ScannedDevice := lDev;
               break;
             end;
           end;

@@ -64,7 +64,7 @@ begin
   fLog[fIndex].KeyStroke.DeviceHandle:=pRawdata^.header.hDevice;
   fLog[fIndex].KeyStroke.VKeyCode:=pRawdata^.keyboard.VKey;
   Result := @(fLog[fIndex].KeyStroke);
-  if (Glb.Scanning) and (fLog[fIndex].KeyStroke.Direction=cDirectionDown) then
+  if (Glb.ScanService.Scanning) and (fLog[fIndex].KeyStroke.Direction=cDirectionDown) then
   begin
     fJustScannedKs := fLog[fIndex].KeyStroke;
     Glb.DebugLog('Recorder scanned keystroke', cHookLoggerName);

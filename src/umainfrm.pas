@@ -161,8 +161,8 @@ end;
 procedure TLmcMainForm.ScanCancelButtonClick(Sender: TObject);
 begin
   ScanPanel.Visible:=False;
-  Glb.ScannedDevice := nil;
-  Glb.ScanEvent.SetEvent;
+  Glb.ScanService.ScannedDevice := nil;
+  Glb.ScanService.ScanEvent.SetEvent;
   Glb.DebugLog('Keyboard scan cancelled.', cGuiLoggerName);
 end;
 
@@ -178,11 +178,12 @@ end;
 
 procedure TLmcMainForm.ScanningChange;
 begin
-  if (Glb.Scanning) then
+  if (Glb.ScanService.Scanning) then
   begin
     ScanPanel.Align := alClient;
+    ScanPanel.Caption:=Format('Press a key to identify device %s...', [Glb.ScanService.ScannedName]);
   end;
-  ScanPanel.Visible:=Glb.Scanning;
+  ScanPanel.Visible:=Glb.ScanService.Scanning;
 end;
 
 procedure TLmcMainForm.WmInputMessage(var Message: TMessage);

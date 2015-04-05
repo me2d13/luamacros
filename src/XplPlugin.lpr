@@ -48,7 +48,7 @@ var
   except
     on E: Exception do
     begin
-      lMessage:=Format('HIDMACROS exception: %s', [e.Message]);
+      lMessage:=Format('LUAMACROS exception: %s', [e.Message]);
       GetMem(lBuff, Length(lMessage) + 1);
       try
         StrPCopy(lBuff, lMessage);
@@ -82,7 +82,7 @@ function MyDrawCallbackFunc(inPhase             : XPLMDrawingPhase;
     except
       on E: Exception do
       begin
-        lMessage:=Format('HIDMACROS exception: %s', [e.Message]);
+        lMessage:=Format('LUAMACROS exception: %s', [e.Message]);
         GetMem(lBuff, Length(lMessage) + 1);
         try
           StrPCopy(lBuff, lMessage);
@@ -109,9 +109,9 @@ function MyDrawCallbackFunc(inPhase             : XPLMDrawingPhase;
   begin
 
     //* First record our plugin information.
-    StrPCopy(outName, 'HIDmacrosController');
-    StrPCopy( outSig,  'PetrMedek.HidMacros.Controller' );
-    StrPCopy(outDesc, 'A plugin to access sim variables in HIDmacros.');
+    StrPCopy(outName, 'LuamacrosController');
+    StrPCopy( outSig,  'PetrMedek.LuaMacros.Controller' );
+    StrPCopy(outDesc, 'A plugin to access sim variables in LuaMacros.');
 
     gEng := TXplEngine.Create;
 

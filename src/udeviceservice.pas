@@ -114,7 +114,7 @@ begin
       exit;
     end
   end;
-  lItem := Glb.ScanDevice;
+  lItem := Glb.ScanService.ScanDevice(pName);
   if (lItem <> nil) then
   begin
     Glb.DebugLog(Format('Name %s assigned to device %s %s', [pName, lItem.TypeCaption, lItem.SystemId]), cDeviceLoggerName);

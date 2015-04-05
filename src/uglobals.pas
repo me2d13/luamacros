@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, uXplControl, uLuaEngine, uDeviceService, uDevice, uHookService,
-  uKeyLogService, windows, syncobjs;
+  uKeyLogService, windows, uScanService;
 
 type
 
@@ -28,10 +28,7 @@ type
       fLogCs: TRTLCriticalSection;
       fMainFormHandle: LongInt;
       fPrintBuffer: TStrings;
-      fScanEvent: TEventObject;
-      fScannedDevice: TDevice;
-      fScanning: Boolean;
-      procedure SetScannedDevice(AValue: TDevice);
+      fScanService: TScanService;
       procedure SetSpoolFileName(AValue: String);
       procedure AskMainFormToFlushPrintBuffer;
     public
@@ -46,7 +43,6 @@ type
       procedure Print(pMessage: String);
       function IsModuleLogged(pLogger: String) : boolean;
       procedure TickMe;
-      function ScanDevice: TDevice;
       procedure FlushBuffer;
 
       property XplControl: TXPLcontrol read fXplCLcontrol;
@@ -58,9 +54,7 @@ type
       property KeyLogService: TKeyLogService read fKeyLogService;
       property SpoolFileName: String read fSpoolFileName write SetSpoolFileName;
       property MainFormHandle: LongInt read fMainFormHandle write fMainFormHandle;
-      property ScanEvent: TEventObject read fScanEvent;
-      property ScannedDevice: TDevice read fScannedDevice write SetScannedDevice;
-      property Scanning: Boolean read fScanning;
+      property ScanService: TScanService read fScanService;
   end;
 
   LmcException = class (Exception)
@@ -93,16 +87,6 @@ begin
     SysUtils.DeleteFile(fSpoolFileName);
 end;
 
-procedure TGlobals.SetScannedDevice(AValue: TDevice);
-begin
-  if fScannedDevice=AValue then Exit;
-  fScannedDevice:=AValue;
-  fScanning:=False;
-  fScanEvent.SetEvent;
-  if (fMainFormHandle > 0) then
-    PostMessage(fMainFormHandle, WM_SCANNING_STATUS_CHANGE, 0, 0);
-end;
-
 procedure TGlobals.AskMainFormToFlushPrintBuffer;
 begin
   if (fMainFormHandle > 0) then
@@ -111,29 +95,28 @@ end;
 
 constructor TGlobals.Create;
 begin
-  fScanning:=false;
   InitCriticalSection(fLogCs);
   fPrintBuffer := TStringList.Create;
   fXplCLcontrol:=TXPLcontrol.Create;
   fLoggedModules := TStringList.Create;
   fLuaEngine := TLuaEngine.Create;
+  fScanService := TScanService.Create;
   fDeviceService := TDeviceService.Create;
   fHookService := THookService.Create;
   fKeyLogService := TKeyLogService.Create;
-  fScanEvent:=TEventObject.Create(nil, true, false, 'LmcScan');
 end;
 
 destructor TGlobals.Destroy;
 begin
   fXplCLcontrol.Free;
-  fLoggedModules.Free;
   fLuaEngine.Free;
   fDeviceService.Free;
   fHookService.Free;
   fKeyLogService.Free;
   fPrintBuffer.Free;
-  fScanEvent.Free;
   DoneCriticalsection(fLogCs);
+  fScanService.Free;
+  fLoggedModules.Free;
   inherited Destroy;
 end;
 
@@ -231,21 +214,6 @@ end;
 procedure TGlobals.TickMe;
 begin
   fDeviceService.TickMe;;
-end;
-
-function TGlobals.ScanDevice: TDevice;
-begin
-  // switch to scan mode to handle raw message in special way
-  fScanning := True;
-  // send message to main form to switch GUI to scan mode
-  if (fMainFormHandle > 0) then
-    PostMessage(fMainFormHandle, WM_SCANNING_STATUS_CHANGE, 0, 0);
-  // this is called from LUA execution thread
-  // wait for signal from GUI thread that scanning is done
-  fScanEvent.WaitFor(INFINITE);
-  // now we should have something ready
-  fScanEvent.ResetEvent;
-  Result := fScannedDevice;
 end;
 
 procedure TGlobals.FlushBuffer;

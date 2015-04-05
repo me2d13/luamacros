@@ -37,7 +37,6 @@
       <Unit0>
         <Filename Value="XplPlugin.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="XplPlugin"/>
       </Unit0>
       <Unit1>
         <Filename Value="uXplPluginEngine.pas"/>
@@ -77,16 +76,15 @@
       <TargetOS Value="win64"/>
     </CodeGeneration>
     <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+      </Debugging>
       <Options>
         <ExecutableType Value="Library"/>
       </Options>
     </Linking>
     <Other>
-      <CompilerMessages>
-        <MsgFileName Value=""/>
-      </CompilerMessages>
       <CustomOptions Value="-dXPLM210 -dXPLM200"/>
-      <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
   <Debugging>

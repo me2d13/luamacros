@@ -253,6 +253,7 @@ begin
   fRunList := TRunItemList.Create();
   fRlSynchronizer := TMultiReadExclusiveWriteSynchronizer.Create;
   fEvent:=TEventObject.Create(nil, true, false, 'LuaExe');
+  FreeOnTerminate:=False;
 end;
 
 destructor TLuaExecutor.Destroy;
@@ -497,6 +498,7 @@ begin
     fLua.Free;
   fTriggers.Free;
   fExecutor.Terminate;
+  fExecutor.WaitFor;
   fExecutor.Free;
   inherited Destroy;
 end;

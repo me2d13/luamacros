@@ -8,7 +8,9 @@
       <Unit0>
         <Filename Value="XplPlugin.lpr"/>
         <IsPartOfProject Value="True"/>
-        <CursorPos X="41" Y="10"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="86"/>
+        <CursorPos Y="118"/>
         <UsageCount Value="35"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -17,10 +19,9 @@
         <Filename Value="uXplPluginEngine.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplPluginEngine"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="132"/>
-        <CursorPos X="6" Y="146"/>
+        <TopLine Value="245"/>
+        <CursorPos X="31" Y="154"/>
         <UsageCount Value="35"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>

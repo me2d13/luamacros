@@ -2,7 +2,7 @@
 clear();
 
 -- log all modules, very verbose
-lmc_log_all();
+--lmc_log_all();
 --lmc_log_module('LUA')
 --lmc_log_spool('lmc_spool.log')
 

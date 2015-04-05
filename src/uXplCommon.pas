@@ -5,7 +5,7 @@ interface
 uses XPLMDataAccess, XPLMUtilities;
 
 const
-  XPL_MEM_FILE = 'XPL_HIDMACROS_MEMORY_FILE';
+  XPL_MEM_FILE = 'XPL_LUAMACROS_MEMORY_FILE';
   XPL_MAX_STRING_SIZE = 1024;
 
   HDMC_GET_VAR = 1;
