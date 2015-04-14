@@ -69,12 +69,58 @@ const
   WM_FLUSH_PRINT_BUFFER = WM_USER + 320;
   WM_SCANNING_STATUS_CHANGE = WM_USER + 330;
 
+function Sto_GetFmtFileVersion(const FileName: String = ''; const Fmt: String = '%d.%d.%d.%d'): String;
+
+
 implementation
 
 {$Define offHARD_LOG}
 
 const
   cLogFileName = 'LmcApp.log';
+
+  function Sto_GetFmtFileVersion(const FileName: String = '';
+    const Fmt: String = '%d.%d.%d.%d'): String;
+  var
+    sFileName: String;
+    iBufferSize: DWORD;
+    iDummy: DWORD;
+    pBuffer: Pointer;
+    pFileInfo: Pointer;
+    iVer: array[1..4] of Word;
+  begin
+    // set default value
+    Result := '';
+    // get filename of exe/dll if no filename is specified
+    sFileName := FileName;
+    if (sFileName = '') then
+    begin
+      // prepare buffer for path and terminating #0
+      SetLength(sFileName, MAX_PATH + 1);
+      SetLength(sFileName,
+        GetModuleFileName(hInstance, PChar(sFileName), MAX_PATH + 1));
+    end;
+    // get size of version info (0 if no version info exists)
+    iBufferSize := GetFileVersionInfoSize(PChar(sFileName), iDummy);
+    if (iBufferSize > 0) then
+    begin
+      GetMem(pBuffer, iBufferSize);
+      try
+      // get fixed file info (language independent)
+      GetFileVersionInfo(PChar(sFileName), 0, iBufferSize, pBuffer);
+      VerQueryValue(pBuffer, '\', pFileInfo, iDummy);
+      // read version blocks
+      iVer[1] := HiWord(PVSFixedFileInfo(pFileInfo)^.dwFileVersionMS);
+      iVer[2] := LoWord(PVSFixedFileInfo(pFileInfo)^.dwFileVersionMS);
+      iVer[3] := HiWord(PVSFixedFileInfo(pFileInfo)^.dwFileVersionLS);
+      iVer[4] := LoWord(PVSFixedFileInfo(pFileInfo)^.dwFileVersionLS);
+      finally
+        FreeMem(pBuffer);
+      end;
+      // format result string
+      Result := Format(Fmt, [iVer[1], iVer[2], iVer[3], iVer[4]]);
+    end;
+  end;
 
 { TGlobals }
 

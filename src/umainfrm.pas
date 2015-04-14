@@ -331,6 +331,7 @@ begin
     EditorDirty:=false;
   end;
   PrevWndProc:=Windows.WNDPROC(SetWindowLongPtr(Self.Handle,GWL_WNDPROC,PtrInt(@WndCallback)));
+  StatusBar1.Panels.Items[1].Text:= 'Version: ' + Sto_GetFmtFileVersion();
 end;
 
 procedure TLmcMainForm.FormDestroy(Sender: TObject);

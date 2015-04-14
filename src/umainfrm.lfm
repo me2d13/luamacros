@@ -564,7 +564,10 @@ object LmcMainForm: TLmcMainForm
     Width = 918
     Panels = <    
       item
-        Width = 50
+        Width = 200
+      end    
+      item
+        Width = 150
       end>
     SimplePanel = False
   end

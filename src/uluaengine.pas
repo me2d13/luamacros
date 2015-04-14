@@ -124,7 +124,7 @@ type
 implementation
 
 uses uMainFrm, uGlobals,
-  uLuaCmdXpl, uLuaCmdDevice, uComDevice, uSendKeys;
+  uLuaCmdXpl, uLuaCmdDevice, uComDevice, uSendKeys, Process;
 
 const
 {$IFDEF UNIX}
@@ -194,6 +194,37 @@ begin
   lSndKey.Sequence := arg;
   lSndKey.Resume;
   Lua_Pop(luaState, Lua_GetTop(luaState));
+  Result := 0;
+end;
+
+function Spawn(luaState : TLuaState) : integer;
+var
+  arg : PAnsiChar;
+  lProcess: TProcess;
+  I: Integer;
+  lNumOfParams: Integer;
+begin
+  lNumOfParams:=lua_gettop(luaState);
+  arg := lua_tostring(luaState, 1);
+  lProcess := TProcess.Create(nil);
+  try
+    lProcess.InheritHandles := False;
+    lProcess.Options := [];
+    lProcess.ShowWindow := swoShow;
+
+    // Copy default environment variables including DISPLAY variable for GUI application to work
+    for I := 0 to GetEnvironmentVariableCount - 1 do
+      lProcess.Environment.Add(GetEnvironmentString(I));
+
+    for I := 2 to lNumOfParams do
+      if lua_isstring(luaState, I) = 1 then
+        lProcess.Parameters.Add(lua_tostring(luaState, I));
+
+    lProcess.Executable := arg;
+    lProcess.Execute;
+  finally
+    lProcess.Free;
+  end;
   Result := 0;
 end;
 
@@ -434,6 +465,7 @@ begin
   fLua.RegisterFunction('lmc_log_spool','',nil,@LogSpool);
   fLua.RegisterFunction('lmc_log_all','',nil,@LogAll);
   fLua.RegisterFunction('lmc_send_keys','',nil,@SendKeys);
+  fLua.RegisterFunction('lmc_spawn','',nil,@Spawn);
   // devices
   fLua.RegisterFunction('lmc_print_devices','',nil,@PrintDevices);
   fLua.RegisterFunction('lmc_assign_keyboard','',nil,@CheckDeviceNameWithAsk);

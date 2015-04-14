@@ -5,6 +5,7 @@ clear();
 --lmc_log_all();
 --lmc_log_module('LUA')
 --lmc_log_spool('lmc_spool.log')
+--lmc_spawn('calc.exe')
 
 -- common LUA statement
 print('This is LuaMacros. Listing detected devices...');
