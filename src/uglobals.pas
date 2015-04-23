@@ -29,12 +29,15 @@ type
       fMainFormHandle: LongInt;
       fPrintBuffer: TStrings;
       fScanService: TScanService;
+      fVersion: String;
       procedure SetSpoolFileName(AValue: String);
       procedure AskMainFormToFlushPrintBuffer;
+      procedure SetVersion(AValue: String);
     public
       constructor Create;
       destructor Destroy; Override;
       procedure Init;
+      procedure InitConfigValues;
       procedure DebugLog(pMessage: String; pLogger: String);
       procedure DebugLogFile(pMessage: String; pLogger: String; pFileName: String);
       procedure DebugLogFmt(pMessage: String; const Args : Array of const; pLogger: String);
@@ -55,6 +58,7 @@ type
       property SpoolFileName: String read fSpoolFileName write SetSpoolFileName;
       property MainFormHandle: LongInt read fMainFormHandle write fMainFormHandle;
       property ScanService: TScanService read fScanService;
+      property Version: String read fVersion write SetVersion;
   end;
 
   LmcException = class (Exception)
@@ -68,6 +72,10 @@ const
   cUnassigned = '<unassigned>';
   WM_FLUSH_PRINT_BUFFER = WM_USER + 320;
   WM_SCANNING_STATUS_CHANGE = WM_USER + 330;
+  WM_MAIN_WINDOW_COMMAND = WM_USER + 340;
+
+  MWC_MINIMIZE = 1;
+
 
 function Sto_GetFmtFileVersion(const FileName: String = ''; const Fmt: String = '%d.%d.%d.%d'): String;
 
@@ -139,6 +147,19 @@ begin
     PostMessage(fMainFormHandle, WM_FLUSH_PRINT_BUFFER, 0, 0);
 end;
 
+procedure TGlobals.InitConfigValues;
+begin
+  fLuaEngine.SetConfigItem('minimizeToTray', false);
+  fLuaEngine.SetConfigItem('version', fVersion);
+end;
+
+procedure TGlobals.SetVersion(AValue: String);
+begin
+  if fVersion=AValue then Exit;
+  fVersion:=AValue;
+  fLuaEngine.SetConfigItem('version', AValue);
+end;
+
 constructor TGlobals.Create;
 begin
   InitCriticalSection(fLogCs);
@@ -171,6 +192,7 @@ begin
   fXplCLcontrol.Init;
   fLuaEngine.Init;
   fDeviceService.Init;
+  InitConfigValues;
 end;
 
 procedure TGlobals.DebugLog(pMessage: String; pLogger: String);

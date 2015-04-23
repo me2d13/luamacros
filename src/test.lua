@@ -1,6 +1,17 @@
 -- GUI thing: clear log window
 clear();
 
+lmc_log_all();
+lmc_log_spool('lmc_spool.log')
+print('Version: ' .. lmc.version)
+lmc.minimizeToTray = true
+if (lmc.minimizeToTray) then
+  print('Will minimize to tray')
+else
+  print('Won\'t minimize to tray')
+end
+lmc_minimize()
+
 -- log all modules, very verbose
 --lmc_log_all();
 --lmc_log_module('LUA')
@@ -20,7 +31,7 @@ lmc_print_devices();
 print(lmc_device_set_name('LB', 'BU0836A'));
 print(lmc_device_set_name('KBD1', '826BD90'));
 --print(lmc_device_set_name('KBD2', '1BDC3055'));
-lmc_assign_keyboard('KBD2');
+--lmc_assign_keyboard('KBD2');
 -- remember 2nd param is regexp, so any unique part from that ugly keyboard system id works
 
 
@@ -105,7 +116,7 @@ lmc_set_handler('KBD2',function(button, direction)
   print('Callback for whole keyboard 2: button ' .. button .. ', direction '..direction)
 end)
 
-lmc_set_handler('KBD1',65, 1, function()
+lmc_set_handler('KBD2',65, 1, function()
   print('Callback for keyboard 1 key "a" down')
   lmc_send_keys('It rocks!')
 end)

@@ -11,7 +11,7 @@ uses
   uXplControl, uGlobals, uLuaCmdXpl, uDxDeviceService, uDevice, uDxDevice,
   udeviceservice, uLuaCmdDevice, uLuaEngine, uComDevice, uComDeviceService,
   uKbdDevice, uKbdDeviceService, uRawInput, uHookService, uHookCommon,
-  uKeyLogService, uSendKeys, uScanService;
+  uKeyLogService, uSendKeys, uScanService, uLuaCmdMainWindow;
 
 {$R *.res}
 

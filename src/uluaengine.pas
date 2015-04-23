@@ -119,12 +119,16 @@ type
       function GetQueueSize: Integer;
       function GetExecutionQueueSize: Integer;
       function IsRunning: Boolean;
+      procedure SetConfigItem(pName: String; pValue: boolean); overload;
+      procedure SetConfigItem(pName: String; pValue: String); overload;
+      function GetConfigItem(pName: String; pDefault: boolean): boolean; overload;
+      function GetConfigItem(pName: String; pDefault: String): String; overload;
   end;
 
 implementation
 
 uses uMainFrm, uGlobals,
-  uLuaCmdXpl, uLuaCmdDevice, uComDevice, uSendKeys, Process;
+  uLuaCmdXpl, uLuaCmdDevice, uComDevice, Process, uLuaCmdMainWindow;
 
 const
 {$IFDEF UNIX}
@@ -145,88 +149,7 @@ const
 
   cLuaLoggerName = 'LUA';
 
-function FormPrint(luaState : TLuaState) : integer;
-var arg : PAnsiChar;
-begin
-     arg := lua_tostring(luaState, 1);
-     Glb.print(arg); // glb version is thread safe
-     Lua_Pop(luaState, Lua_GetTop(luaState));
-     Result := 0;
-end;
-
-function FormClear(luaState : TLuaState) : integer;
-begin
-     gMainForm.ClearLog;
-     Result := 0;
-end;
-
-function LogModule(luaState : TLuaState) : integer;
-var arg : PAnsiChar;
-begin
-     arg := lua_tostring(luaState, 1);
-     Glb.LogModule(arg);
-     Lua_Pop(luaState, Lua_GetTop(luaState));
-     Result := 0;
-end;
-
-function LogAll(luaState : TLuaState) : integer;
-begin
-     Glb.LogAll:=true;
-     Result := 0;
-end;
-
-function LogSpool(luaState : TLuaState) : integer;
-var arg : PAnsiChar;
-begin
-     arg := lua_tostring(luaState, 1);
-     Glb.SpoolFileName := arg;
-     Lua_Pop(luaState, Lua_GetTop(luaState));
-     Result := 0;
-end;
-
-function SendKeys(luaState : TLuaState) : integer;
-var
-  arg : PAnsiChar;
-  lSndKey: TKeySequence;
-begin
-  arg := lua_tostring(luaState, 1);
-  lSndKey := TKeySequence.Create;
-  lSndKey.Sequence := arg;
-  lSndKey.Resume;
-  Lua_Pop(luaState, Lua_GetTop(luaState));
-  Result := 0;
-end;
-
-function Spawn(luaState : TLuaState) : integer;
-var
-  arg : PAnsiChar;
-  lProcess: TProcess;
-  I: Integer;
-  lNumOfParams: Integer;
-begin
-  lNumOfParams:=lua_gettop(luaState);
-  arg := lua_tostring(luaState, 1);
-  lProcess := TProcess.Create(nil);
-  try
-    lProcess.InheritHandles := False;
-    lProcess.Options := [];
-    lProcess.ShowWindow := swoShow;
-
-    // Copy default environment variables including DISPLAY variable for GUI application to work
-    for I := 0 to GetEnvironmentVariableCount - 1 do
-      lProcess.Environment.Add(GetEnvironmentString(I));
-
-    for I := 2 to lNumOfParams do
-      if lua_isstring(luaState, I) = 1 then
-        lProcess.Parameters.Add(lua_tostring(luaState, I));
-
-    lProcess.Executable := arg;
-    lProcess.Execute;
-  finally
-    lProcess.Free;
-  end;
-  Result := 0;
-end;
+  cConfigVariableName = 'lmc';
 
 { TLuaExecutor }
 
@@ -466,6 +389,7 @@ begin
   fLua.RegisterFunction('lmc_log_all','',nil,@LogAll);
   fLua.RegisterFunction('lmc_send_keys','',nil,@SendKeys);
   fLua.RegisterFunction('lmc_spawn','',nil,@Spawn);
+  fLua.RegisterFunction('lmc_minimize','',nil,@MinimizeMainWindow);
   // devices
   fLua.RegisterFunction('lmc_print_devices','',nil,@PrintDevices);
   fLua.RegisterFunction('lmc_assign_keyboard','',nil,@CheckDeviceNameWithAsk);
@@ -482,6 +406,71 @@ begin
   fLua.RegisterFunction('lmc_xpl_text','',nil,@XplDrawText);
   fLua.RegisterFunction('lmc_xpl_command_begin','',nil,@XplCommandBegin);
   fLua.RegisterFunction('lmc_xpl_command_end','',nil,@XplCommandEnd);
+end;
+
+procedure TLuaEngine.SetConfigItem(pName: String; pValue: boolean);
+begin
+  lua_getglobal(fLua.LuaInstance, cConfigVariableName);
+  if (not lua_istable(fLua.LuaInstance, -1)) then
+    lua_newtable(fLua.LuaInstance);
+  lua_pushstring(fLua.LuaInstance, PChar(pName));
+  lua_pushboolean(fLua.LuaInstance, Integer(pValue));
+  lua_settable(fLua.LuaInstance, -3);
+  lua_setglobal(fLua.LuaInstance, cConfigVariableName);
+end;
+
+procedure TLuaEngine.SetConfigItem(pName: String; pValue: String);
+begin
+  lua_getglobal(fLua.LuaInstance, cConfigVariableName);
+  if (not lua_istable(fLua.LuaInstance, -1)) then
+    lua_newtable(fLua.LuaInstance);
+  lua_pushstring(fLua.LuaInstance, PChar(pName));
+  lua_pushstring(fLua.LuaInstance, PChar(pValue));
+  lua_settable(fLua.LuaInstance, -3);
+  lua_setglobal(fLua.LuaInstance, cConfigVariableName);
+end;
+
+function TLuaEngine.GetConfigItem(pName: String; pDefault: boolean): boolean;
+var
+  lLuaResult: Integer;
+begin
+  Result := pDefault;
+  lua_getglobal(fLua.LuaInstance, cConfigVariableName);
+  if (lua_istable(fLua.LuaInstance, -1)) then
+  begin
+    lua_pushstring(fLua.LuaInstance, PChar(pName));
+    lua_gettable(fLua.LuaInstance, -2);
+    if (lua_isboolean(fLua.LuaInstance, -1)) then
+    begin
+      lLuaResult:=lua_toboolean(fLua.LuaInstance, -1);
+      lua_pop(fLua.LuaInstance, 1);
+      Result := boolean(lLuaResult);
+    end
+    else
+      Glb.LogError(pName + ' is not a boolean', cLuaLoggerName);
+  end
+  else
+    Glb.LogError('Config variable not found for ' + pName, cLuaLoggerName);
+end;
+
+function TLuaEngine.GetConfigItem(pName: String; pDefault: String): String;
+begin
+  Result := pDefault;
+  lua_getglobal(fLua.LuaInstance, cConfigVariableName);
+  if (lua_istable(fLua.LuaInstance, -1)) then
+  begin
+    lua_pushstring(fLua.LuaInstance, PChar(pName));
+    lua_gettable(fLua.LuaInstance, -2);
+    if (lua_isstring(fLua.LuaInstance, -1) > 0) then
+    begin
+      Result:=lua_tostring(fLua.LuaInstance, -1);
+      lua_pop(fLua.LuaInstance, 1);
+    end
+    else
+      Glb.LogError(pName + ' is not a string', cLuaLoggerName);
+  end
+  else
+    Glb.LogError('Config variable not found for ' + pName, cLuaLoggerName);
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer);
@@ -577,16 +566,19 @@ var
 begin
   lDevice := Glb.DeviceService.GetByName(pDeviceName);
   if (lDevice = nil) then
-    raise Exception('Device with name ' + pDeviceName + ' not found');
-  lTrigger := TTrigger.Create;
-  lTrigger.Device := lDevice;
-  lTrigger.KeyNumber:=pButton;
-  lTrigger.Direction:=pDirection;
-  lTrigger.LuaRef:=pHandlerRef;
-  lTrigger.WholeDevice:=False;
-  fTriggers.Add(lTrigger);
-  Glb.DebugLog(Format('Added handler %d for device %s, key %d, direction %d',
-      [pHandlerRef, lDevice.Name, pButton, pDirection]), cLuaLoggerName);
+    Glb.LogError('Device with name ' + pDeviceName + ' not found', cLuaLoggerName)
+  else
+  begin
+    lTrigger := TTrigger.Create;
+    lTrigger.Device := lDevice;
+    lTrigger.KeyNumber:=pButton;
+    lTrigger.Direction:=pDirection;
+    lTrigger.LuaRef:=pHandlerRef;
+    lTrigger.WholeDevice:=False;
+    fTriggers.Add(lTrigger);
+    Glb.DebugLog(Format('Added handler %d for device %s, key %d, direction %d',
+        [pHandlerRef, lDevice.Name, pButton, pDirection]), cLuaLoggerName);
+  end;
 end;
 
 procedure TLuaEngine.SetDeviceCallback(pDeviceName: String; pHandlerRef: Integer
@@ -597,18 +589,22 @@ var
 begin
   lDevice := Glb.DeviceService.GetByName(pDeviceName);
   if (lDevice = nil) then
-    raise Exception('Device with name ' + pDeviceName + ' not found');
-  if (lDevice is TComDevice) then
+    Glb.LogError('Device with name ' + pDeviceName + ' not found', cLuaLoggerName)
+    //raise Exception('Device with name ' + pDeviceName + ' not found');
+  else
   begin
-    (lDevice as TComDevice).Active:=true;
+    if (lDevice is TComDevice) then
+    begin
+      (lDevice as TComDevice).Active:=true;
+    end;
+    lTrigger := TTrigger.Create;
+    lTrigger.Device := lDevice;
+    lTrigger.WholeDevice:=True;
+    lTrigger.LuaRef:=pHandlerRef;
+    fTriggers.Add(lTrigger);
+    Glb.DebugLog(Format('Added handler %d for whole device %s',
+        [pHandlerRef, lDevice.Name]), cLuaLoggerName);
   end;
-  lTrigger := TTrigger.Create;
-  lTrigger.Device := lDevice;
-  lTrigger.WholeDevice:=True;
-  lTrigger.LuaRef:=pHandlerRef;
-  fTriggers.Add(lTrigger);
-  Glb.DebugLog(Format('Added handler %d for whole device %s',
-      [pHandlerRef, lDevice.Name]), cLuaLoggerName);
 end;
 
 procedure TLuaEngine.OnDeviceEvent(pDevice: TDevice; pButton: Integer;

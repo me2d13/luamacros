@@ -59,7 +59,7 @@ begin
   begin
     fSMPtr^.MainWinHandle := pMainFormHandle;
     fSMPtr^.LmcPID := GetCurrentProcessId;
-    fSMPtr^.Debug:=1; // for now
+    fSMPtr^.Debug:=0; // for now
   end;
 end;
 

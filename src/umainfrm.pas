@@ -6,8 +6,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, SynEdit, Forms, Controls, Graphics, Dialogs,
-  PairSplitter, ExtCtrls, ComCtrls, StdCtrls, ActnList, SynHighlighterLua,
-  UniqueInstance, uLuaEngine, Windows;
+  PairSplitter, ExtCtrls, ComCtrls, StdCtrls, ActnList, Menus,
+  SynHighlighterLua, UniqueInstance, uLuaEngine, Windows;
 
 const
   WM_LUA_RUN_CHANGE = WM_USER + 310;
@@ -17,6 +17,11 @@ type
   { TLmcMainForm }
 
   TLmcMainForm = class(TForm)
+    MenuItem2: TMenuItem;
+    ShowAction: TAction;
+    ExitAction: TAction;
+    MenuItem1: TMenuItem;
+    PopupMenu1: TPopupMenu;
     ScanCancelButton: TButton;
     OpenDialog1: TOpenDialog;
     OpenFileAction: TAction;
@@ -41,22 +46,29 @@ type
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
     ToolButton5: TToolButton;
+    TrayIcon1: TTrayIcon;
     UniqueInstance1: TUniqueInstance;
+    procedure ExitActionExecute(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormWindowStateChange(Sender: TObject);
     procedure OpenFileActionExecute(Sender: TObject);
     procedure RunScriptActionExecute(Sender: TObject);
     procedure SaveActionExecute(Sender: TObject);
     procedure SaveAsActionExecute(Sender: TObject);
     procedure ScanCancelButtonClick(Sender: TObject);
+    procedure ShowActionExecute(Sender: TObject);
     procedure SynEdit1Change(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure ScanningChange;
+    procedure ManageTrayIcon;
+    procedure TrayIcon1DblClick(Sender: TObject);
   private
     { private declarations }
     fEditorDirty: boolean;
     fFileName: String;
+    fAutoExecute: Boolean;
     procedure SetEditorDirty(AValue: boolean);
     procedure SetFileName(AValue: String);
     procedure BuildFormCaption;
@@ -74,6 +86,7 @@ type
     // message listeners
     procedure WmInputMessage(var Message: TMessage);
     procedure WmLuaRunChange(var Message: TMessage);
+    function WmMainWindowCommand(wParam: WParam; lParam: LParam):LRESULT;
 
     property EditorDirty: boolean read fEditorDirty write SetEditorDirty;
     property FileName: String read fFileName write SetFileName;
@@ -124,6 +137,9 @@ begin
   begin
     Glb.FlushBuffer;
     Result := lMessage.Result;
+  end else if uMsg=WM_MAIN_WINDOW_COMMAND then
+  begin
+    Result := gMainForm.WmMainWindowCommand(wParam, lParam);
   end else if uMsg=WM_SCANNING_STATUS_CHANGE then
   begin
     gMainForm.ScanningChange;
@@ -144,6 +160,7 @@ begin
   begin
     Glb.LuaEngine.Reset;
     Glb.DeviceService.DetectDevices; // clears device table
+    Glb.InitConfigValues;
     Glb.LuaEngine.runCode(SynEdit1.Lines.GetText);
   end;
 end;
@@ -166,6 +183,11 @@ begin
   Glb.DebugLog('Keyboard scan cancelled.', cGuiLoggerName);
 end;
 
+procedure TLmcMainForm.ShowActionExecute(Sender: TObject);
+begin
+  Show;
+end;
+
 procedure TLmcMainForm.SynEdit1Change(Sender: TObject);
 begin
   EditorDirty:=true;
@@ -186,6 +208,20 @@ begin
   ScanPanel.Visible:=Glb.ScanService.Scanning;
 end;
 
+procedure TLmcMainForm.ManageTrayIcon;
+begin
+  if (Glb.LuaEngine.GetConfigItem('minimizeToTray', false)) then
+    TrayIcon1.Show
+  else
+    TrayIcon1.Hide;
+end;
+
+procedure TLmcMainForm.TrayIcon1DblClick(Sender: TObject);
+begin
+  ShowInTaskBar:=stDefault;
+  Show;
+end;
+
 procedure TLmcMainForm.WmInputMessage(var Message: TMessage);
 begin
   Glb.DeviceService.KbdDeviceService.OnRawMessage(Message);
@@ -202,9 +238,20 @@ begin
   end else begin
     RunScriptAction.Enabled:=True;
     lCaption:='Not running';
+    ManageTrayIcon;
   end;
   // refresh lua running indicators
   StatusBar1.Panels.Items[0].Text:=lCaption;
+end;
+
+function TLmcMainForm.WmMainWindowCommand(wParam: WParam; lParam: LParam
+  ): LRESULT;
+begin
+  if (wParam = MWC_MINIMIZE) then
+  begin
+    WindowState:=wsMinimized;
+    FormWindowStateChange(self);
+  end;
 end;
 
 
@@ -234,10 +281,22 @@ begin
 end;
 
 procedure TLmcMainForm.ProcesApplicationParams;
+var
+  i: Integer;
 begin
-  if FileExists(Application.Params[1]) then
+  i := 1;
+  while i <= Application.ParamCount do
   begin
-    LoadFile(Application.Params[1]);
+    if (UpperCase(Application.Params[i]) = '-R') then
+    begin
+      fAutoExecute := True; // start after complete init is done
+    end else if FileExists(Application.Params[i]) then
+    begin
+      LoadFile(Application.Params[i]);
+    end else begin
+      Glb.LogError('Unexpected parameter (or file not readable): ' + Application.Params[i], cGuiLoggerName);
+    end;
+    Inc(i);
   end;
 end;
 
@@ -315,12 +374,17 @@ begin
   // here Glb is alreadu created & initialized
   OrderRawInputMessagesToBeReceived;
   Glb.HookService.Init(Handle);
+  if (fAutoExecute) then
+  begin
+    RunScriptAction.Execute;
+  end;
   // maybe resume LUA execution thread here to have panel update
 end;
 
 procedure TLmcMainForm.FormCreate(Sender: TObject);
 begin
   gMainFormThreadId := GetCurrentThreadID;
+  fAutoExecute := False;
   Glb.LogFunction:=@print;
   Glb.MainFormHandle:=handle;
   if (Application.ParamCount > 0) then
@@ -331,16 +395,32 @@ begin
     EditorDirty:=false;
   end;
   PrevWndProc:=Windows.WNDPROC(SetWindowLongPtr(Self.Handle,GWL_WNDPROC,PtrInt(@WndCallback)));
-  StatusBar1.Panels.Items[1].Text:= 'Version: ' + Sto_GetFmtFileVersion();
+  Glb.Version:=Sto_GetFmtFileVersion();
+  StatusBar1.Panels.Items[1].Text:= 'Version: ' + Glb.Version;
 end;
 
 procedure TLmcMainForm.FormDestroy(Sender: TObject);
 begin
 end;
 
+procedure TLmcMainForm.FormWindowStateChange(Sender: TObject);
+begin
+  if (WindowState = wsMinimized) and (Glb.LuaEngine.GetConfigItem('minimizeToTray', false)) then
+  begin
+    WindowState:=wsNormal;
+    Hide;
+    ShowInTaskBar:=stNever;
+  end;
+end;
+
 procedure TLmcMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);
 begin
   CanClose:=CheckDirtyTrueCanContinue;
+end;
+
+procedure TLmcMainForm.ExitActionExecute(Sender: TObject);
+begin
+  Close;
 end;
 
 procedure TLmcMainForm.OpenFileActionExecute(Sender: TObject);
