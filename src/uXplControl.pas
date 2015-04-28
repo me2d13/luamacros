@@ -2,7 +2,7 @@ unit uXplControl;
 
 interface
 
-uses MemMap, uXplCommon, Classes;
+uses MemMap, uXplCommon, Classes, uXplListener;
 
 type
 
@@ -14,7 +14,7 @@ type
     pBuffer: PXplComRecord;
     fVars: TStringList;
     fCommands: TStringList;
-    fActiveDuringCompilation: Boolean;
+    fXplListener: TXplListener;
     procedure DebugLog(Value: String);
     function GetCustomXplVariable(pName: String; pIndex: Integer; isArray: Boolean): Variant;
     procedure SetCustomXplVariable(pName: String; pIndex: Integer; pValue: Variant; isArray: Boolean; pToggleCommand: Integer);
@@ -60,14 +60,14 @@ begin
   fVars.CaseSensitive := False;
   fCommands := TStringList.Create;
   fCommands.CaseSensitive := False;
-  fActiveDuringCompilation := False;
+  fXplListener := TXplListener.Create;
   fMM := TMemMap.Create(XPL_MEM_FILE, SizeOf(TXplComRecord));
 end;
 
 procedure TXPLcontrol.DebugLog(Value: String);
 begin
   if Glb <> nil then
-    Glb.DebugLog(Value, 'XPL');
+    Glb.DebugLog(Value, cLoggerXpl);
 end;
 
 destructor TXPLcontrol.Destroy;
@@ -78,6 +78,7 @@ begin
   fVars.Free;
   for I := 0 to fCommands.Count - 1 do
     fCommands.Objects[I].Free;
+  fXplListener.Free;
   fCommands.Free;
   fMM.Free;
   inherited;
@@ -98,6 +99,7 @@ begin
     pBuffer^.ComSlots[0].XplRequestFlag := 1;
     pBuffer^.XplRequestFlag := 1; // ask XPL for response
   end;
+  fXplListener.Init;
   //lGlb.DebugLog(Format('Slot size: %d, mem size: %d', [SizeOf(TXplComSlot), SizeOf(TXplComRecord)]), 'XPL');
 end;
 

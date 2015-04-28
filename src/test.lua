@@ -10,7 +10,7 @@ if (lmc.minimizeToTray) then
 else
   print('Won\'t minimize to tray')
 end
-lmc_minimize()
+--lmc_minimize()
 
 -- log all modules, very verbose
 --lmc_log_all();

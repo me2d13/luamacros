@@ -14,7 +14,7 @@ uses
     XPLMDataAccess,
     MemMap in 'MemMap.pas',
     uXplPluginEngine in 'uXplPluginEngine.pas',
-    uXplCommon in 'uXplCommon.pas';
+    uXplCommon in 'uXplCommon.pas', uXplPluginSender, uXplAbstractReceiver;
 
   // The Delphi Compiler must create a file with a .XPL extention. The default
   // extention for a Delphi library is .DLL - thus we use the $E compiler

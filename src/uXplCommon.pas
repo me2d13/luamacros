@@ -22,6 +22,9 @@ const
 
   COM_SLOTS_COUNT = 8;
 
+  cServerName = 'LuaMacrosXplListener';
+
+
 type
   Pointer8b = Int64;
 

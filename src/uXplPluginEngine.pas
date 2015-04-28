@@ -4,7 +4,7 @@ unit uXplPluginEngine;
 
 interface
 
-uses MemMap, XPLMDataAccess, uXplCommon;
+uses MemMap, XPLMDataAccess, uXplCommon, uXplPluginSender;
 
 type
 
@@ -26,6 +26,7 @@ TXplEngine = class (TObject)
     fBasicFontWidth: Integer;
     fTextFloatPosition: Single;
     fTextHideTs: TDateTime;
+    fSender: TXplSender;
     procedure DebugLog(Value: String);
     function GetArrayLength(pDataRef: XPLMDataRef ;pDataType: XPLMDataTypeID): Integer;
     procedure ProcessSlot(pSlot: PXplComSlot);
@@ -72,6 +73,7 @@ begin
   end
   else
     DebugLog('FATAL: Shared memory not created.');
+  fSender := TXplSender.Create;
   InitGlValues;
 end;
 
@@ -110,6 +112,7 @@ begin
   if pBuffer <> nil then
     pBuffer^.XplConnected := 0;
   fMM.Free;
+  fSender.Free;
   inherited;
 end;
 
@@ -256,6 +259,7 @@ begin
        (pSlot^.HDMcommand = HDMC_COMMAND_END)
     then
     begin
+      fSender.SendString('Ahoj');
       // is already registered?
       if pSlot^.CommandRef = 0 then
       begin

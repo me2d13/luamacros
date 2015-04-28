@@ -18,7 +18,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
-      <BuildNr Value="12"/>
+      <BuildNr Value="18"/>
       <StringTable ProductVersion=""/>
     </VersionInfo>
     <BuildModes Count="1">
@@ -50,7 +50,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="24">
+    <Units Count="25">
       <Unit0>
         <Filename Value="LuaMacros.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -174,6 +174,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uLuaCmdMainWindow"/>
       </Unit23>
+      <Unit24>
+        <Filename Value="uxpllistener.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uXplListener"/>
+      </Unit24>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
