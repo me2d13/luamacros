@@ -1,5 +1,6 @@
 -- GUI thing: clear log window
 clear();
+lmc_xpl_text('From LUA macros')
 
 lmc_log_all();
 lmc_log_spool('lmc_spool.log')

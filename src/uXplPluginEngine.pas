@@ -4,7 +4,7 @@ unit uXplPluginEngine;
 
 interface
 
-uses MemMap, XPLMDataAccess, uXplCommon, uXplPluginSender;
+uses MemMap, XPLMDataAccess, uXplCommon, uXplSender, uXplPluginReceiver, uXplMessages, classes;
 
 type
 
@@ -27,6 +27,8 @@ TXplEngine = class (TObject)
     fTextFloatPosition: Single;
     fTextHideTs: TDateTime;
     fSender: TXplSender;
+    fReceiver: TXplPluginReceiver;
+    fDataRefs: TStrings;
     procedure DebugLog(Value: String);
     function GetArrayLength(pDataRef: XPLMDataRef ;pDataType: XPLMDataTypeID): Integer;
     procedure ProcessSlot(pSlot: PXplComSlot);
@@ -34,6 +36,12 @@ TXplEngine = class (TObject)
     procedure SimpleReadWrite(pSlot: PXplComSlot; pMakeChecks: Boolean);
     procedure ToggleVar(pSlot: PXplComSlot);
     procedure InitGlValues;
+    procedure OnLmcMessage(pSender: TObject);
+    procedure XplDebugFmt(pFormat:String; pArgs: array of const);
+    procedure RunAndFree(pText: TXplDrawText); overload;
+    procedure RunAndFree(pVar: TXplSetVariable); overload;
+    function GetOrRegisterXplVariable(pName: String): TXplVariable;
+    procedure SetVariable(pDef: TXplVariable; pVal: TXplValue);
   public
     { Public declarations }
     constructor Create;
@@ -44,14 +52,14 @@ end;
 
 implementation
 
-uses Classes, SysUtils, Windows, XPLMUtilities, XPLMGraphics, gl, glu, XPLMDisplay, dateutils;
+uses SysUtils, XPLMUtilities, XPLMGraphics, gl, glu, XPLMDisplay, dateutils;
 
 { TXplEngine }
 
 constructor TXplEngine.Create;
 begin
   pBuffer := nil;
-  fDebugging := FileExists('hidmacros.log');
+  fDebugging := FileExists('luamacros.log');
   fPosCountDown := -1;
   fTextToBeDrawn:='';
   fTextFloatPosition := 0;
@@ -73,7 +81,12 @@ begin
   end
   else
     DebugLog('FATAL: Shared memory not created.');
-  fSender := TXplSender.Create;
+  fSender := TXplSender.Create(cXplToLmcPipeName);
+  fSender.DebugMethod:=XplDebugFmt;
+  fReceiver := TXplPluginReceiver.Create(cLmcToXplPipeName);
+  fReceiver.OnMessage:=OnLmcMessage;
+  fReceiver.Init;
+  fDataRefs:=TStringList.Create;
   InitGlValues;
 end;
 
@@ -83,11 +96,9 @@ var
   lVal: String;
   logFile: TextFile;
 begin
-  if pBuffer = nil then
-    exit;
   if not fDebugging then
     exit;
-  lVal := 'XPLHDMplugin:'+ Value;
+  lVal := 'XPLLUMplugin:'+ Value;
   {$IFDEF OUTPUTDEBUGSTRING}
   GetMem(tmp, Length(lVal) + 1);
   try
@@ -98,8 +109,8 @@ begin
   end;
   {$ENDIF}
   // to file
-  AssignFile(logFile, 'hidmacros.log');
-  if FileExists('hidmacros.log') then
+  AssignFile(logFile, 'luamacros.log');
+  if FileExists('luamacros.log') then
       Append(logFile)
     else
       Rewrite(logFile);
@@ -108,11 +119,19 @@ begin
 end;
 
 destructor TXplEngine.Destroy;
+var
+  I: Integer;
 begin
+  fReceiver.Free;
   if pBuffer <> nil then
     pBuffer^.XplConnected := 0;
   fMM.Free;
   fSender.Free;
+  for I := 0 to fDataRefs.Count - 1 do
+  begin
+    fDataRefs.Objects[I].Free;
+  end;
+  fDataRefs.Free;
   inherited;
 end;
 
@@ -191,7 +210,7 @@ begin
   begin
     // dump
     DebugLog('Slot dump, size of slot is ' + IntToStr(SizeOf(pSlot^)));
-    DebugLog(MemoryDump(pSlot, 1570));
+    //DebugLog(MemoryDump(pSlot, 1570));
     // check command
     if (pSlot^.HDMcommand = HDMC_GET_VAR) or
        (pSlot^.HDMcommand = HDMC_SET_VAR) or
@@ -441,10 +460,10 @@ begin
 
 procedure TXplEngine.ToggleVar(pSlot: PXplComSlot);
 var
-  lVals: array of TXplValue;
+  lVals: array of TXplValueRec;
   lStrings: TStringList;
   i: Integer;
-  lClosest: TXplValue;
+  lClosest: TXplValueRec;
   lClosestIndex : Integer;
   lCount: Integer;
   lSetIndex: Integer;
@@ -550,6 +569,137 @@ procedure TXplEngine.InitGlValues;
 begin
   XPLMGetScreenSize(@fScreenWidth, @fScreenHeight);
   XPLMGetFontDimensions(xplmFont_Basic, @fBasicFontWidth, @fBasicFontHeight, nil);
+end;
+
+procedure TXplEngine.OnLmcMessage(pSender: TObject);
+var
+  lStream: TMemoryStream;
+  lMessageType: byte;
+begin
+  lStream := TMemoryStream.Create;
+  try
+    try
+      fReceiver.Server.GetMessageData(lStream);
+      lStream.Position:=0;
+      lMessageType := lStream.ReadByte;
+      case lMessageType of
+        HDMC_SHOW_TEXT: RunAndFree(TXplDrawText.Create(lStream));
+        HDMC_SET_VAR: RunAndFree(TXplSetVariable.Create(lStream));
+      end;
+    except
+      on E:Exception do
+        XplDebugFmt('Pipe exception: %s', [E.Message]);
+    end;
+  finally
+    lStream.Free;
+  end;
+end;
+
+procedure TXplEngine.XplDebugFmt(pFormat: String; pArgs: array of const);
+var
+ lBuff: PChar;
+ lMessage: String;
+begin
+  lMessage:=Format(pFormat, pArgs) + #13;
+  GetMem(lBuff, Length(lMessage) + 1);
+  try
+    StrPCopy(lBuff, lMessage);
+    XPLMDebugString(lBuff);
+  finally
+    FreeMem(lBuff);
+  end;
+end;
+
+procedure TXplEngine.RunAndFree(pText: TXplDrawText);
+begin
+  fTextFloatPosition := pText.Position;
+  fTextToBeDrawn := pText.Text;
+  if (pText.TimeInSec > 0) then
+    fTextHideTs := IncSecond(Now(), pText.TimeInSec)
+  else
+    fTextHideTs := 0;
+  DebugLog(Format('Received DrawText %s at pos %f.', [fTextToBeDrawn, fTextFloatPosition]));
+  pText.Free;
+end;
+
+procedure TXplEngine.RunAndFree(pVar: TXplSetVariable);
+var
+  lXV: TXplVariable;
+begin
+  DebugLog('Received request to set variable ' + pVar.Name + ' to ' + pVar.Value.ToString);
+  lXV := GetOrRegisterXplVariable(pVar.Name);
+  if (lXV <> nil) then
+  begin
+    if (lXV.Writable) then
+      SetVariable(lXV, pVar.Value)
+    else
+      DebugLog('Variable ' + pVar.Name + ' is not witable.');
+  end;
+end;
+
+function TXplEngine.GetOrRegisterXplVariable(pName: String): TXplVariable;
+var
+  lIndex: Integer;
+  lXV: TXplVariable;
+  lDR: XPLMDataRef;
+begin
+  Result := nil;
+  lIndex := fDataRefs.IndexOf(pName);
+  if (lIndex >= 0) then
+  begin
+    Result := TXplVariable(fDataRefs.Objects[lIndex]);
+    DebugLog('Variable ' + pName + ' already known with offset ' + IntToStr(Int64(Result.DataRef)));
+  end
+  else
+  begin
+    lDr := XPLMFindDataRef(PChar(pName));
+    if (lDr <> nil) then
+    begin
+      lXV := TXplVariable.Create;
+      LXV.Name:=pName;
+      lXV.DataRef:=lDR;
+      lXV.Writable:=(XPLMCanWriteDataRef(lDR) <> 0);
+      lXV.DataType:=XPLMGetDataRefTypes(lDR);
+      lXV.Length:=GetArrayLength(lDR, lXV.DataType);
+      fDataRefs.AddObject(pName, lXV);
+      Result := lXV;
+      DebugLog('Variable ' + pName + ' located with offset ' + IntToStr(Int64(Result.DataRef)));
+    end
+    else
+      DebugLog('XPL doesn''t know variable ' + pName);
+  end;
+end;
+
+procedure TXplEngine.SetVariable(pDef: TXplVariable; pVal: TXplValue);
+var
+  lBuff: PChar;
+begin
+  case pDef.DataType of
+  xplmType_Float:
+  begin
+    pVal.MakeDouble;
+    DebugLog('Setting variable ' + pDef.Name + ' to float value ' + FloatToStr(pVal.DoubleValue));
+    XPLMSetDataf(pDef.DataRef, pVal.DoubleValue);
+  end;
+  xplmType_Double:
+  begin
+    pVal.MakeDouble;
+    DebugLog('Setting variable ' + pDef.Name + ' to double value ' + FloatToStr(pVal.DoubleValue));
+    XPLMSetDatad(pDef.DataRef, pVal.DoubleValue);
+  end;
+  xplmType_Int:
+  begin
+    pVal.MakeInt;
+    DebugLog('Setting variable ' + pDef.Name + ' to int value ' + IntToStr(pVal.IntValue));
+    XPLMSetDatai(pDef.DataRef, pVal.IntValue);
+  end;
+  xplmType_Data:
+  begin
+    pVal.MakeString;
+    //XPLMSetDatab(Pointer8b2Pointer(pDef), pVal.IntValue);
+    DebugLog('Setting string not yet implemented');
+  end;
+  end;
 end;
 
 procedure TXplEngine.DrawText;

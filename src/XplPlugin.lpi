@@ -33,7 +33,7 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <Units Count="6">
+    <Units Count="8">
       <Unit0>
         <Filename Value="XplPlugin.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -54,15 +54,25 @@
         <UnitName Value="MemMap"/>
       </Unit3>
       <Unit4>
-        <Filename Value="uxplpluginsender.pas"/>
+        <Filename Value="uxplsender.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="uXplPluginSender"/>
+        <UnitName Value="uXplSender"/>
       </Unit4>
       <Unit5>
         <Filename Value="uxplabstractreceiver.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplAbstractReceiver"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="uxplpluginreceiver.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uXplPluginReceiver"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="uxplmessages.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uXplMessages"/>
+      </Unit7>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

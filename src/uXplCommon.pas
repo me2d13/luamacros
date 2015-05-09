@@ -2,7 +2,7 @@ unit uXplCommon;
 
 interface
 
-uses XPLMDataAccess, XPLMUtilities;
+uses XPLMDataAccess, XPLMUtilities, classes;
 
 const
   XPL_MEM_FILE = 'XPL_LUAMACROS_MEMORY_FILE';
@@ -22,14 +22,15 @@ const
 
   COM_SLOTS_COUNT = 8;
 
-  cServerName = 'LuaMacrosXplListener';
+  cXplToLmcPipeName = 'XplToLuaMacrosPipe';
+  cLmcToXplPipeName = 'LuaMacrosToXplPipe';
 
 
 type
   Pointer8b = Int64;
 
-  PXplValue = ^TXplValue;
-  TXplValue = packed record
+  PXplValue = ^TXplValueRec;
+  TXplValueRec = packed record
     case Integer of
     0: (intData : Integer);
     1: (floatData : Single);
@@ -48,7 +49,7 @@ type
     Length: SmallInt;
     Index: Integer;
     Writable: Boolean;
-    Value: TXplValue;
+    Value: TXplValueRec;
     ValueName: array[0..255] of char;
     ValueUntyped: array[0..255] of char;
     StringBuffer: array[0..XPL_MAX_STRING_SIZE-1] of char;
@@ -72,7 +73,7 @@ type
   public
     Name: String;
     DataType: XPLMDataTypeID;
-    DataRef: Int64;
+    DataRef: XPLMDataRef;
     Writable: Boolean;
     Length: Integer;
     constructor Create;

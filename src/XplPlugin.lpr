@@ -7,14 +7,9 @@ uses
     Classes,
     Windows,
     //Graphics,
-    XPLMDefs,
-    XPLMDisplay,
-    XPLMProcessing,
-    XPLMUtilities,
-    XPLMDataAccess,
-    MemMap in 'MemMap.pas',
-    uXplPluginEngine in 'uXplPluginEngine.pas',
-    uXplCommon in 'uXplCommon.pas', uXplPluginSender, uXplAbstractReceiver;
+    XPLMDefs, XPLMDisplay, XPLMProcessing, XPLMUtilities, XPLMDataAccess,
+    MemMap, uXplPluginEngine, uXplCommon, uXplSender,
+    uXplAbstractReceiver, uXplPluginReceiver, uxplmessages;
 
   // The Delphi Compiler must create a file with a .XPL extention. The default
   // extention for a Delphi library is .DLL - thus we use the $E compiler

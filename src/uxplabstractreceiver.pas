@@ -9,32 +9,44 @@ uses
 
 type
 
-  { TXplAbstractListener }
+  { TXplAbstractReceiver }
 
-  TXplAbstractListener = class abstract(TObject)
+  TXplAbstractReceiver = class (TObject)
     private
       fServer: TSimpleIPCServer;
-      procedure OnXplMessage(Sender: TObject); virtual; abstract;
+      function GetOnMessage: TNotifyEvent;
+      procedure SetOnMessage(AValue: TNotifyEvent);
     public
       constructor Create(pName: String);
       destructor Destroy; Override;
       procedure Init;
+      Property OnMessage : TNotifyEvent Read GetOnMessage Write SetOnMessage;
+      property Server: TSimpleIPCServer read fServer;
   end;
 
 
 implementation
 
-{ TXplAbstractListener }
+{ TXplAbstractReceiver }
 
-constructor TXplAbstractListener.Create(pName: String);
+procedure TXplAbstractReceiver.SetOnMessage(AValue: TNotifyEvent);
+begin
+  fServer.OnMessage:=AValue;
+end;
+
+function TXplAbstractReceiver.GetOnMessage: TNotifyEvent;
+begin
+  Result := fServer.OnMessage;
+end;
+
+constructor TXplAbstractReceiver.Create(pName: String);
 begin
   fServer := TSimpleIPCServer.Create(nil);
   fServer.ServerID:=pName;
-  fServer.OnMessage:=OnXplMessage;
   fServer.Global:=true;
 end;
 
-destructor TXplAbstractListener.Destroy;
+destructor TXplAbstractReceiver.Destroy;
 begin
   if (fServer.Active) then
     fServer.StopServer;
@@ -42,7 +54,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TXplAbstractListener.Init;
+procedure TXplAbstractReceiver.Init;
 begin
   fServer.StartServer;
 end;

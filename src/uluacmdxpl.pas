@@ -18,7 +18,7 @@ function XplDrawText(luaState : TLuaState) : integer;
 implementation
 
 uses
-  uGlobals, uXplCommon, variants;
+  uGlobals, uXplCommon, variants, uXplMessages;
 
 function XplCommand(luaState : TLuaState) : integer;
 var arg : PAnsiChar;
@@ -76,15 +76,16 @@ end;
 
 function SetXplVariable(luaState: TLuaState): integer;
 var arg : PAnsiChar;
-  lVal: Variant;
+  lVal: TXplValue;
 begin
   arg := lua_tostring(luaState, 1);
-  if (lua_isstring(luaState, 2) <> 0) then lVal := lua_tostring(luaState, 2)
-  else if (lua_isnumber(luaState, 2) = 0) then lVal := lua_tonumber(luaState, 2)
+  if (lua_isstring(luaState, 2) <> 0) then lVal := TXplValue.Create(lua_tostring(luaState, 2))
+  else if (lua_isnumber(luaState, 2) = 0) then lVal := TXplValue.Create(lua_tonumber(luaState, 2))
   else
   begin
     raise Exception.Create('Unexpected variable type');
   end;
+  Glb.DebugLog('Setting variable ' + arg + ' to ' + lVal.ToString, cLoggerXpl);
   Glb.XplControl.SetXplVariable(arg, lVal);
   Result := 0;
 end;
