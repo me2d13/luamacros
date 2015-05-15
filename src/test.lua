@@ -2,7 +2,8 @@
 clear();
 lmc_xpl_text('From LUA macros')
 
-lmc_log_all();
+--lmc_log_all();
+lmc_log_module('XPL')
 lmc_log_spool('lmc_spool.log')
 print('Version: ' .. lmc.version)
 lmc.minimizeToTray = true

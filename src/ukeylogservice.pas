@@ -30,7 +30,7 @@ type
       constructor Create;
       function AddRaw(pRawdata: PRAWINPUT): TKeyStrokePtr;
       procedure AssignDevice(var pKS: TKeyStroke);
-      function UnixTimestampMs: LongInt;
+      function UnixTimestampMs: Int64;
       procedure RemoveOldItems;
       procedure ResetScanned;
       property JustScannedKs: TKeyStroke read fJustScannedKs;
@@ -129,7 +129,7 @@ begin
   end;
 end;
 
-function TKeyLogService.UnixTimestampMs: LongInt;
+function TKeyLogService.UnixTimestampMs: Int64;
 begin
   Result := Round(Now * 24*60*60*1000);
 end;

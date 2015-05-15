@@ -32,7 +32,7 @@ var
  lMessage: String;
   begin
     //* If any data refs are missing, do not proceed.
-    if (gEng = nil) or (gEng.pBuffer = nil) then
+    if (gEng = nil) then
     begin
       result := 1;
       exit;
@@ -66,7 +66,7 @@ function MyDrawCallbackFunc(inPhase             : XPLMDrawingPhase;
    lMessage: String;
   begin
     //* If any data refs are missing, do not proceed.
-    if (gEng = nil) or (gEng.pBuffer = nil) then
+    if (gEng = nil)  then
     begin
       result := 1;
       exit;
@@ -116,7 +116,7 @@ function MyDrawCallbackFunc(inPhase             : XPLMDrawingPhase;
   	{/* Find the data refs we want to record. */}
   	//gLatitutde := XPLMFindDataRef('sim/flightmodel/position/latitude');
 
-    if gEng.pBuffer <> nil then
+    if gEng <> nil then
     begin
       XPLMRegisterFlightLoopCallback(@MyFlightLoopCallbackFunc, -1, nil);
       XPLMRegisterDrawCallback(@MyDrawCallbackFunc, xplm_Phase_Window, 1, nil);

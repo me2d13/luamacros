@@ -40,7 +40,7 @@ function XplCommandBegin(luaState: TLuaState): integer;
 var arg : PAnsiChar;
 begin
      arg := lua_tostring(luaState, 1);
-     Glb.XplControl.ExecuteCommand(arg, HDMC_COMMAND_BEGIN);
+     Glb.XplControl.ExecuteCommandBegin(arg);
      Result := 0;
 end;
 
@@ -48,30 +48,39 @@ function XplCommandEnd(luaState: TLuaState): integer;
 var arg : PAnsiChar;
 begin
      arg := lua_tostring(luaState, 1);
-     Glb.XplControl.ExecuteCommand(arg, HDMC_COMMAND_END);
+     Glb.XplControl.ExecuteCommandEnd(arg);
      Result := 0;
 end;
 
 function GetXplVariable(luaState: TLuaState): integer;
 var arg : PAnsiChar;
-  lRes: Variant;
+  lRes: TXplValue;
   lMessage: String;
 begin
      arg := lua_tostring(luaState, 1);
      lRes := Glb.XplControl.GetXplVariable(arg);
-     if (VarIsStr(lRes)) then
+     if (lRes = nil) then
      begin
-       lMessage:=lRes;
+       lMessage:='No value returned from Xplane';
        lua_pushstring(luaState, PChar(lMessage));
-     end
-     else if (VarIsOrdinal(lRes)) then lua_pushinteger(luaState, lRes)
-     else if (VarIsFloat(lRes)) then lua_pushnumber(luaState, lRes)
-     else
+       Result := 1;
+     end else
+     begin
+       if (lRes.ValueType = vtString) then
        begin
-         lMessage:='Unexpected type returned from XPL with value ' + lRes;
-         lua_pushstring(luaState, PChar(lMessage))
-       end;
-     Result := 1;
+         lMessage:=lRes.StringValue;
+         lua_pushstring(luaState, PChar(lMessage));
+       end
+       else if (lRes.ValueType = vtInteger) then lua_pushinteger(luaState, lRes.IntValue)
+       else if (lRes.ValueType = vtDouble) then lua_pushnumber(luaState, lRes.DoubleValue)
+       else
+         begin
+           lMessage:='Unexpected type returned from XPL with value ' + lRes.ToString;
+           lua_pushstring(luaState, PChar(lMessage))
+         end;
+       Result := 1;
+       Glb.XplControl.XplVarProcessed;
+     end;
 end;
 
 function SetXplVariable(luaState: TLuaState): integer;

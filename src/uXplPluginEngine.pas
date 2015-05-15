@@ -4,21 +4,14 @@ unit uXplPluginEngine;
 
 interface
 
-uses MemMap, XPLMDataAccess, uXplCommon, uXplSender, uXplPluginReceiver, uXplMessages, classes;
+uses XPLMDataAccess, XPLMUtilities, uXplCommon, uXplSender, uXplPluginReceiver, uXplMessages, classes;
 
 type
 
 { TXplEngine }
 
 TXplEngine = class (TObject)
-    fMM: TMemMap;
-    fPosCountDown: Integer;
-    fLatitudeRef: XPLMDataRef;
-    fLongitudeRef: XPLMDataRef;
-    fHeadingRef: XPLMDataRef;
-    fHeightRef: XPLMDataRef;
     fDebugging: Boolean;
-    pBuffer: PXplComRecord;
     fTextToBeDrawn: String;
     fScreenWidth: Integer;
     fScreenHeight: Integer;
@@ -28,20 +21,23 @@ TXplEngine = class (TObject)
     fTextHideTs: TDateTime;
     fSender: TXplSender;
     fReceiver: TXplPluginReceiver;
-    fDataRefs: TStrings;
+    fDataRefs: TStringList;
+    fCommands: TStringList;
     procedure DebugLog(Value: String);
     function GetArrayLength(pDataRef: XPLMDataRef ;pDataType: XPLMDataTypeID): Integer;
     procedure ProcessSlot(pSlot: PXplComSlot);
     procedure String2XplValue(pIn:String; pOut: PXplValue; pDataType: XPLMDataTypeID);
-    procedure SimpleReadWrite(pSlot: PXplComSlot; pMakeChecks: Boolean);
-    procedure ToggleVar(pSlot: PXplComSlot);
     procedure InitGlValues;
     procedure OnLmcMessage(pSender: TObject);
     procedure XplDebugFmt(pFormat:String; pArgs: array of const);
     procedure RunAndFree(pText: TXplDrawText); overload;
     procedure RunAndFree(pVar: TXplSetVariable); overload;
+    procedure RunAndFree(pVar: TXplGetVariable); overload;
+    procedure RunAndFree(pComm: TXplExecuteCommand); overload;
     function GetOrRegisterXplVariable(pName: String): TXplVariable;
+    function GetOrRegisterXplCommand(pName: String): XPLMCommandRef;
     procedure SetVariable(pDef: TXplVariable; pVal: TXplValue);
+    function GetVariable(pDef: TXplVariable): TXplValue;
   public
     { Public declarations }
     constructor Create;
@@ -52,41 +48,30 @@ end;
 
 implementation
 
-uses SysUtils, XPLMUtilities, XPLMGraphics, gl, glu, XPLMDisplay, dateutils;
+uses SysUtils, XPLMGraphics, gl, glu, XPLMDisplay, dateutils;
 
 { TXplEngine }
 
 constructor TXplEngine.Create;
 begin
-  pBuffer := nil;
   fDebugging := FileExists('luamacros.log');
-  fPosCountDown := -1;
   fTextToBeDrawn:='';
   fTextFloatPosition := 0;
-  fMM := TMemMap.Create(XPL_MEM_FILE, SizeOf(TXplComRecord));
-  if fMM.Memory <> nil then
-  begin
-    pBuffer := fMM.Memory;
-    //DebugLog(Format('pBuffer addr is %s.', [IntToStr(ULong(pBuffer))]));
-    //DebugLog(Format('Slot size: %d, mem size: %d', [SizeOf(TXplComSlot), SizeOf(TXplComRecord)]));
-    if pBuffer^.HdmConnected > 0 then
-    begin
-      DebugLog('Hidmacros already connected to shared memory.');
-      fPosCountDown := pBuffer^.PosInterval;
-    end
-    else
-      DebugLog('Hidmacros not yet connected to shared memory.');
-    pBuffer^.XplConnected := 1;
-    pBuffer^.XplRequestFlag := 0;
-  end
-  else
-    DebugLog('FATAL: Shared memory not created.');
   fSender := TXplSender.Create(cXplToLmcPipeName);
   fSender.DebugMethod:=XplDebugFmt;
   fReceiver := TXplPluginReceiver.Create(cLmcToXplPipeName);
   fReceiver.OnMessage:=OnLmcMessage;
   fReceiver.Init;
   fDataRefs:=TStringList.Create;
+  fDataRefs.CaseSensitive:=False;
+  fCommands:=TStringList.Create;
+  fCommands.CaseSensitive:=False;
+  if (fSender.ServerRunning) then
+  begin
+    // LMC is already running, but its sender could be connected to nowhere (old XPL instance)
+    // send it reconnect request
+    fSender.SendMessage(TXplReconnectToServer.Create);
+  end;
   InitGlValues;
 end;
 
@@ -123,15 +108,13 @@ var
   I: Integer;
 begin
   fReceiver.Free;
-  if pBuffer <> nil then
-    pBuffer^.XplConnected := 0;
-  fMM.Free;
   fSender.Free;
   for I := 0 to fDataRefs.Count - 1 do
   begin
     fDataRefs.Objects[I].Free;
   end;
   fDataRefs.Free;
+  fCommands.Free;
   inherited;
 end;
 
@@ -147,54 +130,7 @@ begin
 end;
 
 procedure TXplEngine.XplTick;
-var
-  i: Integer;
-  lAllDone : Boolean;
 begin
-  //DebugLog('Tick');
-  if pBuffer = nil then
-    exit;
-  if pBuffer^.XplRequestFlag = 1 then
-  begin
-    for I := 0 to COM_SLOTS_COUNT - 1 do
-      if pBuffer^.ComSlots[i].XplRequestFlag = 1 then
-      begin
-        ProcessSlot(@pBuffer^.ComSlots[i]);
-      end;
-    lAllDone := True;
-    for I := 0 to COM_SLOTS_COUNT - 1 do
-      lAllDone := lAllDone and (pBuffer^.ComSlots[i].XplRequestFlag = 0);
-    if lAllDone then
-      pBuffer^.XplRequestFlag := 0;
-  end;
-  if (pBuffer^.HdmConnected > 0) and (fPosCountDown > 0) then
-  begin
-    Dec(fPosCountDown);
-    if (fPosCountDown = 0) then
-    begin
-      // refresh pos values
-      if fLatitudeRef = nil then
-        fLatitudeRef := XPLMFindDataRef('sim/flightmodel/position/latitude');
-      if fLongitudeRef = nil then
-        fLongitudeRef := XPLMFindDataRef('sim/flightmodel/position/longitude');
-      if fHeadingRef = nil then
-        fHeadingRef := XPLMFindDataRef('sim/flightmodel/position/psi');
-      if fHeightRef = nil then
-        fHeightRef := XPLMFindDataRef('sim/flightmodel/position/elevation');
-      if fLatitudeRef <> nil then
-        pBuffer^.Latitude := XPLMGetDatad(fLatitudeRef);
-      if fLongitudeRef <> nil then
-        pBuffer^.Longitude := XPLMGetDatad(fLongitudeRef);
-      if fHeadingRef <> nil then
-        pBuffer^.Heading := XPLMGetDataf(fHeadingRef);
-      if fHeightRef <> nil then
-        pBuffer^.Height := XPLMGetDataf(fHeightRef);
-      fPosCountDown := pBuffer^.PosInterval;
-      //DebugLog('Pos: lat ' + FloatToStr(pBuffer^.Latitude) +
-      //         ', lon ' + FloatToStr(pBuffer^.Longitude) +
-      //         ', heading ' + FloatToStr(pBuffer^.Heading));
-    end;
-  end;
   DrawText();
 end;
 
@@ -265,12 +201,12 @@ begin
         end;
         if (pSlot^.HDMcommand = HDMC_GET_VAR) or
            (pSlot^.HDMcommand = HDMC_SET_VAR) then
-          SimpleReadWrite(pSlot, lMakeChecks);
+          //SimpleReadWrite(pSlot, lMakeChecks);
         if (pSlot^.HDMcommand = HDMC_TOGGLE_NEXT) or
            (pSlot^.HDMcommand = HDMC_TOGGLE_PREVIOUS) or
            (pSlot^.HDMcommand = HDMC_SWITCH_NEXT) or
            (pSlot^.HDMcommand = HDMC_SWITCH_PREVIOUS) then
-          ToggleVar(pSlot);
+          //ToggleVar(pSlot);
           end;
     end;
     if (pSlot^.HDMcommand = HDMC_EXEC_COMMAND) or
@@ -278,7 +214,6 @@ begin
        (pSlot^.HDMcommand = HDMC_COMMAND_END)
     then
     begin
-      fSender.SendString('Ahoj');
       // is already registered?
       if pSlot^.CommandRef = 0 then
       begin
@@ -301,7 +236,7 @@ begin
       end;
     end;
     if (pSlot^.HDMcommand = HDMC_SET_POSINTERVAL) then
-      fPosCountDown := pBuffer^.PosInterval;
+      //fPosCountDown := pBuffer^.PosInterval;
     if (pSlot^.HDMcommand = HDMC_SHOW_TEXT) then
     begin
       fTextFloatPosition := pSlot^.Value.floatData;
@@ -357,214 +292,6 @@ begin
   end;
 end;
 
-procedure TXplEngine.SimpleReadWrite(pSlot: PXplComSlot; pMakeChecks: Boolean);
-var
-  lInt: Integer;
-  lFloat: Single;
-  lBuff: PChar;
-begin
-  case pSlot^.DataType of
-  xplmType_Float:
-    begin
-      DebugLog('Got/set-ing value ' + FloatToStr(pSlot^.Value.floatData));
-      case pSlot^.HDMcommand of
-        HDMC_GET_VAR: pSlot^.Value.floatData := XPLMGetDataf(Pointer8b2Pointer(pSlot^.DataRef));
-        HDMC_SET_VAR: XPLMSetDataf(Pointer8b2Pointer(pSlot^.DataRef), pSlot^.Value.floatData);
-      end;
-      DebugLog('Got/set value ' + FloatToStr(pSlot^.Value.floatData));
-    end;
-  xplmType_Double:
-    begin
-      case pSlot^.HDMcommand of
-        HDMC_GET_VAR: pSlot^.Value.doubleData := XPLMGetDatad(Pointer8b2Pointer(pSlot^.DataRef));
-        HDMC_SET_VAR: XPLMSetDatad(Pointer8b2Pointer(pSlot^.DataRef), pSlot^.Value.doubleData);
-      end;
-      DebugLog('Got/set value ' + FloatToStr(pSlot^.Value.doubleData));
-    end;
-  xplmType_Int:
-    begin
-      case pSlot^.HDMcommand of
-        HDMC_GET_VAR: pSlot^.Value.intData := XPLMGetDatai(Pointer8b2Pointer(pSlot^.DataRef));
-        HDMC_SET_VAR: XPLMSetDatai(Pointer8b2Pointer(pSlot^.DataRef), pSlot^.Value.intData);
-      end;
-      DebugLog('Got/set value ' + IntToStr(pSlot^.Value.intData));
-    end;
-  xplmType_IntArray:
-          begin
-            // check range
-            if pSlot^.Index < 0 then
-              pSlot^.Value.intData := GetArrayLength(Pointer8b2Pointer(pSlot^.DataRef), pSlot^.DataType)
-      else if (not pMakeChecks) or (pSlot^.Index < (pSlot^.Length - 1)) then
-            begin
-              case pSlot^.HDMcommand of
-                HDMC_GET_VAR:
-                begin
-                  XPLMGetDatavi(Pointer8b2Pointer(pSlot^.DataRef), @lInt,
-                      pSlot^.Index, 1);
-                  pSlot^.Value.intData := lInt;
-                end;
-                HDMC_SET_VAR:
-                begin
-                  lInt := pSlot^.Value.intData;
-                  XPLMSetDatavi(Pointer8b2Pointer(pSlot^.DataRef), @lInt, pSlot^.Index, 1);
-                end;
-              end;
-            DebugLog('Got/Set value ' + IntToStr(pSlot^.Value.intData));
-            end else
-              DebugLog('Index for int array too high ' + IntToStr(pSlot^.Index));
-          end;
-        xplmType_FloatArray:
-          begin
-            // check range
-            if pSlot^.Index < 0 then
-              pSlot^.Value.intData := GetArrayLength(Pointer8b2Pointer(pSlot^.DataRef), pSlot^.DataType)
-      else if (not pMakeChecks) or (pSlot^.Index < (pSlot^.Length - 1)) then
-            begin
-              case pSlot^.HDMcommand of
-                HDMC_GET_VAR:
-                begin
-                  XPLMGetDatavf(Pointer8b2Pointer(pSlot^.DataRef), @lFloat,
-                      pSlot^.Index, 1);
-                  pSlot^.Value.floatData := lFloat;
-                end;
-                HDMC_SET_VAR:
-                begin
-                  lFloat := pSlot^.Value.floatData;
-                  XPLMSetDatavf(Pointer8b2Pointer(pSlot^.DataRef), @lFloat, pSlot^.Index, 1);
-                end;
-              end;
-              DebugLog('Got/Set value ' + FloatToStr(pSlot^.Value.floatData));
-            end else
-              DebugLog('Index for array too high ' + IntToStr(pSlot^.Index));
-          end;
-        xplmType_Data:
-          begin
-            if (pSlot^.Length > XPL_MAX_STRING_SIZE) then
-              pSlot^.Length := XPL_MAX_STRING_SIZE;
-            lBuff := pSlot^.StringBuffer;
-            case pSlot^.HDMcommand of
-              HDMC_GET_VAR:
-              begin
-                XPLMGetDatab(Pointer8b2Pointer(pSlot^.DataRef), lBuff, 0, pSlot^.Length);
-              end;
-              HDMC_SET_VAR:
-              begin
-                lInt := StrLen(lBuff)+1; // copy also end str char
-                XPLMSetDatab(Pointer8b2Pointer(pSlot^.DataRef), lBuff, 0, lInt);
-              end;
-            end;
-            DebugLog('Got/Set value ' + lBuff);
-          end;
-        end;
-      end;
-
-procedure TXplEngine.ToggleVar(pSlot: PXplComSlot);
-var
-  lVals: array of TXplValueRec;
-  lStrings: TStringList;
-  i: Integer;
-  lClosest: TXplValueRec;
-  lClosestIndex : Integer;
-  lCount: Integer;
-  lSetIndex: Integer;
-begin
-  // step 1 - read current value
-  case pSlot^.DataType of
-  xplmType_Float:
-    pSlot^.Value.floatData := XPLMGetDataf(Pointer8b2Pointer(pSlot^.DataRef));
-  xplmType_Double:
-    pSlot^.Value.doubleData := XPLMGetDatad(Pointer8b2Pointer(pSlot^.DataRef));
-  xplmType_Int:
-    pSlot^.Value.intData := XPLMGetDatai(Pointer8b2Pointer(pSlot^.DataRef));
-  else
-    exit;
-  end;
-  // step 2 - split incoming string to array
-  lStrings:= TStringList.Create;
-  try
-    lStrings.Delimiter:=';';
-    lStrings.DelimitedText:=pSlot^.ValueUntyped;
-    if lStrings.Count = 0 then
-      exit;
-    lCount := lStrings.Count;
-    SetLength(lVals, lCount);
-    for i := 0 to lCount - 1 do
-      String2XplValue(lStrings[i], @(lVals[i]), pSlot^.DataType);
-  finally
-    lStrings.Free;
-  end;
-  // step 3 - find the closest value
-  lClosestIndex := 0;
-  case pSlot^.DataType of
-  xplmType_Float:  lClosest.floatData := Abs(lVals[lClosestIndex].floatData - pSlot^.Value.floatData);
-  xplmType_Double: lClosest.doubleData := Abs(lVals[lClosestIndex].doubleData - pSlot^.Value.doubleData);
-  xplmType_Int:    lClosest.intData := Abs(lVals[lClosestIndex].intData - pSlot^.Value.intData);
-  end;
-  for i := 0 to lCount - 1 do
-    case pSlot^.DataType of
-    xplmType_Float:
-    begin
-      if Abs(lVals[i].floatData - pSlot^.Value.floatData) < lClosest.floatData then
-      begin
-        lClosestIndex:=i;
-        lClosest.floatData := Abs(lVals[i].floatData - pSlot^.Value.floatData);
-      end;
-      if lClosest.floatData = 0 then
-        break;
-    end;
-    xplmType_Double:
-    begin
-      if Abs(lVals[i].doubleData - pSlot^.Value.doubleData) < lClosest.doubleData then
-      begin
-        lClosestIndex:=i;
-        lClosest.doubleData := Abs(lVals[i].doubleData - pSlot^.Value.doubleData);
-      end;
-      if lClosest.doubleData = 0 then
-        break;
-    end;
-    xplmType_Int:
-    begin
-      if Abs(lVals[i].intData - pSlot^.Value.intData) < lClosest.intData then
-      begin
-        lClosestIndex:=i;
-        lClosest.intData := Abs(lVals[i].intData - pSlot^.Value.intData);
-      end;
-      if lClosest.intData = 0 then
-        break;
-    end;
-  end;
-  // step 4 - decide next value index
-  case pSlot^.HDMcommand of
-  HDMC_TOGGLE_NEXT:
-    if (lClosestIndex + 1 = lCount) then
-      lSetIndex:= 0
-    else
-      lSetIndex:= lClosestIndex + 1;
-  HDMC_SWITCH_NEXT:
-    if (lClosestIndex + 1 = lCount) then
-      lSetIndex:= lClosestIndex
-    else
-      lSetIndex:= lClosestIndex + 1;
-  HDMC_TOGGLE_PREVIOUS:
-    if (lClosestIndex - 1 < 0) then
-      lSetIndex:= lCount - 1
-    else
-      lSetIndex:= lClosestIndex - 1;
-  HDMC_SWITCH_PREVIOUS:
-    if (lClosestIndex - 1 < 0) then
-      lSetIndex:= 0
-    else
-      lSetIndex:= lClosestIndex - 1;
-  end;
-  DebugLog(Format('Toggle: The closest index is %d, so setting %d in values [%s].', [lClosestIndex, lSetIndex, pSlot^.ValueUntyped]));
-  // step 5 - set value
-  case pSlot^.DataType of
-  xplmType_Float:  XPLMSetDataf(Pointer8b2Pointer(pSlot^.DataRef), lVals[lSetIndex].floatData);
-  xplmType_Double: XPLMSetDatad(Pointer8b2Pointer(pSlot^.DataRef), lVals[lSetIndex].doubleData);
-  xplmType_Int:    XPLMSetDatai(Pointer8b2Pointer(pSlot^.DataRef), lVals[lSetIndex].intData);
-  end;
-end;
-
 procedure TXplEngine.InitGlValues;
 begin
   XPLMGetScreenSize(@fScreenWidth, @fScreenHeight);
@@ -574,7 +301,9 @@ end;
 procedure TXplEngine.OnLmcMessage(pSender: TObject);
 var
   lStream: TMemoryStream;
-  lMessageType: byte;
+  lMessageType, b, i: byte;
+  lStr: String;
+  lInt: Int64;
 begin
   lStream := TMemoryStream.Create;
   try
@@ -585,6 +314,11 @@ begin
       case lMessageType of
         HDMC_SHOW_TEXT: RunAndFree(TXplDrawText.Create(lStream));
         HDMC_SET_VAR: RunAndFree(TXplSetVariable.Create(lStream));
+        HDMC_GET_VAR: RunAndFree(TXplGetVariable.Create(lStream));
+        HDMC_EXEC_COMMAND: RunAndFree(TXplExecuteCommand.Create(lStream));
+        HDMC_COMMAND_BEGIN: RunAndFree(TXplExecuteCommandBegin.Create(lStream));
+        HDMC_COMMAND_END: RunAndFree(TXplExecuteCommandEnd.Create(lStream));
+        HDMC_RECONNECT: fSender.Reconnect;
       end;
     except
       on E:Exception do
@@ -633,8 +367,57 @@ begin
     if (lXV.Writable) then
       SetVariable(lXV, pVar.Value)
     else
-      DebugLog('Variable ' + pVar.Name + ' is not witable.');
+      DebugLog('Variable ' + pVar.Name + ' is not writable.');
   end;
+  pVar.Free;
+end;
+
+procedure TXplEngine.RunAndFree(pVar: TXplGetVariable);
+var
+  lXV: TXplVariable;
+  lValue: TXplValue;
+begin
+  DebugLog(Format('Received request id %d to get variable %s.', [pVar.Id, pVar.Name]));
+  lXV := GetOrRegisterXplVariable(pVar.Name);
+  if (lXV <> nil) then
+  begin
+    lValue := GetVariable(lXV);
+    if (lValue <> nil) then
+    begin
+      fSender.SendMessage(TXplVariableValue.Create(pVar.Name, lValue, pVar.Id));
+      DebugLog('Written to stream');
+    end
+    else
+      DebugLog('Can not find out value of variable ' + pVar.Name);
+  end
+  else
+    DebugLog('Variable ' + pVar.Name + ' not found.');
+  pVar.Free;
+end;
+
+procedure TXplEngine.RunAndFree(pComm: TXplExecuteCommand);
+var
+  lCom: XPLMCommandRef;
+begin
+  lCom:=GetOrRegisterXplCommand(pComm.Name);
+  if (lCom <> nil) then
+  begin
+    if (pComm is TXplExecuteCommandBegin) then
+    begin
+      XPLMCommandBegin(lCom);
+      DebugLog(Format('Executed command begin %s.', [pComm]));
+    end else
+    if (pComm is TXplExecuteCommandEnd) then
+    begin
+      XPLMCommandEnd(lCom);
+      DebugLog(Format('Executed command end %s.', [pComm]));
+    end else
+    begin
+      XPLMCommandOnce(lCom);
+      DebugLog(Format('Executed command %s.', [pComm]));
+    end;
+  end;
+  pComm.Free;
 end;
 
 function TXplEngine.GetOrRegisterXplVariable(pName: String): TXplVariable;
@@ -670,6 +453,32 @@ begin
   end;
 end;
 
+function TXplEngine.GetOrRegisterXplCommand(pName: String): XPLMCommandRef;
+var
+  lIndex: Integer;
+  lXV: TXplVariable;
+  lDR: XPLMDataRef;
+begin
+  Result := nil;
+  lIndex := fCommands.IndexOf(pName);
+  if (lIndex >= 0) then
+  begin
+    Result := XPLMCommandRef(fCommands.Objects[lIndex]);
+    DebugLog('Command ' + pName + ' already known with offset ' + IntToStr(Int64(Result)));
+  end
+  else
+  begin
+    Result := XPLMFindCommand(PChar(pName));
+    if (Result <> nil) then
+    begin
+      fCommands.AddObject(pName, Result);
+      DebugLog('Command ' + pName + ' located with offset ' + IntToStr(Int64(Result)));
+    end
+    else
+      DebugLog('XPL doesn''t know command ' + pName);
+  end;
+end;
+
 procedure TXplEngine.SetVariable(pDef: TXplVariable; pVal: TXplValue);
 var
   lBuff: PChar;
@@ -698,6 +507,48 @@ begin
     pVal.MakeString;
     //XPLMSetDatab(Pointer8b2Pointer(pDef), pVal.IntValue);
     DebugLog('Setting string not yet implemented');
+  end;
+  end;
+end;
+
+function TXplEngine.GetVariable(pDef: TXplVariable): TXplValue;
+var
+  lBuff: array[0..500] of char;
+  lBuffPtr: PChar;
+  lLength: Integer;
+  lSingle: Single;
+  lReal: Real;
+  lInt: Integer;
+begin
+  case pDef.DataType of
+  xplmType_Float:
+  begin
+    lSingle:=XPLMGetDataf(pDef.DataRef);
+    DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
+    Result := TXplValue.Create(lSingle);
+  end;
+  xplmType_Double:
+  begin
+    lReal:=XPLMGetDatad(pDef.DataRef);
+    DebugLog(Format('Got double value %f of variable %s.', [lReal, pDef.Name]));
+    Result := TXplValue.Create(lReal);
+  end;
+  xplmType_Int:
+  begin
+    lInt:=XPLMGetDatai(pDef.DataRef);
+    DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
+    Result := TXplValue.Create(lInt);
+  end;
+  xplmType_Data:
+  begin
+    if (pDef.Length > 500) then
+      lLength:=500
+    else
+      lLength:=pDef.Length;
+    lBuffPtr:=lBuff;
+    XPLMGetDatab(pDef.DataRef, lBuffPtr, 0, lLength);
+    DebugLog('Got string value of variable ' + pDef.Name + ': ' + lBuff);
+    Result := TXplValue.Create(lBuff);
   end;
   end;
 end;

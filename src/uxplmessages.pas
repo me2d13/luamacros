@@ -38,11 +38,11 @@ type
   TXplValue = class
   private
     fType: TXplVarType;
-    fIntValue: Integer;
+    fIntValue: Int64;
     fDoubleValue: Double;
     fStringValue: String;
     procedure SetDoubleValue(AValue: Double);
-    procedure SetIntValue(AValue: Integer);
+    procedure SetIntValue(AValue: Int64);
     procedure SetStringValue(AValue: String);
   public
     constructor Create;overload;
@@ -50,12 +50,12 @@ type
     constructor Create(pDoubleValue: Double);overload;
     constructor Create(pStringValue: String);overload;
     constructor Create(pStream: TStream);overload;
-    procedure SerializeToStream(pStream: TStream);
+    procedure SerializeToStream(pStream: TStream);virtual;
     procedure MakeDouble;
     procedure MakeInt;
     procedure MakeString;
     function ToString: ansistring;override;
-    property IntValue: Integer read fIntValue write SetIntValue;
+    property IntValue: Int64 read fIntValue write SetIntValue;
     property DoubleValue: Double read fDoubleValue write SetDoubleValue;
     property StringValue: String read fStringValue write SetStringValue;
     property ValueType: TXplVarType read fType;
@@ -64,9 +64,10 @@ type
   { TXplSetVariable }
 
   TXplSetVariable = class (TXplMessage)
-  private
+  protected
     fName: String;
     fValue: TXplValue;
+    procedure WriteIdentByte(pStream: TStream);virtual;
   public
     constructor Create(pName: String; pValue: TXplValue);overload;
     constructor Create(pStream: TStream);overload;
@@ -76,11 +77,178 @@ type
     property Value: TXplValue read fValue write fValue;
   end;
 
+  { TXplGetVariable }
+
+  TXplGetVariable = class (TXplMessage)
+  private
+    fName: String;
+    fId: Int64;
+  public
+    constructor Create(pName: String; pId: Int64);overload;
+    constructor Create(pStream: TStream);overload;
+    destructor Destroy;override;
+    procedure SerializeToStream(pStream: TStream);override;
+    property Name: String read fName write fName;
+    property Id: Int64 read fId write fId;
+  end;
+
+  { TXplVariableValue }
+
+  TXplVariableValue = class (TXplSetVariable)
+  protected
+    fId: Int64;
+    procedure WriteIdentByte(pStream: TStream);override;
+  public
+    constructor Create(pName: String; pValue: TXplValue; pId: Int64);overload;
+    constructor Create(pStream: TStream);overload;
+    procedure SerializeToStream(pStream: TStream);override;
+    function ToString: ansistring;override;
+    property Id: Int64 read fId write fId;
+  end;
+
+  { TXplReconnectToServer }
+
+  TXplReconnectToServer = class (TXplMessage)
+  public
+    procedure SerializeToStream(pStream: TStream);override;
+  end;
+
+  { TXplExecuteCommand }
+
+  TXplExecuteCommand = class (TXplMessage)
+  protected
+    fName: String;
+    procedure WriteIdentByte(pStream: TStream);virtual;
+  public
+    constructor Create(pName: String);overload;
+    constructor Create(pStream: TStream);overload;
+    procedure SerializeToStream(pStream: TStream);override;
+    property Name: String read fName write fName;
+  end;
+
+  { TXplExecuteCommandBegin }
+
+  TXplExecuteCommandBegin = class (TXplExecuteCommand)
+  protected
+    procedure WriteIdentByte(pStream: TStream);override;
+  end;
+
+  { TXplExecuteCommandEnd }
+
+  TXplExecuteCommandEnd = class (TXplExecuteCommand)
+  protected
+    procedure WriteIdentByte(pStream: TStream);override;
+  end;
 
 implementation
 
 uses
   uXplCommon;
+
+{ TXplExecuteCommandEnd }
+
+procedure TXplExecuteCommandEnd.WriteIdentByte(pStream: TStream);
+begin
+  pStream.WriteByte(HDMC_COMMAND_END);
+end;
+
+{ TXplExecuteCommandBegin }
+
+procedure TXplExecuteCommandBegin.WriteIdentByte(pStream: TStream);
+begin
+  pStream.WriteByte(HDMC_COMMAND_BEGIN);
+end;
+
+{ TXplExecuteCommand }
+
+procedure TXplExecuteCommand.WriteIdentByte(pStream: TStream);
+begin
+  pStream.WriteByte(HDMC_EXEC_COMMAND);
+end;
+
+constructor TXplExecuteCommand.Create(pName: String);
+begin
+  fName:=pName;
+end;
+
+constructor TXplExecuteCommand.Create(pStream: TStream);
+begin
+  fName:=pStream.ReadAnsiString;
+end;
+
+procedure TXplExecuteCommand.SerializeToStream(pStream: TStream);
+begin
+  WriteIdentByte(pStream);
+  pStream.WriteAnsiString(fName);
+end;
+
+{ TXplReconnectToServer }
+
+procedure TXplReconnectToServer.SerializeToStream(pStream: TStream);
+begin
+  pStream.WriteByte(HDMC_RECONNECT);
+end;
+
+{ TXplVariableValue }
+
+procedure TXplVariableValue.WriteIdentByte(pStream: TStream);
+begin
+  pStream.WriteByte(HDMC_VAR_RESPONSE);
+end;
+
+constructor TXplVariableValue.Create(pName: String; pValue: TXplValue;
+  pId: Int64);
+begin
+  inherited Create(pName, pValue);
+  fId:=pId;
+end;
+
+constructor TXplVariableValue.Create(pStream: TStream);
+begin
+  inherited;
+  pStream.Read(fId, SizeOf(fId));
+end;
+
+procedure TXplVariableValue.SerializeToStream(pStream: TStream);
+begin
+  inherited SerializeToStream(pStream);
+  pStream.Write(fId, SizeOf(fId));
+end;
+
+function TXplVariableValue.ToString: ansistring;
+begin
+  Result := Format('name "%s", id %d, value ', [fName, fId]);
+  if (fValue = nil) then
+    Result := Result + 'nil'
+  else
+    Result := Result + fValue.ToString;
+end;
+
+{ TXplGetVariable }
+
+constructor TXplGetVariable.Create(pName: String; pId: Int64);
+begin
+  fName:=pName;
+  fId:=pId;
+end;
+
+constructor TXplGetVariable.Create(pStream: TStream);
+begin
+  fName := pStream.ReadAnsiString;
+  pStream.Read(fId, SizeOf(fId));
+end;
+
+destructor TXplGetVariable.Destroy;
+begin
+  inherited Destroy;
+end;
+
+procedure TXplGetVariable.SerializeToStream(pStream: TStream);
+begin
+  pStream.WriteByte(HDMC_GET_VAR);
+  pStream.WriteAnsiString(fName);
+  pStream.Write(fId, SizeOf(fId));
+end;
 
 { TXplValue }
 
@@ -90,7 +258,7 @@ begin
   fType:=vtDouble;
 end;
 
-procedure TXplValue.SetIntValue(AValue: Integer);
+procedure TXplValue.SetIntValue(AValue: Int64);
 begin
   fIntValue:=AValue;
   fType:=vtInteger;
@@ -188,6 +356,11 @@ end;
 
 { TXplSetVariable }
 
+procedure TXplSetVariable.WriteIdentByte(pStream: TStream);
+begin
+  pStream.WriteByte(HDMC_SET_VAR);
+end;
+
 constructor TXplSetVariable.Create(pName: String; pValue: TXplValue);
 begin
   fName:=pName;
@@ -209,7 +382,7 @@ end;
 
 procedure TXplSetVariable.SerializeToStream(pStream: TStream);
 begin
-  pStream.WriteByte(HDMC_SET_VAR);
+  WriteIdentByte(pStream);
   pStream.WriteAnsiString(fName);
   if (fValue = nil) then
     fValue := TXplValue.Create;
