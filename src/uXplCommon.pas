@@ -2,12 +2,9 @@ unit uXplCommon;
 
 interface
 
-uses XPLMDataAccess, XPLMUtilities, classes;
+uses XPLMDataAccess, classes, uXplMessages;
 
 const
-  XPL_MEM_FILE = 'XPL_LUAMACROS_MEMORY_FILE';
-  XPL_MAX_STRING_SIZE = 1024;
-
   HDMC_GET_VAR = 1;
   HDMC_SET_VAR = 2;
   HDMC_EXEC_COMMAND = 3;
@@ -21,10 +18,10 @@ const
   HDMC_SHOW_TEXT = 11;
   HDMC_VAR_RESPONSE = 12;
   HDMC_RECONNECT = 13;
-
-  COM_SLOTS_COUNT = 8;
+  HDMC_VAR_CALLBACK = 14;
 
   cXplToLmcPipeName = 'XplToLuaMacrosPipe';
+  cXplToLmcAsyncPipeName = 'XplToLuaMacrosAsyncPipe';
   cLmcToXplPipeName = 'LuaMacrosToXplPipe';
 
 
@@ -39,38 +36,6 @@ type
     2: (doubleData : Double);
   end;
 
-  PXplComSlot = ^TXplComSlot;
-  TXplComSlot = packed record
-    XplRequestFlag: byte;
-    HDMcommand: byte;
-    //DataRef: XPLMDataRef;
-    //CommandRef: XPLMCommandRef;
-    DataRef: Pointer8b;
-    CommandRef: Pointer8b;
-    DataType: XPLMDataTypeID;
-    Length: SmallInt;
-    Index: Integer;
-    Writable: Boolean;
-    Value: TXplValueRec;
-    ValueName: array[0..255] of char;
-    ValueUntyped: array[0..255] of char;
-    StringBuffer: array[0..XPL_MAX_STRING_SIZE-1] of char;
-  end;
-
-  PXplComRecord = ^TXplComRecord;
-  TXplComRecord = packed record
-    HdmConnected: byte;
-    XplConnected: byte;
-    XplRequestFlag: byte;
-    ComSlots: array[0..COM_SLOTS_COUNT] of TXplComSlot;
-    Debug: Boolean;
-    Latitude: double;
-    Longitude: double;
-    Heading: double;
-    Height: double;
-    PosInterval: Integer;
-  end;
-
   TXplVariable = class(TObject)
   public
     Name: String;
@@ -82,6 +47,28 @@ type
     function IsArray: Boolean;
     function IsString: Boolean;
   end;
+
+  { TXplVariableCallbackInfo }
+
+  TXplVariableCallbackInfo = class(TObject)
+  public
+    Id: Int64;
+    XplVariable: TXplVariable;
+    LastCallback: Int64;
+    LastValue: TXplValue;
+    ChangeCount: Integer;
+    Interval: Int64;
+    destructor Destroy; Override;
+  end;
+
+  TLmcVariableCallbackInfo = class(TObject)
+  public
+    Id: Int64;
+    Name: String;
+    Interval: Int64;
+    LuaHandlerRef: Integer;
+  end;
+
 
   function Pointer2Pointer8b(Input: Pointer) : Pointer8b;
   function Pointer8b2Pointer(Input: Pointer8b) : Pointer;
@@ -140,6 +127,15 @@ begin
     lRes := lRes + sLineBreak;
   end;
   Result := lRes;
+end;
+
+{ TXplVariableCallbackInfo }
+
+destructor TXplVariableCallbackInfo.Destroy;
+begin
+  if LastValue <> nil then
+    LastValue.Free;
+  inherited Destroy;
 end;
 
 { TXplVariable }

@@ -4,9 +4,11 @@ unit uXplPluginEngine;
 
 interface
 
-uses XPLMDataAccess, XPLMUtilities, uXplCommon, uXplSender, uXplPluginReceiver, uXplMessages, classes;
+uses XPLMDataAccess, XPLMUtilities, uXplCommon, uXplSender, uXplPluginReceiver, uXplMessages, classes, fgl;
 
 type
+
+TCallbackInfoMap = TFPGMap<Int64,TXplVariableCallbackInfo>;
 
 { TXplEngine }
 
@@ -19,13 +21,15 @@ TXplEngine = class (TObject)
     fBasicFontWidth: Integer;
     fTextFloatPosition: Single;
     fTextHideTs: TDateTime;
-    fSender: TXplSender;
+    fSyncSender: TXplSender;
+    fAsyncSender: TXplSender;
     fReceiver: TXplPluginReceiver;
     fDataRefs: TStringList;
     fCommands: TStringList;
+    fVarCallbacks: TCallbackInfoMap;
     procedure DebugLog(Value: String);
+    procedure DebugLogFmt(pFormat:String; pArgs: array of const);
     function GetArrayLength(pDataRef: XPLMDataRef ;pDataType: XPLMDataTypeID): Integer;
-    procedure ProcessSlot(pSlot: PXplComSlot);
     procedure String2XplValue(pIn:String; pOut: PXplValue; pDataType: XPLMDataTypeID);
     procedure InitGlValues;
     procedure OnLmcMessage(pSender: TObject);
@@ -34,10 +38,15 @@ TXplEngine = class (TObject)
     procedure RunAndFree(pVar: TXplSetVariable); overload;
     procedure RunAndFree(pVar: TXplGetVariable); overload;
     procedure RunAndFree(pComm: TXplExecuteCommand); overload;
+    procedure RunAndFree(pVar: TXplVariableCallback); overload;
     function GetOrRegisterXplVariable(pName: String): TXplVariable;
     function GetOrRegisterXplCommand(pName: String): XPLMCommandRef;
+    function GetOrRegisterXplVariableCallback(pId: Int64; pName: String): TXplVariableCallbackInfo;
     procedure SetVariable(pDef: TXplVariable; pVal: TXplValue);
     function GetVariable(pDef: TXplVariable): TXplValue;
+    procedure ReconnectSenders;
+    procedure CheckVariableCallbacks;
+    function UnixTimestampMs: Int64;
   public
     { Public declarations }
     constructor Create;
@@ -50,6 +59,8 @@ implementation
 
 uses SysUtils, XPLMGraphics, gl, glu, XPLMDisplay, dateutils;
 
+{ TXplVariableCallbackInfo }
+
 { TXplEngine }
 
 constructor TXplEngine.Create;
@@ -57,8 +68,10 @@ begin
   fDebugging := FileExists('luamacros.log');
   fTextToBeDrawn:='';
   fTextFloatPosition := 0;
-  fSender := TXplSender.Create(cXplToLmcPipeName);
-  fSender.DebugMethod:=XplDebugFmt;
+  fSyncSender := TXplSender.Create(cXplToLmcPipeName);
+  fSyncSender.DebugMethod:=DebugLogFmt;
+  fAsyncSender := TXplSender.Create(cXplToLmcAsyncPipeName);
+  fAsyncSender.DebugMethod:=DebugLogFmt;
   fReceiver := TXplPluginReceiver.Create(cLmcToXplPipeName);
   fReceiver.OnMessage:=OnLmcMessage;
   fReceiver.Init;
@@ -66,33 +79,24 @@ begin
   fDataRefs.CaseSensitive:=False;
   fCommands:=TStringList.Create;
   fCommands.CaseSensitive:=False;
-  if (fSender.ServerRunning) then
+  fVarCallbacks:=TCallbackInfoMap.Create;
+  if (fSyncSender.ServerRunning) then
   begin
     // LMC is already running, but its sender could be connected to nowhere (old XPL instance)
     // send it reconnect request
-    fSender.SendMessage(TXplReconnectToServer.Create);
+    fSyncSender.SendMessage(TXplReconnectToServer.Create);
   end;
   InitGlValues;
 end;
 
 procedure TXplEngine.DebugLog(Value: String);
 var
-  tmp: PChar;
   lVal: String;
   logFile: TextFile;
 begin
   if not fDebugging then
     exit;
-  lVal := 'XPLLUMplugin:'+ Value;
-  {$IFDEF OUTPUTDEBUGSTRING}
-  GetMem(tmp, Length(lVal) + 1);
-  try
-    StrPCopy(tmp, lVal);
-    OutputDebugString(tmp);
-  finally
-    FreeMem(tmp);
-  end;
-  {$ENDIF}
+  lVal := Format('%s [XPLLUMplugin]: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), Value]);
   // to file
   AssignFile(logFile, 'luamacros.log');
   if FileExists('luamacros.log') then
@@ -103,18 +107,29 @@ begin
   CloseFile(logFile);
 end;
 
+procedure TXplEngine.DebugLogFmt(pFormat: String; pArgs: array of const);
+begin
+  DebugLog(Format(pFormat, pArgs));
+end;
+
 destructor TXplEngine.Destroy;
 var
   I: Integer;
 begin
   fReceiver.Free;
-  fSender.Free;
+  fSyncSender.Free;
+  fAsyncSender.Free;
   for I := 0 to fDataRefs.Count - 1 do
   begin
     fDataRefs.Objects[I].Free;
   end;
+  for I := 0 to fVarCallbacks.Count - 1 do
+  begin
+    fVarCallbacks.Data[I].Free;
+  end;
   fDataRefs.Free;
   fCommands.Free;
+  fVarCallbacks.Free;
   inherited;
 end;
 
@@ -131,9 +146,10 @@ end;
 
 procedure TXplEngine.XplTick;
 begin
-  DrawText();
+  CheckVariableCallbacks;
 end;
 
+{$IFDEF OLDWAY}
 procedure TXplEngine.ProcessSlot(pSlot: PXplComSlot);
 var
   lInt: Integer;
@@ -250,6 +266,7 @@ begin
     pSlot^.XplRequestFlag := 0;
   end;
 end;
+{$EndIf}
 
 procedure TXplEngine.String2XplValue(pIn: String; pOut: PXplValue; pDataType: XPLMDataTypeID);
 var
@@ -301,9 +318,7 @@ end;
 procedure TXplEngine.OnLmcMessage(pSender: TObject);
 var
   lStream: TMemoryStream;
-  lMessageType, b, i: byte;
-  lStr: String;
-  lInt: Int64;
+  lMessageType: byte;
 begin
   lStream := TMemoryStream.Create;
   try
@@ -318,7 +333,8 @@ begin
         HDMC_EXEC_COMMAND: RunAndFree(TXplExecuteCommand.Create(lStream));
         HDMC_COMMAND_BEGIN: RunAndFree(TXplExecuteCommandBegin.Create(lStream));
         HDMC_COMMAND_END: RunAndFree(TXplExecuteCommandEnd.Create(lStream));
-        HDMC_RECONNECT: fSender.Reconnect;
+        HDMC_RECONNECT: ReconnectSenders;
+        HDMC_VAR_CALLBACK: RunAndFree(TXplVariableCallback.Create(lStream));
       end;
     except
       on E:Exception do
@@ -384,7 +400,7 @@ begin
     lValue := GetVariable(lXV);
     if (lValue <> nil) then
     begin
-      fSender.SendMessage(TXplVariableValue.Create(pVar.Name, lValue, pVar.Id));
+      fSyncSender.SendMessage(TXplVariableValue.Create(pVar.Name, lValue, pVar.Id));
       DebugLog('Written to stream');
     end
     else
@@ -418,6 +434,23 @@ begin
     end;
   end;
   pComm.Free;
+end;
+
+procedure TXplEngine.RunAndFree(pVar: TXplVariableCallback);
+var
+  lXVC: TXplVariableCallbackInfo;
+begin
+  DebugLog(Format('Received request for variable %s callback with id %d.', [pVar.Name, pVar.Id]));
+  lXVC := GetOrRegisterXplVariableCallback(pVar.Id, pVar.Name);
+  if (lXVC <> nil) then
+  begin
+    lXVC.Interval:=pVar.IntervalMs;
+    lXVC.Id:=pVar.Id;
+    DebugLog(Format('Variable %s registered with id %d and interval %d ms.', [pVar.Name, pVar.Id, pVar.IntervalMs]));
+  end
+  else
+    DebugLog('Variable ' + pVar.Name + ' not found.');
+  pVar.Free;
 end;
 
 function TXplEngine.GetOrRegisterXplVariable(pName: String): TXplVariable;
@@ -479,6 +512,34 @@ begin
   end;
 end;
 
+function TXplEngine.GetOrRegisterXplVariableCallback(pId: Int64; pName: String): TXplVariableCallbackInfo;
+var
+  lIndex: Integer;
+  lXV: TXplVariable;
+  lXVC: TXplVariableCallbackInfo;
+begin
+  Result := nil;
+  lIndex := fVarCallbacks.IndexOf(pId);
+  if (lIndex >= 0) then
+  begin
+    Result := fVarCallbacks.Data[lIndex];
+    DebugLog('Variable ' + Result.XplVariable.Name + ' already registered with interval ' + IntToStr(Int64(Result.Interval)));
+  end
+  else
+  begin
+    lXV := GetOrRegisterXplVariable(pName);
+    if (lXV <> nil) then
+    begin
+      lXVC := TXplVariableCallbackInfo.Create;
+      lXVC.XplVariable := lXV;
+      fVarCallbacks.Add(pId, lXVC);
+      Result := lXVC;
+    end else begin
+      DebugLog('Can not register variable callback because XPL doesn''t know variable ' + pName);
+    end;
+  end;
+end;
+
 procedure TXplEngine.SetVariable(pDef: TXplVariable; pVal: TXplValue);
 var
   lBuff: PChar;
@@ -524,19 +585,19 @@ begin
   xplmType_Float:
   begin
     lSingle:=XPLMGetDataf(pDef.DataRef);
-    DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
+    //DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
     Result := TXplValue.Create(lSingle);
   end;
   xplmType_Double:
   begin
     lReal:=XPLMGetDatad(pDef.DataRef);
-    DebugLog(Format('Got double value %f of variable %s.', [lReal, pDef.Name]));
+    //DebugLog(Format('Got double value %f of variable %s.', [lReal, pDef.Name]));
     Result := TXplValue.Create(lReal);
   end;
   xplmType_Int:
   begin
     lInt:=XPLMGetDatai(pDef.DataRef);
-    DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
+    //DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
     Result := TXplValue.Create(lInt);
   end;
   xplmType_Data:
@@ -547,10 +608,67 @@ begin
       lLength:=pDef.Length;
     lBuffPtr:=lBuff;
     XPLMGetDatab(pDef.DataRef, lBuffPtr, 0, lLength);
-    DebugLog('Got string value of variable ' + pDef.Name + ': ' + lBuff);
+    //DebugLog('Got string value of variable ' + pDef.Name + ': ' + lBuff);
     Result := TXplValue.Create(lBuff);
   end;
   end;
+end;
+
+procedure TXplEngine.ReconnectSenders;
+begin
+  fSyncSender.Reconnect;
+  fAsyncSender.Reconnect;
+end;
+
+procedure TXplEngine.CheckVariableCallbacks;
+var
+  I: Integer;
+  lXVC: TXplVariableCallbackInfo;
+  lValue: TXplValue;
+  lChanged: boolean;
+  lSend: boolean;
+  lNow: Int64;
+begin
+  for I := 0 to Pred(fVarCallbacks.Count) do
+  begin
+    lXVC := TXplVariableCallbackInfo(fVarCallbacks.Data[I]);
+    // get value
+    lValue := GetVariable(lXVC.XplVariable);
+    if (lValue = nil) then
+      Continue; // can not find out variable value
+    // compare with last from info
+    lChanged:= (lXVC.LastValue = nil) or // first assignment
+      (not lValue.Equals(lXVC.LastValue)); // different value
+    if (lChanged) or (lXVC.ChangeCount > 0) then
+    begin
+      if lChanged then
+      begin
+        // set current value as last, so first free last value
+        if (lXVC.LastValue <> nil) then
+          lXVC.LastValue.Free;
+        lXVC.LastValue := lValue;
+        Inc(lXVC.ChangeCount);
+      end;
+      // should we send the change? Calculate interval
+      lNow := UnixTimestampMs;
+      lSend := (lNow - lXVC.LastCallback) >= lXVC.Interval;
+      if (lSend) then
+      begin
+        fAsyncSender.SendMessage(TXplVariableValue.Create(lXVC.XplVariable.Name, lValue, lXVC.Id, lXVC.ChangeCount));
+        DebugLog(Format('Change of variable %s written to stream with value %s and change count %d',
+          [lXVC.XplVariable.Name, lValue.ToString, lXVC.ChangeCount]));
+        lXVC.ChangeCount:=0;
+        lXVC.LastCallback:=lNow;
+      end;
+    end
+    else
+      lValue.Free;
+  end;
+end;
+
+function TXplEngine.UnixTimestampMs: Int64;
+begin
+  Result := Round(Now * 24*60*60*1000);
 end;
 
 procedure TXplEngine.DrawText;

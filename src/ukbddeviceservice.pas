@@ -171,6 +171,7 @@ begin
   finally
     FreeMem(buff);
   end;
+  Message.Result:=0;
 end;
 
 function TKbdDeviceService.GetCharFromVirtualKey(Key: Word): String;

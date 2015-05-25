@@ -2,20 +2,25 @@ unit uXplControl;
 
 interface
 
-uses uXplCommon, Classes, uXplListener, uXplSender, uXplMessages;
+uses uXplCommon, Classes, uXplListener, uXplSender, uXplMessages, fgl;
 
 type
+
+  TCallbackInfoMap = TFPGMap<Int64,TLmcVariableCallbackInfo>;
 
   { TXPLcontrol }
 
   TXPLcontrol = class
   private
-    fXplListener: TXplListener;
+    fXplSyncListener: TXplListener; // for get var
+    fXplAsyncListener: TXplListener; // for var callback
     fXplSender: TXplSender;
     fXplVariableValue: TXplVariableValue;
+    fCallbacks: TCallbackInfoMap;
     procedure DebugLog(Value: String);
     procedure DebugLogFmt(pFormat:String; pArgs: array of const);
     procedure OnXplSyncMessage(Sender: TObject);
+    procedure OnXplAsyncMessage(Sender: TObject);
   public
     { Public declarations }
     constructor Create;
@@ -28,6 +33,7 @@ type
     procedure ExecuteCommandEnd(pCmdName: String);
     procedure DrawText(pText: String; pPos: Single = 0; pSec: Integer = 5);
     procedure XplVarProcessed;
+    procedure SetVariableHook(pVarName: String; pHandlerRef: Integer; pIntervalMs: Integer);
   end;
 
   TXPLRefHolder = class
@@ -49,11 +55,14 @@ uses SysUtils, Windows, Forms, XPLMDataAccess, Variants,
 constructor TXPLcontrol.Create;
 begin
   //lGlb.DebugLog('Xplane control created.', 'XPL');
-  fXplListener := TXplListener.Create(cXplToLmcPipeName);
-  fXplListener.OnMessage:=OnXplSyncMessage;
+  fXplSyncListener := TXplListener.Create(cXplToLmcPipeName);
+  fXplSyncListener.OnMessage:=OnXplSyncMessage;
+  fXplAsyncListener := TXplListener.Create(cXplToLmcAsyncPipeName);
+  fXplAsyncListener.OnMessage:=OnXplAsyncMessage;
   fXplSender := TXplSender.Create(cLmcToXplPipeName);
   fXplSender.DebugMethod:=DebugLogFmt;
   fXplVariableValue := nil;
+  fCallbacks := TCallbackInfoMap.Create;
 end;
 
 procedure TXPLcontrol.DebugLog(Value: String);
@@ -71,14 +80,19 @@ end;
 destructor TXPLcontrol.Destroy;
 var I: Integer;
 begin
-  fXplListener.Free;
+  fXplSyncListener.Free;
+  fXplAsyncListener.Free;
   fXplSender.Free;
+  for I := fCallbacks.Count - 1 downto 0 do
+    fCallbacks.Data[I].Free;
+  fCallbacks.Free;
   inherited;
 end;
 
 procedure TXPLcontrol.Init;
 begin
-  fXplListener.Init;
+  fXplSyncListener.Init;
+  fXplAsyncListener.Init;
   if (fXplSender.ServerRunning) then
   begin
     // Xplane is already running, could be connected to wrong previous LMC instance
@@ -110,6 +124,27 @@ begin
     Glb.LogError('Value from XPL should be markes as processed, but there''s no such value', cLoggerXpl);
 end;
 
+procedure TXPLcontrol.SetVariableHook(pVarName: String; pHandlerRef: Integer;
+  pIntervalMs: Integer);
+var
+  lXplObj: TXplVariableCallback;
+  lCbInfo: TLmcVariableCallbackInfo;
+  lId: Int64;
+begin
+  lId:=Glb.KeyLogService.UnixTimestampMs;
+  lXplObj := TXplVariableCallback.Create(pVarName, pIntervalMs, lId);
+  fXplSender.SendMessage(lXplObj);
+  lCbInfo := TLmcVariableCallbackInfo.Create;
+  lCbInfo.Id:=lId;
+  lCbInfo.Interval:=pIntervalMs;
+  lCbInfo.Name:=pVarName;
+  lCbInfo.LuaHandlerRef:=pHandlerRef;
+  fCallbacks.Add(lId, lCbInfo);
+  Glb.DebugLog(Format('Registered variable callback for %s with id %d and interval %d',
+    [pVarName, lId, pIntervalMs]), cLoggerXpl);
+  lXplObj.Free;
+end;
+
 procedure TXPLcontrol.OnXplSyncMessage(Sender: TObject);
 var
   lStream: TMemoryStream;
@@ -119,7 +154,7 @@ begin
   lStream := TMemoryStream.Create;
   try
     try
-      fXplListener.Server.GetMessageData(lStream);
+      fXplSyncListener.Server.GetMessageData(lStream);
       Glb.DebugLog('Received message with length ' + IntToStr(lStream.Size), cLoggerXpl);
       lStream.Position:=0;
       lMessageType := lStream.ReadByte;
@@ -148,6 +183,46 @@ begin
   end;
 end;
 
+procedure TXPLcontrol.OnXplAsyncMessage(Sender: TObject);
+var
+  lStream: TMemoryStream;
+  lMessageType: byte;
+  lVarValue: TXplVariableValue;
+  lCallbackInfo: TLmcVariableCallbackInfo;
+begin
+  Glb.DebugLog('Async message from XPL arrived.', cLoggerXpl);
+  lStream := TMemoryStream.Create;
+  try
+    try
+      fXplAsyncListener.Server.GetMessageData(lStream);
+      Glb.DebugLog('Received async message with length ' + IntToStr(lStream.Size), cLoggerXpl);
+      lStream.Position:=0;
+      lMessageType := lStream.ReadByte;
+      if (lMessageType = HDMC_RECONNECT) then
+      begin
+        fXplSender.Reconnect;
+      end else if (lMessageType = HDMC_VAR_RESPONSE) then
+      begin
+        lVarValue := TXplVariableValue.Create(lStream);
+        Glb.DebugLog('Got variable response with value ' + lVarValue.ToString, cLoggerXpl);
+        lCallbackInfo := fCallbacks.KeyData[lVarValue.Id];
+        if (lCallbackInfo = nil) then
+          Glb.LogError(Format('Callback for variable %s with id %d not found.', [lVarValue.Name, lVarValue.Id]), cLoggerXpl)
+        else
+        begin
+          Glb.LuaEngine.CallFunctionByRef(lCallbackInfo.LuaHandlerRef, lVarValue, lVarValue.ChangeCount);
+        end;
+      end else
+        Glb.LogError(Format('Unexpected message from Xplane with type %d', [lMessageType]), cLoggerXpl);
+    except
+      on E:Exception do
+        Glb.LogError(Format('Pipe exception: %s', [E.Message]), cLoggerXpl);
+    end;
+  finally
+    lStream.Free;
+  end;
+end;
+
 function TXPLcontrol.GetXplVariable(pName: String): TXplValue;
 var
   lXplObj: TXplGetVariable;
@@ -160,7 +235,7 @@ begin
   DebugLog(Format('Sending GetXplVar command for name %s with id %d.', [pName, lXplObj.Id]));
   fXplSender.SendMessage(lXplObj);
   // wait for XPL answer
-  lDataRead := fXplListener.Server.PeekMessage(1000, true); // in ms
+  lDataRead := fXplSyncListener.Server.PeekMessage(1000, true); // in ms
   // function above should return true when something was read
   // however it seems to return falsi even when onMessage method was called :-(
   // so check also if xpl variable is set with correct id

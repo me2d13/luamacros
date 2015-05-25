@@ -3,7 +3,7 @@ unit uLuaEngine;
 interface
 
 uses
-  Classes, SysUtils, Lua, uDevice, fgl, uKbdDevice, syncobjs, windows;
+  Classes, SysUtils, Lua, uDevice, fgl, uKbdDevice, syncobjs, windows, uXplMessages;
 
 type
 
@@ -69,6 +69,19 @@ type
       function Describe: String; override;
   end;
 
+  { TRiRefXplValueInteger }
+
+  TRiRefXplValueInteger = class (TRiRef)
+    protected
+      fPar1: TXplVariableValue;
+      fPar2: Integer;
+      procedure PushXplValue(pValue: TXplVariableValue; pLuaState: TLuaState);
+    public
+      constructor Create(pRef: Integer; p1: TXplVariableValue; p2: Integer);
+      procedure Execute(pLua: TLua); override;
+      function Describe: String; override;
+  end;
+
   TRunItemList = TFPGObjectList<TRunItem>;
 
   TTriggerList = TFPGObjectList<TTrigger>;
@@ -123,6 +136,8 @@ type
       procedure SetConfigItem(pName: String; pValue: String); overload;
       function GetConfigItem(pName: String; pDefault: boolean): boolean; overload;
       function GetConfigItem(pName: String; pDefault: String): String; overload;
+      procedure StackDump(pLuaState: TLuaState);
+      procedure CallFunctionByRef(pRef: Integer; pValue: TXplVariableValue; pChangeCount: Integer);overload;
   end;
 
 implementation
@@ -147,9 +162,39 @@ const
 
   cMaxQueueSize = 30;
 
-  cLuaLoggerName = 'LUA';
-
   cConfigVariableName = 'lmc';
+
+{ TRiRefXplValueInteger }
+
+procedure TRiRefXplValueInteger.PushXplValue(pValue: TXplVariableValue;
+  pLuaState: TLuaState);
+begin
+  // TODO: implement
+  lua_pushinteger(pLuaState, 13);
+end;
+
+constructor TRiRefXplValueInteger.Create(pRef: Integer; p1: TXplVariableValue;
+  p2: Integer);
+begin
+  inherited Create(pRef);
+  fPar1:=p1;
+  fPar2:=p2;
+end;
+
+procedure TRiRefXplValueInteger.Execute(pLua: TLua);
+begin
+  if (pLua = nil) then
+    raise LmcException.Create('LUA not initialized');
+  lua_rawgeti(pLua.LuaInstance, LUA_REGISTRYINDEX, fRef);
+  PushXplValue(pLua.LuaInstance, fPar1);
+  lua_pushinteger(pLua.LuaInstance, fPar2);
+  lua_pcall(pLua.LuaInstance, 2, 0, LUA_MULTRET);
+end;
+
+function TRiRefXplValueInteger.Describe: String;
+begin
+  Result:=Format('callback id %d, xpl value %s, int param %d', [fRef, fPar1.ToString, fPar2]);
+end;
 
 { TLuaExecutor }
 
@@ -163,31 +208,31 @@ begin
     lQSize:=GetQueueSize;
     if (lQSize = 0) then
     begin
-      Glb.DebugLog('Lua worker: queue size is 0, suspending thread...', cLuaLoggerName);
+      Glb.DebugLog('Lua worker: queue size is 0, suspending thread...', cLoggerLua);
       if (Glb.MainFormHandle <> 0) then // first start handle is not yet ready
         PostMessage(Glb.MainFormHandle, WM_LUA_RUN_CHANGE, 0, 0);
       fEvent.WaitFor(INFINITE);
       fEvent.ResetEvent;
-      Glb.DebugLog('Lua worker: resumed...', cLuaLoggerName);
+      Glb.DebugLog('Lua worker: resumed...', cLoggerLua);
       PostMessage(Glb.MainFormHandle, WM_LUA_RUN_CHANGE, 0, 0);
     end;
     if (lQSize > 0) then
     begin
       Glb.DebugLogFmt('Lua worker: starting %s, queue size is %d',
-          [fRunList.Items[0].Describe, lQSize], cLuaLoggerName);
+          [fRunList.Items[0].Describe, lQSize], cLoggerLua);
       try
         lStart:=Round(Now * 24*60*60*1000);
         fRunList.Items[0].Execute(fLua);
         lStop:=Round(Now * 24*60*60*1000);
         Glb.DebugLogFmt('Lua worker: finished %s, execution time: %d ms',
-            [fRunList.Items[0].Describe, lStop - lStart], cLuaLoggerName);
+            [fRunList.Items[0].Describe, lStop - lStart], cLoggerLua);
       except
         on E: Exception do
         begin
           lStop:=Round(Now * 24*60*60*1000);
           Glb.DebugLogFmt('Lua worker: finished %s with error, execution time: %d ms',
-              [fRunList.Items[0].Describe, lStop - lStart], cLuaLoggerName);
-          Glb.LogError('Exception in LUA code: ' + E.Message, cLuaLoggerName);
+              [fRunList.Items[0].Describe, lStop - lStart], cLoggerLua);
+          Glb.LogError('Exception in LUA code: ' + E.Message, cLoggerLua);
         end;
       end;
       fRlSynchronizer.Beginwrite;
@@ -236,7 +281,7 @@ begin
   finally
     fRlSynchronizer.Endwrite;
   end;
-  Glb.DebugLogFmt('Item %s added to queue making it %d items big.', [pItem.Describe, Result], cLuaLoggerName);
+  Glb.DebugLogFmt('Item %s added to queue making it %d items big.', [pItem.Describe, Result], cLoggerLua);
   fEvent.SetEvent; // even if it runs already
 end;
 
@@ -361,7 +406,7 @@ begin
     begin
       lMes := E.Message;
       lMes := lMes + #10 + #09 + lua_tostring(pLua.LuaInstance, -1);
-      Glb.LogError(lMes, cLuaLoggerName);
+      Glb.LogError(lMes, cLoggerLua);
     end;
   end;
 end;
@@ -378,7 +423,7 @@ procedure TLuaEngine.RegisterFunctions;
 begin
   if (fLua = nil) then
   begin
-    Glb.LogError('Can''t register Lua functions, LUA init failed.', cLuaLoggerName);
+    Glb.LogError('Can''t register Lua functions, LUA init failed.', cLoggerLua);
     exit;
   end;
   // general
@@ -406,6 +451,7 @@ begin
   fLua.RegisterFunction('lmc_xpl_text','',nil,@XplDrawText);
   fLua.RegisterFunction('lmc_xpl_command_begin','',nil,@XplCommandBegin);
   fLua.RegisterFunction('lmc_xpl_command_end','',nil,@XplCommandEnd);
+  fLua.RegisterFunction('lmc_on_xpl_var_change','',nil,@XplVarChange);
 end;
 
 procedure TLuaEngine.SetConfigItem(pName: String; pValue: boolean);
@@ -447,10 +493,10 @@ begin
       Result := boolean(lLuaResult);
     end
     else
-      Glb.LogError(pName + ' is not a boolean', cLuaLoggerName);
+      Glb.LogError(pName + ' is not a boolean', cLoggerLua);
   end
   else
-    Glb.LogError('Config variable not found for ' + pName, cLuaLoggerName);
+    Glb.LogError('Config variable not found for ' + pName, cLoggerLua);
 end;
 
 function TLuaEngine.GetConfigItem(pName: String; pDefault: String): String;
@@ -467,10 +513,28 @@ begin
       lua_pop(fLua.LuaInstance, 1);
     end
     else
-      Glb.LogError(pName + ' is not a string', cLuaLoggerName);
+      Glb.LogError(pName + ' is not a string', cLoggerLua);
   end
   else
-    Glb.LogError('Config variable not found for ' + pName, cLuaLoggerName);
+    Glb.LogError('Config variable not found for ' + pName, cLoggerLua);
+end;
+
+procedure TLuaEngine.StackDump(pLuaState: TLuaState);
+var
+  i, top, lType: Integer;
+begin
+  top := lua_gettop(pLuaState);
+  Glb.DebugLog(Format('Dumping stack with %d items.', [top]), cLoggerLua);
+  for i := 1 to top do
+  begin
+    lType := lua_type(pLuaState, i);
+    case lType of
+      LUA_TSTRING: Glb.DebugLog(Format('  %d: string %s', [i, lua_tostring(pLuaState, i)]), cLoggerLua);
+      LUA_TNUMBER: Glb.DebugLog(Format('  %d: number %f', [i, lua_tonumber(pLuaState, i)]), cLoggerLua);
+    else
+      Glb.DebugLog(Format('  %d: unknown [%d]', [i, lType]), cLoggerLua);
+    end;
+  end;
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer);
@@ -489,6 +553,12 @@ begin
   fExecutor.Run(TRiRefIntegerInteger.Create(pRef, pKey, pDirection));
 end;
 
+procedure TLuaEngine.CallFunctionByRef(pRef: Integer;
+  pValue: TXplVariableValue; pChangeCount: Integer);
+begin
+  fExecutor.Run(TRiRefXplValueInteger.Create(pRef, pValue, pChangeCount));
+end;
+
 constructor TLuaEngine.Create;
 begin
   //Tries loading the dynamic library file
@@ -497,7 +567,7 @@ begin
   begin
     if not Lua.LoadLuaLibrary(LUALIBRARY) then
     begin
-      Glb.LogError('Lua library could not load : ' + Lua.errorString, cLuaLoggerName);
+      Glb.LogError('Lua library could not load : ' + Lua.errorString, cLoggerLua);
       fInitOk:=false;
     end;
   end;
@@ -566,7 +636,7 @@ var
 begin
   lDevice := Glb.DeviceService.GetByName(pDeviceName);
   if (lDevice = nil) then
-    Glb.LogError('Device with name ' + pDeviceName + ' not found', cLuaLoggerName)
+    Glb.LogError('Device with name ' + pDeviceName + ' not found', cLoggerLua)
   else
   begin
     lTrigger := TTrigger.Create;
@@ -577,7 +647,7 @@ begin
     lTrigger.WholeDevice:=False;
     fTriggers.Add(lTrigger);
     Glb.DebugLog(Format('Added handler %d for device %s, key %d, direction %d',
-        [pHandlerRef, lDevice.Name, pButton, pDirection]), cLuaLoggerName);
+        [pHandlerRef, lDevice.Name, pButton, pDirection]), cLoggerLua);
   end;
 end;
 
@@ -589,7 +659,7 @@ var
 begin
   lDevice := Glb.DeviceService.GetByName(pDeviceName);
   if (lDevice = nil) then
-    Glb.LogError('Device with name ' + pDeviceName + ' not found', cLuaLoggerName)
+    Glb.LogError('Device with name ' + pDeviceName + ' not found', cLoggerLua)
     //raise Exception('Device with name ' + pDeviceName + ' not found');
   else
   begin
@@ -603,7 +673,7 @@ begin
     lTrigger.LuaRef:=pHandlerRef;
     fTriggers.Add(lTrigger);
     Glb.DebugLog(Format('Added handler %d for whole device %s',
-        [pHandlerRef, lDevice.Name]), cLuaLoggerName);
+        [pHandlerRef, lDevice.Name]), cLoggerLua);
   end;
 end;
 
@@ -621,13 +691,13 @@ begin
       (pDirection = lTrigger.Direction) then
       begin
         Glb.DebugLog(Format('Calling handler %d for device %s, key %d, direction %d',
-            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), cLuaLoggerName);
+            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), cLoggerLua);
         CallFunctionByRef(lTrigger.LuaRef);
       end;
       if (lTrigger.WholeDevice) then
       begin
         Glb.DebugLog(Format('Calling handler %d for device %s with params key %d, direction %d',
-            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), cLuaLoggerName);
+            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), cLoggerLua);
         CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection);
       end;
     end;
@@ -643,7 +713,7 @@ begin
     if (pDevice = lTrigger.Device) and (lTrigger.WholeDevice) then
     begin
       Glb.DebugLog(Format('Calling handler %d for device %s with data %s',
-          [lTrigger.LuaRef, pDevice.Name, pData]), cLuaLoggerName);
+          [lTrigger.LuaRef, pDevice.Name, pData]), cLoggerLua);
       CallFunctionByRef(lTrigger.LuaRef, pData);
     end;
   end;

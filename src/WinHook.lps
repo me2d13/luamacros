@@ -34,8 +34,8 @@
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="126"/>
-        <CursorPos X="78" Y="154"/>
+        <TopLine Value="1"/>
+        <CursorPos X="17" Y="8"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit2>
@@ -57,7 +57,7 @@
     <General>
       <ActiveWindowIndexAtStart Value="0"/>
     </General>
-    <JumpHistory Count="25" HistoryIndex="24">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="uWHookInt.pas"/>
         <Caret Line="1" Column="7" TopLine="1"/>
@@ -158,6 +158,26 @@
         <Filename Value="uWHookInt.pas"/>
         <Caret Line="154" Column="23" TopLine="126"/>
       </Position25>
+      <Position26>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="144" Column="22" TopLine="153"/>
+      </Position26>
+      <Position27>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="120" Column="10" TopLine="147"/>
+      </Position27>
+      <Position28>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
+      </Position28>
+      <Position29>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="8" Column="17" TopLine="1"/>
+      </Position29>
+      <Position30>
+        <Filename Value="uWHookInt.pas"/>
+        <Caret Line="100" Column="17" TopLine="69"/>
+      </Position30>
     </JumpHistory>
   </ProjectSession>
   <EditorMacros Count="0"/>

@@ -13,6 +13,7 @@ function XplCommandEnd(luaState : TLuaState) : integer;
 function GetXplVariable(luaState : TLuaState) : integer;
 function SetXplVariable(luaState : TLuaState) : integer;
 function XplDrawText(luaState : TLuaState) : integer;
+function XplVarChange(luaState : TLuaState) : integer;
 
 
 implementation
@@ -117,6 +118,35 @@ begin
   else
     lSec := 5;
   Glb.XplControl.DrawText(lText, lPos, lSec);
+  Result := 0;
+end;
+
+function XplVarChange(luaState: TLuaState): integer;
+var
+  lVarName : PAnsiChar;
+  lIntervalMs : Integer;
+  lHandlerRef: Integer;
+  lNumOfParams: Integer;
+begin
+  Glb.LuaEngine.StackDump(luaState);
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams <= 2) then
+    raise LmcException.Create('Wrong number of parameters. Provide at least name and handler.');
+  if (lNumOfParams = 3) then
+  begin
+    if (lua_isnumber(luaState, -1) = 1) then
+    begin
+      lIntervalMs:=Trunc(lua_tonumber(luaState, -1));
+      lua_settop(luaState, 2);
+    end
+    else
+      raise LmcException.Create('3rd parameter is supposed to be a number.');
+  end
+  else
+    lIntervalMs:=0;
+  lHandlerRef := luaL_ref(luaState, LUA_REGISTRYINDEX);
+  lVarName := lua_tostring(luaState, 1);
+  Glb.XplControl.SetVariableHook(lVarName, lHandlerRef, lIntervalMs);
   Result := 0;
 end;
 

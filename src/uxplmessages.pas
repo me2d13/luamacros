@@ -55,6 +55,7 @@ type
     procedure MakeInt;
     procedure MakeString;
     function ToString: ansistring;override;
+    function Equals(pVar: TXplValue): boolean;
     property IntValue: Int64 read fIntValue write SetIntValue;
     property DoubleValue: Double read fDoubleValue write SetDoubleValue;
     property StringValue: String read fStringValue write SetStringValue;
@@ -97,13 +98,16 @@ type
   TXplVariableValue = class (TXplSetVariable)
   protected
     fId: Int64;
+    fChangeCount: Int64; // how many times variable was changed between 2 messages
     procedure WriteIdentByte(pStream: TStream);override;
   public
     constructor Create(pName: String; pValue: TXplValue; pId: Int64);overload;
+    constructor Create(pName: String; pValue: TXplValue; pId: Int64; pChangeCount: Int64);overload;
     constructor Create(pStream: TStream);overload;
     procedure SerializeToStream(pStream: TStream);override;
     function ToString: ansistring;override;
     property Id: Int64 read fId write fId;
+    property ChangeCount: Int64 read fChangeCount write fChangeCount;
   end;
 
   { TXplReconnectToServer }
@@ -140,10 +144,51 @@ type
     procedure WriteIdentByte(pStream: TStream);override;
   end;
 
+  { TXplVariableCallback }
+
+  TXplVariableCallback = class (TXplMessage)
+  private
+    fName: String;
+    fIntervalMs: Int64;
+    fId: Int64;
+  public
+    constructor Create(pName: String; pIntervalMs: Int64; pId: Int64);overload;
+    constructor Create(pStream: TStream);overload;
+    procedure SerializeToStream(pStream: TStream);override;
+    property Name: String read fName write fName;
+    property IntervalMs: Int64 read fIntervalMs write fIntervalMs;
+    property Id: Int64 read fId write fId;
+  end;
+
+
 implementation
 
 uses
   uXplCommon;
+
+{ TXplVariableCallback }
+
+constructor TXplVariableCallback.Create(pName: String; pIntervalMs: Int64; pId: Int64);
+begin
+  fName:=pName;
+  fIntervalMs:=pIntervalMs;
+  fId := pId;
+end;
+
+constructor TXplVariableCallback.Create(pStream: TStream);
+begin
+  fName:=pStream.ReadAnsiString;
+  pStream.Read(fId, SizeOf(fId));
+  pStream.Read(fIntervalMs, SizeOf(fIntervalMs));
+end;
+
+procedure TXplVariableCallback.SerializeToStream(pStream: TStream);
+begin
+  pStream.WriteByte(HDMC_VAR_CALLBACK);
+  pStream.WriteAnsiString(fName);
+  pStream.Write(fId, SizeOf(fId));
+  pStream.Write(fIntervalMs, SizeOf(fIntervalMs));
+end;
 
 { TXplExecuteCommandEnd }
 
@@ -201,6 +246,13 @@ constructor TXplVariableValue.Create(pName: String; pValue: TXplValue;
 begin
   inherited Create(pName, pValue);
   fId:=pId;
+end;
+
+constructor TXplVariableValue.Create(pName: String; pValue: TXplValue;
+  pId: Int64; pChangeCount: Int64);
+begin
+  Create(pName, pValue, pId);
+  fChangeCount:=pChangeCount;
 end;
 
 constructor TXplVariableValue.Create(pStream: TStream);
@@ -352,6 +404,18 @@ begin
     vtInteger: Result := '[int] ' + IntToStr(fIntValue);
     vtDouble: Result := '[double] ' + FloatToStr(fDoubleValue);
   end;
+end;
+
+function TXplValue.Equals(pVar: TXplValue): boolean;
+begin
+  Result := False;
+  if (pVar = nil) then exit;
+  if (fType <> pVar.ValueType) then exit;
+  Result :=
+    ((fType = vtInteger) and (fIntValue = pVar.IntValue)) or
+    ((fType = vtDouble) and (fDoubleValue = pVar.DoubleValue)) or
+    ((fType = vtString) and (fStringValue = pVar.StringValue)) or
+    ((fType = vtNull));
 end;
 
 { TXplSetVariable }

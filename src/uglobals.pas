@@ -77,6 +77,7 @@ const
   MWC_MINIMIZE = 1;
 
   cLoggerXpl = 'XPL';
+  cLoggerLua = 'LUA';
 
 
 function Sto_GetFmtFileVersion(const FileName: String = ''; const Fmt: String = '%d.%d.%d.%d'): String;
