@@ -130,7 +130,7 @@ var
 begin
   Glb.LuaEngine.StackDump(luaState);
   lNumOfParams:=lua_gettop(luaState);
-  if (lNumOfParams <= 2) then
+  if (lNumOfParams < 2) then
     raise LmcException.Create('Wrong number of parameters. Provide at least name and handler.');
   if (lNumOfParams = 3) then
   begin
@@ -145,6 +145,7 @@ begin
   else
     lIntervalMs:=0;
   lHandlerRef := luaL_ref(luaState, LUA_REGISTRYINDEX);
+  Glb.DebugLog(Format('Got function reference with key %d', [lHandlerRef]), cLoggerLua);
   lVarName := lua_tostring(luaState, 1);
   Glb.XplControl.SetVariableHook(lVarName, lHandlerRef, lIntervalMs);
   Result := 0;

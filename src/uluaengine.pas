@@ -75,7 +75,7 @@ type
     protected
       fPar1: TXplVariableValue;
       fPar2: Integer;
-      procedure PushXplValue(pValue: TXplVariableValue; pLuaState: TLuaState);
+      procedure PushXplValue(pLuaState: TLuaState; pValue: TXplVariableValue);
     public
       constructor Create(pRef: Integer; p1: TXplVariableValue; p2: Integer);
       procedure Execute(pLua: TLua); override;
@@ -166,11 +166,19 @@ const
 
 { TRiRefXplValueInteger }
 
-procedure TRiRefXplValueInteger.PushXplValue(pValue: TXplVariableValue;
-  pLuaState: TLuaState);
+procedure TRiRefXplValueInteger.PushXplValue(pLuaState: TLuaState; pValue: TXplVariableValue);
 begin
-  // TODO: implement
-  lua_pushinteger(pLuaState, 13);
+  if (pValue = nil) or (pValue.Value = nil) or (pValue.Value.ValueType = vtNull) then
+  begin
+    lua_pushinteger(pLuaState, 0);
+    Glb.LogError('No XPL variable value for LUA callback', cLoggerLua);
+  end else begin
+    case pValue.Value.ValueType of
+      vtInteger: lua_pushinteger(pLuaState, pValue.Value.IntValue);
+      vtDouble: lua_pushnumber(pLuaState, pValue.Value.DoubleValue);
+      vtString: lua_pushstring(pLuaState, PChar(pValue.Value.StringValue));
+    end;
+  end;
 end;
 
 constructor TRiRefXplValueInteger.Create(pRef: Integer; p1: TXplVariableValue;
@@ -531,6 +539,7 @@ begin
     case lType of
       LUA_TSTRING: Glb.DebugLog(Format('  %d: string %s', [i, lua_tostring(pLuaState, i)]), cLoggerLua);
       LUA_TNUMBER: Glb.DebugLog(Format('  %d: number %f', [i, lua_tonumber(pLuaState, i)]), cLoggerLua);
+      LUA_TFUNCTION: Glb.DebugLog(Format('  %d: function', [i]), cLoggerLua);
     else
       Glb.DebugLog(Format('  %d: unknown [%d]', [i, lType]), cLoggerLua);
     end;

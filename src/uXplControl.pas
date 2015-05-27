@@ -205,11 +205,18 @@ begin
       begin
         lVarValue := TXplVariableValue.Create(lStream);
         Glb.DebugLog('Got variable response with value ' + lVarValue.ToString, cLoggerXpl);
-        lCallbackInfo := fCallbacks.KeyData[lVarValue.Id];
+        try
+          lCallbackInfo := fCallbacks.KeyData[lVarValue.Id];
+        except
+          on E:EListError do
+            lCallbackInfo := nil;
+        end;
         if (lCallbackInfo = nil) then
           Glb.LogError(Format('Callback for variable %s with id %d not found.', [lVarValue.Name, lVarValue.Id]), cLoggerXpl)
         else
         begin
+          Glb.DebugLog(Format('Calling Lua function %d with change count %d.',
+              [lCallbackInfo.LuaHandlerRef, lVarValue.ChangeCount]), cLoggerXpl);
           Glb.LuaEngine.CallFunctionByRef(lCallbackInfo.LuaHandlerRef, lVarValue, lVarValue.ChangeCount);
         end;
       end else

@@ -259,12 +259,14 @@ constructor TXplVariableValue.Create(pStream: TStream);
 begin
   inherited;
   pStream.Read(fId, SizeOf(fId));
+  pStream.Read(fChangeCount, SizeOf(fChangeCount));
 end;
 
 procedure TXplVariableValue.SerializeToStream(pStream: TStream);
 begin
   inherited SerializeToStream(pStream);
   pStream.Write(fId, SizeOf(fId));
+  pStream.Write(fChangeCount, SizeOf(fChangeCount));
 end;
 
 function TXplVariableValue.ToString: ansistring;
