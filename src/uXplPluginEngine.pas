@@ -37,12 +37,13 @@ TXplEngine = class (TObject)
     procedure RunAndFree(pText: TXplDrawText); overload;
     procedure RunAndFree(pVar: TXplSetVariable); overload;
     procedure RunAndFree(pVar: TXplGetVariable); overload;
-    procedure RunAndFree(pComm: TXplExecuteCommand); overload;
+    procedure RunAndFreeCommand(pComm: TXplCallWithName);
     procedure RunAndFree(pVar: TXplVariableCallback); overload;
+    procedure RunAndFree(pVar: TXplUnhookVariable); overload;
     function GetOrRegisterXplVariable(pName: String): TXplVariable;
     function GetOrRegisterXplCommand(pName: String): XPLMCommandRef;
     function GetOrRegisterXplVariableCallback(pId: Int64; pName: String): TXplVariableCallbackInfo;
-    procedure SetVariable(pDef: TXplVariable; pVal: TXplValue);
+    procedure SetVariable(pDef: TXplVariable; pVal: TXplValue; pIndex: Int64);
     function GetVariable(pDef: TXplVariable): TXplValue;
     procedure ReconnectSenders;
     procedure CheckVariableCallbacks;
@@ -330,11 +331,12 @@ begin
         HDMC_SHOW_TEXT: RunAndFree(TXplDrawText.Create(lStream));
         HDMC_SET_VAR: RunAndFree(TXplSetVariable.Create(lStream));
         HDMC_GET_VAR: RunAndFree(TXplGetVariable.Create(lStream));
-        HDMC_EXEC_COMMAND: RunAndFree(TXplExecuteCommand.Create(lStream));
-        HDMC_COMMAND_BEGIN: RunAndFree(TXplExecuteCommandBegin.Create(lStream));
-        HDMC_COMMAND_END: RunAndFree(TXplExecuteCommandEnd.Create(lStream));
+        HDMC_EXEC_COMMAND: RunAndFreeCommand(TXplExecuteCommand.Create(lStream));
+        HDMC_COMMAND_BEGIN: RunAndFreeCommand(TXplExecuteCommandBegin.Create(lStream));
+        HDMC_COMMAND_END: RunAndFreeCommand(TXplExecuteCommandEnd.Create(lStream));
         HDMC_RECONNECT: ReconnectSenders;
         HDMC_VAR_CALLBACK: RunAndFree(TXplVariableCallback.Create(lStream));
+        HDMC_UNHOOK_VAR: RunAndFree(TXplUnhookVariable.Create(lStream));
       end;
     except
       on E:Exception do
@@ -376,15 +378,23 @@ procedure TXplEngine.RunAndFree(pVar: TXplSetVariable);
 var
   lXV: TXplVariable;
 begin
-  DebugLog('Received request to set variable ' + pVar.Name + ' to ' + pVar.Value.ToString);
+  if (pVar.Index = NO_INDEX) then
+    DebugLog('Received request to set variable ' + pVar.Name + ' to ' + pVar.Value.ToString)
+  else
+    DebugLogFmt('Received request to set variable %s[%d] to %s', [pVar.Name, pVar.Index, pVar.Value.ToString]);
   lXV := GetOrRegisterXplVariable(pVar.Name);
   if (lXV <> nil) then
   begin
     if (lXV.Writable) then
-      SetVariable(lXV, pVar.Value)
+    begin
+      DebugLog('Variable ' + pVar.Name + ' is writable, setting...');
+      SetVariable(lXV, pVar.Value, pVar.Index)
+    end
     else
       DebugLog('Variable ' + pVar.Name + ' is not writable.');
-  end;
+  end
+  else
+    DebugLog('Cannot set variable ' + pVar.Name + ' - not found.');
   pVar.Free;
 end;
 
@@ -411,7 +421,7 @@ begin
   pVar.Free;
 end;
 
-procedure TXplEngine.RunAndFree(pComm: TXplExecuteCommand);
+procedure TXplEngine.RunAndFreeCommand(pComm: TXplCallWithName);
 var
   lCom: XPLMCommandRef;
 begin
@@ -450,6 +460,27 @@ begin
   end
   else
     DebugLog('Variable ' + pVar.Name + ' not found.');
+  pVar.Free;
+end;
+
+procedure TXplEngine.RunAndFree(pVar: TXplUnhookVariable);
+var
+  I:Integer;
+begin
+  // remove from my records
+  i := 0;
+  while i < fVarCallbacks.Count do
+  begin
+    if UpperCase(pVar.Name) = UpperCase(fVarCallbacks.Data[I].XplVariable.Name) then
+    begin
+      DebugLogFmt('Removing registered variable %s with id %d and interval %d',
+        [fVarCallbacks.Data[I].XplVariable.Name, fVarCallbacks.Keys[i], fVarCallbacks.Data[I].Interval]);
+      fVarCallbacks.Data[I].Free;
+      fVarCallbacks.Delete(i);
+    end
+    else
+      Inc(i);
+  end;
   pVar.Free;
 end;
 
@@ -540,36 +571,57 @@ begin
   end;
 end;
 
-procedure TXplEngine.SetVariable(pDef: TXplVariable; pVal: TXplValue);
+procedure TXplEngine.SetVariable(pDef: TXplVariable; pVal: TXplValue; pIndex: Int64);
 var
-  lBuff: PChar;
+  lSingle: Single;
+  lInteger: Integer;
 begin
+  DebugLogFmt('About to set type %d of variable %s', [Ord(pDef.DataType), pDef.Name]);
   case pDef.DataType of
-  xplmType_Float:
-  begin
-    pVal.MakeDouble;
-    DebugLog('Setting variable ' + pDef.Name + ' to float value ' + FloatToStr(pVal.DoubleValue));
-    XPLMSetDataf(pDef.DataRef, pVal.DoubleValue);
+    xplmType_Float:
+    begin
+      pVal.MakeDouble;
+      DebugLog('Setting variable ' + pDef.Name + ' to float value ' + FloatToStr(pVal.DoubleValue));
+      XPLMSetDataf(pDef.DataRef, pVal.DoubleValue);
+    end;
+    xplmType_Double:
+    begin
+      pVal.MakeDouble;
+      DebugLog('Setting variable ' + pDef.Name + ' to double value ' + FloatToStr(pVal.DoubleValue));
+      XPLMSetDatad(pDef.DataRef, pVal.DoubleValue);
+    end;
+    xplmType_Int:
+    begin
+      pVal.MakeInt;
+      DebugLog('Setting variable ' + pDef.Name + ' to int value ' + IntToStr(pVal.IntValue));
+      XPLMSetDatai(pDef.DataRef, pVal.IntValue);
+    end;
+    xplmType_Data:
+    begin
+      pVal.MakeString;
+      //XPLMSetDatab(Pointer8b2Pointer(pDef), pVal.IntValue);
+      DebugLog('Setting string not yet implemented');
+    end;
+    xplmType_IntArray:
+    begin
+      pVal.MakeInt;
+      DebugLogFmt('Setting variable %s[%d] to int value %d', [pDef.Name, pIndex, pVal.IntValue]);
+      lInteger:=pVal.IntValue;
+      XPLMSetDatavi(pDef.DataRef, @lInteger, pIndex, 1);
+    end;
+    xplmType_FloatArray:
+    begin
+      pVal.MakeDouble;
+      DebugLogFmt('Setting variable %s[%d] to double value %f', [pDef.Name, pIndex, pVal.DoubleValue]);
+      lSingle := pVal.DoubleValue;
+      XPLMSetDatavf(pDef.DataRef, @lSingle, pIndex, 1);
+    end;
+    else
+    begin
+      DebugLogFmt('Unknown type %d of variable %s', [Ord(pDef.DataType), pDef.Name]);
+    end;
   end;
-  xplmType_Double:
-  begin
-    pVal.MakeDouble;
-    DebugLog('Setting variable ' + pDef.Name + ' to double value ' + FloatToStr(pVal.DoubleValue));
-    XPLMSetDatad(pDef.DataRef, pVal.DoubleValue);
-  end;
-  xplmType_Int:
-  begin
-    pVal.MakeInt;
-    DebugLog('Setting variable ' + pDef.Name + ' to int value ' + IntToStr(pVal.IntValue));
-    XPLMSetDatai(pDef.DataRef, pVal.IntValue);
-  end;
-  xplmType_Data:
-  begin
-    pVal.MakeString;
-    //XPLMSetDatab(Pointer8b2Pointer(pDef), pVal.IntValue);
-    DebugLog('Setting string not yet implemented');
-  end;
-  end;
+  DebugLogFmt('Setting done %d of variable %s', [Ord(pDef.DataType), pDef.Name]);
 end;
 
 function TXplEngine.GetVariable(pDef: TXplVariable): TXplValue;

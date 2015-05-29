@@ -4,13 +4,13 @@
     <PathDelim Value="\"/>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="29">
+    <Units Count="30">
       <Unit0>
         <Filename Value="XplPlugin.lpr"/>
         <IsPartOfProject Value="True"/>
         <TopLine Value="19"/>
         <CursorPos X="12" Y="42"/>
-        <UsageCount Value="83"/>
+        <UsageCount Value="89"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
@@ -19,14 +19,14 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplPluginEngine"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="634"/>
-        <CursorPos X="4" Y="657"/>
-        <UsageCount Value="83"/>
+        <TopLine Value="596"/>
+        <CursorPos X="17" Y="614"/>
+        <UsageCount Value="89"/>
         <Bookmarks Count="4">
-          <Item0 Y="427" ID="3"/>
-          <Item1 X="3" Y="545" ID="4"/>
-          <Item2 X="3" Y="396" ID="2"/>
-          <Item3 X="3" Y="658" ID="1"/>
+          <Item0 Y="437" ID="3"/>
+          <Item1 Y="578" ID="4"/>
+          <Item2 X="3" Y="406" ID="2"/>
+          <Item3 X="7" Y="610" ID="1"/>
         </Bookmarks>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -36,8 +36,9 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplCommon"/>
         <EditorIndex Value="4"/>
-        <CursorPos X="11" Y="15"/>
-        <UsageCount Value="83"/>
+        <TopLine Value="29"/>
+        <CursorPos X="5" Y="29"/>
+        <UsageCount Value="89"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit2>
@@ -48,7 +49,7 @@
         <EditorIndex Value="9"/>
         <TopLine Value="29"/>
         <CursorPos X="24" Y="47"/>
-        <UsageCount Value="83"/>
+        <UsageCount Value="89"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit3>
@@ -58,8 +59,8 @@
         <UnitName Value="uXplSender"/>
         <EditorIndex Value="2"/>
         <TopLine Value="108"/>
-        <CursorPos X="31" Y="116"/>
-        <UsageCount Value="68"/>
+        <CursorPos X="31" Y="108"/>
+        <UsageCount Value="74"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit4>
@@ -70,7 +71,7 @@
         <EditorIndex Value="8"/>
         <TopLine Value="2"/>
         <CursorPos X="54" Y="24"/>
-        <UsageCount Value="66"/>
+        <UsageCount Value="72"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit5>
@@ -80,7 +81,7 @@
         <UnitName Value="uXplPluginReceiver"/>
         <EditorIndex Value="7"/>
         <CursorPos X="42" Y="8"/>
-        <UsageCount Value="65"/>
+        <UsageCount Value="71"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit6>
@@ -90,9 +91,9 @@
         <UnitName Value="uXplMessages"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="258"/>
-        <CursorPos X="48" Y="262"/>
-        <UsageCount Value="60"/>
+        <TopLine Value="411"/>
+        <CursorPos Y="416"/>
+        <UsageCount Value="66"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit7>
@@ -100,75 +101,76 @@
         <Filename Value="..\..\TurboDelphi\Includes\XPLM\XPLMDataAccess.pas"/>
         <TopLine Value="69"/>
         <CursorPos X="4" Y="80"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
       </Unit8>
       <Unit9>
         <Filename Value="..\..\TurboDelphi\Includes\XPLM\XPLMUtilities.pas"/>
         <TopLine Value="723"/>
         <CursorPos Y="747"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit9>
       <Unit10>
         <Filename Value="..\..\TurboDelphi\Includes\XPLM\XPLMProcessing.pas"/>
         <TopLine Value="44"/>
         <CursorPos X="6" Y="59"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit10>
       <Unit11>
         <Filename Value="..\..\TurboDelphi\XPL\SDK212\Delphi\XPLM\XPLMProcessing.pas"/>
         <TopLine Value="240"/>
         <CursorPos X="30" Y="256"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit11>
       <Unit12>
         <Filename Value="..\..\TurboDelphi\XPL\SDK212\Delphi\XPLM\XPLMUtilities.pas"/>
         <TopLine Value="872"/>
         <CursorPos X="68" Y="920"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit12>
       <Unit13>
         <Filename Value="..\..\TurboDelphi\XPL\SDK212\Delphi\XPLM\XPLMDataAccess.pas"/>
         <TopLine Value="84"/>
         <CursorPos X="7" Y="102"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit13>
       <Unit14>
         <Filename Value="..\..\TurboDelphi\XPL\SDK212\Delphi\XPLM\XPLMCamera.pas"/>
         <TopLine Value="55"/>
         <CursorPos Y="55"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit14>
       <Unit15>
         <Filename Value="..\..\TurboDelphi\XPL\SDK212\Delphi\XPLM\XPLMDefs.pas"/>
         <TopLine Value="14"/>
         <CursorPos X="15" Y="36"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit15>
       <Unit16>
         <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\rtl\objpas\sysutils\sysstrh.inc"/>
         <TopLine Value="105"/>
         <CursorPos X="10" Y="124"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
       </Unit16>
       <Unit17>
         <Filename Value="..\inc\XPL_SDK212_XPLM\XPLMDataAccess.pas"/>
+        <UnitName Value="XPLMDataAccess"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="206"/>
-        <CursorPos X="29" Y="218"/>
-        <UsageCount Value="19"/>
+        <TopLine Value="95"/>
+        <CursorPos X="7" Y="111"/>
+        <UsageCount Value="18"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit17>
       <Unit18>
         <Filename Value="C:\Apps\lazarus126\fpc\2.6.4\source\packages\opengl\src\gl.pp"/>
         <CursorPos X="48" Y="9"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
       </Unit18>
       <Unit19>
         <Filename Value="C:\Apps\lazarus14rc2\fpc\2.6.4\source\packages\fcl-process\src\simpleipc.pp"/>
@@ -176,7 +178,7 @@
         <EditorIndex Value="6"/>
         <TopLine Value="361"/>
         <CursorPos X="36" Y="389"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="31"/>
         <Loaded Value="True"/>
       </Unit19>
       <Unit20>
@@ -184,43 +186,43 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="261"/>
         <CursorPos X="3" Y="279"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
       </Unit20>
       <Unit21>
         <Filename Value="C:\Apps\lazarus14rc2\fpc\2.6.4\source\rtl\inc\objpash.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="225"/>
         <CursorPos X="48" Y="241"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit21>
       <Unit22>
         <Filename Value="C:\Apps\lazarus14rc2\fpc\2.6.4\source\rtl\inc\objpas.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="967"/>
         <CursorPos X="11" Y="969"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit22>
       <Unit23>
         <Filename Value="uXplControl.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="7"/>
         <CursorPos X="45" Y="23"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="11"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit23>
       <Unit24>
         <Filename Value="uglobals.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="32" Y="5"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit24>
       <Unit25>
         <Filename Value="uluaengine.pas"/>
         <UnitName Value="uLuaEngine"/>
         <EditorIndex Value="5"/>
-        <CursorPos X="29" Y="16"/>
-        <UsageCount Value="15"/>
+        <CursorPos X="40"/>
+        <UsageCount Value="18"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit25>
@@ -229,142 +231,151 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="706"/>
         <CursorPos X="30" Y="733"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit26>
       <Unit27>
         <Filename Value="C:\Apps\lazarus14rc2\fpc\2.6.4\source\rtl\objpas\classes\streams.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="589"/>
         <CursorPos X="3" Y="592"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit27>
       <Unit28>
         <Filename Value="..\inc\XPL_SDK212_XPLM\XPLMUtilities.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="775"/>
         <CursorPos X="4" Y="791"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit28>
+      <Unit29>
+        <Filename Value="C:\Apps\lazarus14rc2\fpc\2.6.4\source\rtl\win\sysutils.pp"/>
+        <UnitName Value="sysutils"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="54"/>
+        <CursorPos X="11" Y="70"/>
+        <UsageCount Value="10"/>
+      </Unit29>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="96" Column="20" TopLine="89"/>
+        <Caret Line="334" Column="45" TopLine="318"/>
       </Position1>
       <Position2>
         <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="389" Column="8" TopLine="376"/>
       </Position2>
       <Position3>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="14" Column="15"/>
+        <Caret Line="46" Column="15" TopLine="31"/>
       </Position3>
       <Position4>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="65" Column="13" TopLine="38"/>
+        <Caret Line="392" Column="7" TopLine="374"/>
       </Position4>
       <Position5>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="96" Column="20" TopLine="69"/>
+        <Caret Line="381" Column="3" TopLine="376"/>
       </Position5>
       <Position6>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="29" Column="20" TopLine="18"/>
+        <Caret Line="488" Column="3" TopLine="481"/>
       </Position6>
       <Position7>
-        <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="34" Column="26" TopLine="13"/>
+        <Filename Value="uXplCommon.pas"/>
+        <Caret Line="45" Column="5" TopLine="29"/>
       </Position7>
       <Position8>
         <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="600" Column="7" TopLine="571"/>
       </Position8>
       <Position9>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="34" Column="26" TopLine="7"/>
       </Position9>
       <Position10>
-        <Filename Value="XplPlugin.lpr"/>
-        <Caret Line="42" Column="12" TopLine="19"/>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="576" Column="18" TopLine="549"/>
       </Position10>
       <Position11>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="148" Column="3" TopLine="145"/>
+        <Caret Line="582" Column="18" TopLine="555"/>
       </Position11>
       <Position12>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="443" Column="14" TopLine="437"/>
+        <Caret Line="588" Column="18" TopLine="561"/>
       </Position12>
       <Position13>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="635" Column="20" TopLine="621"/>
+        <Caret Line="593" Column="20" TopLine="566"/>
       </Position13>
       <Position14>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="633" Column="21" TopLine="624"/>
+        <Caret Line="600" Column="18" TopLine="574"/>
       </Position14>
       <Position15>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="29" Column="35"/>
+        <Caret Line="500" Column="30" TopLine="473"/>
       </Position15>
       <Position16>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="83" TopLine="66"/>
+        <Caret Line="600" Column="59" TopLine="585"/>
       </Position16>
       <Position17>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="128" Column="23" TopLine="112"/>
+        <Caret Line="596" TopLine="585"/>
       </Position17>
       <Position18>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="521" Column="15" TopLine="506"/>
+        <Caret Line="606" Column="51" TopLine="585"/>
       </Position18>
       <Position19>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="515" Column="63" TopLine="499"/>
+        <Caret Line="600" Column="36" TopLine="584"/>
       </Position19>
       <Position20>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="41" TopLine="41"/>
+        <Caret Line="602" Column="45" TopLine="581"/>
       </Position20>
       <Position21>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="522" Column="35" TopLine="514"/>
+        <Caret Line="389" Column="13" TopLine="376"/>
       </Position21>
       <Position22>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="444" Column="50" TopLine="428"/>
+        <Caret Line="615" Column="50" TopLine="567"/>
       </Position22>
       <Position23>
-        <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="525" Column="41" TopLine="509"/>
+        <Filename Value="uXplCommon.pas"/>
+        <Caret Line="45" Column="5" TopLine="29"/>
       </Position23>
       <Position24>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="526" TopLine="510"/>
+        <Caret Line="615" Column="83" TopLine="592"/>
       </Position24>
       <Position25>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="515" Column="68" TopLine="514"/>
+        <Caret Line="391" Column="40" TopLine="376"/>
       </Position25>
       <Position26>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="535" Column="79" TopLine="503"/>
+        <Caret Line="614" Column="17" TopLine="596"/>
       </Position26>
       <Position27>
-        <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="515" Column="78" TopLine="499"/>
+        <Filename Value="uxplmessages.pas"/>
+        <Caret Line="404" Column="26" TopLine="396"/>
       </Position27>
       <Position28>
-        <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="536" TopLine="514"/>
+        <Filename Value="uxplmessages.pas"/>
+        <Caret Line="187" Column="35" TopLine="171"/>
       </Position28>
       <Position29>
-        <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="444" Column="61" TopLine="428"/>
+        <Filename Value="uxplmessages.pas"/>
+        <Caret Line="191" Column="22" TopLine="175"/>
       </Position29>
       <Position30>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="657" Column="4" TopLine="634"/>
+        <Caret Line="614" Column="17" TopLine="596"/>
       </Position30>
     </JumpHistory>
   </ProjectSession>

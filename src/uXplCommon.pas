@@ -19,6 +19,9 @@ const
   HDMC_VAR_RESPONSE = 12;
   HDMC_RECONNECT = 13;
   HDMC_VAR_CALLBACK = 14;
+  HDMC_UNHOOK_VAR = 15;
+
+  NO_INDEX = -1;
 
   cXplToLmcPipeName = 'XplToLuaMacrosPipe';
   cXplToLmcAsyncPipeName = 'XplToLuaMacrosAsyncPipe';

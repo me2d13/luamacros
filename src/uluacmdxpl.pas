@@ -14,6 +14,7 @@ function GetXplVariable(luaState : TLuaState) : integer;
 function SetXplVariable(luaState : TLuaState) : integer;
 function XplDrawText(luaState : TLuaState) : integer;
 function XplVarChange(luaState : TLuaState) : integer;
+function UnregisterXplVarChange(luaState : TLuaState) : integer;
 
 
 implementation
@@ -87,16 +88,28 @@ end;
 function SetXplVariable(luaState: TLuaState): integer;
 var arg : PAnsiChar;
   lVal: TXplValue;
+  lNumOfParams: Integer;
+  lIndex: Integer;
 begin
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams < 2) then
+    raise LmcException.Create('Wrong number of parameters. Provide at least name and value.');
   arg := lua_tostring(luaState, 1);
-  if (lua_isstring(luaState, 2) <> 0) then lVal := TXplValue.Create(lua_tostring(luaState, 2))
-  else if (lua_isnumber(luaState, 2) = 0) then lVal := TXplValue.Create(lua_tonumber(luaState, 2))
+  if (lua_isnumber(luaState, 2) = 0) then lVal := TXplValue.Create(lua_tonumber(luaState, 2))
+  else if (lua_isstring(luaState, 2) <> 0) then lVal := TXplValue.Create(lua_tostring(luaState, 2))
   else
   begin
     raise Exception.Create('Unexpected variable type');
   end;
-  Glb.DebugLog('Setting variable ' + arg + ' to ' + lVal.ToString, cLoggerXpl);
-  Glb.XplControl.SetXplVariable(arg, lVal);
+  if (lNumOfParams = 3) then
+  begin
+    lIndex := lua_tointeger(luaState, 3);
+    Glb.DebugLogFmt('Setting variable %s[%d] to %s', [arg, lIndex, lVal.ToString], cLoggerXpl);
+    Glb.XplControl.SetXplVariable(arg, lVal, lIndex);
+  end else begin
+    Glb.DebugLog('Setting variable ' + arg + ' to ' + lVal.ToString, cLoggerXpl);
+    Glb.XplControl.SetXplVariable(arg, lVal);
+  end;
   Result := 0;
 end;
 
@@ -128,7 +141,7 @@ var
   lHandlerRef: Integer;
   lNumOfParams: Integer;
 begin
-  Glb.LuaEngine.StackDump(luaState);
+  //Glb.LuaEngine.StackDump(luaState);
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams < 2) then
     raise LmcException.Create('Wrong number of parameters. Provide at least name and handler.');
@@ -148,6 +161,25 @@ begin
   Glb.DebugLog(Format('Got function reference with key %d', [lHandlerRef]), cLoggerLua);
   lVarName := lua_tostring(luaState, 1);
   Glb.XplControl.SetVariableHook(lVarName, lHandlerRef, lIntervalMs);
+  Result := 0;
+end;
+
+function UnregisterXplVarChange(luaState: TLuaState): integer;
+var
+  lVarName : PAnsiChar;
+  lNumOfParams: Integer;
+begin
+  //Glb.LuaEngine.StackDump(luaState);
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams <> 1) then
+    raise LmcException.Create('Wrong number of parameters. Provide name.');
+  if (lua_isstring(luaState, -1) = 1) then
+  begin
+    lVarName := lua_tostring(luaState, 1);
+  end
+  else
+    raise LmcException.Create('1st parameter is supposed to be a string.');
+  Glb.XplControl.UnhookVariable(lVarName);
   Result := 0;
 end;
 

@@ -27,13 +27,15 @@ type
     destructor Destroy; Override;
     procedure Init;
     function GetXplVariable(pName: String): TXplValue;
-    procedure SetXplVariable(pName: String; pValue: TXplValue);
+    procedure SetXplVariable(pName: String; pValue: TXplValue); overload;
+    procedure SetXplVariable(pName: String; pValue: TXplValue; lIndex: Integer); overload;
     procedure ExecuteCommand(pCmdName: String);
     procedure ExecuteCommandBegin(pCmdName: String);
     procedure ExecuteCommandEnd(pCmdName: String);
     procedure DrawText(pText: String; pPos: Single = 0; pSec: Integer = 5);
     procedure XplVarProcessed;
     procedure SetVariableHook(pVarName: String; pHandlerRef: Integer; pIntervalMs: Integer);
+    procedure UnhookVariable(pVarName: String);
   end;
 
   TXPLRefHolder = class
@@ -143,6 +145,30 @@ begin
   Glb.DebugLog(Format('Registered variable callback for %s with id %d and interval %d',
     [pVarName, lId, pIntervalMs]), cLoggerXpl);
   lXplObj.Free;
+end;
+
+procedure TXPLcontrol.UnhookVariable(pVarName: String);
+var
+  I:Integer;
+  lXplObj: TXplUnhookVariable;
+begin
+  // remove from XPL plugin
+  lXplObj := TXplUnhookVariable.Create(pVarName);
+  fXplSender.SendMessage(lXplObj);
+  // remove from my records
+  i := 0;
+  while i < fCallbacks.Count do
+  begin
+    if UpperCase(pVarName) = UpperCase(fCallbacks.Data[I].Name) then
+    begin
+      Glb.DebugLog(Format('Removing registered variable %s with id %d and interval %d',
+        [fCallbacks.Data[I].Name, fCallbacks.Keys[i], fCallbacks.Data[I].Interval]), cLoggerXpl);
+      fCallbacks.Data[I].Free;
+      fCallbacks.Delete(i);
+    end
+    else
+      Inc(i);
+  end;
 end;
 
 procedure TXPLcontrol.OnXplSyncMessage(Sender: TObject);
@@ -264,17 +290,23 @@ begin
 end;
 
 procedure TXPLcontrol.SetXplVariable(pName: String; pValue: TXplValue);
+begin
+  SetXplVariable(pName, pValue, NO_INDEX);
+end;
+
+procedure TXPLcontrol.SetXplVariable(pName: String; pValue: TXplValue;
+  lIndex: Integer);
 var
   lSetVar: TXplSetVariable;
 begin
-  lSetVar := TXplSetVariable.Create(pName, pValue);
+  lSetVar := TXplSetVariable.Create(pName, pValue, lIndex);
   fXplSender.SendMessage(lSetVar);
   lSetVar.Free;
 end;
 
 procedure TXPLcontrol.ExecuteCommand(pCmdName: String);
 var
-  lXplObj: TXplExecuteCommand;
+  lXplObj: TXplCallWithName;
 begin
   lXplObj := TXplExecuteCommand.Create(pCmdName);
   fXplSender.SendMessage(lXplObj);
@@ -283,7 +315,7 @@ end;
 
 procedure TXPLcontrol.ExecuteCommandBegin(pCmdName: String);
 var
-  lXplObj: TXplExecuteCommand;
+  lXplObj: TXplCallWithName;
 begin
   lXplObj := TXplExecuteCommandBegin.Create(pCmdName);
   fXplSender.SendMessage(lXplObj);
@@ -292,7 +324,7 @@ end;
 
 procedure TXPLcontrol.ExecuteCommandEnd(pCmdName: String);
 var
-  lXplObj: TXplExecuteCommand;
+  lXplObj: TXplCallWithName;
 begin
   lXplObj := TXplExecuteCommandEnd.Create(pCmdName);
   fXplSender.SendMessage(lXplObj);
