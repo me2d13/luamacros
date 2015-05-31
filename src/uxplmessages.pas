@@ -86,13 +86,15 @@ type
   private
     fName: String;
     fId: Int64;
+    fIndex: Int64;
   public
-    constructor Create(pName: String; pId: Int64);overload;
+    constructor Create(pName: String; pId: Int64; pIndex: Integer);overload;
     constructor Create(pStream: TStream);overload;
     destructor Destroy;override;
     procedure SerializeToStream(pStream: TStream);override;
     property Name: String read fName write fName;
     property Id: Int64 read fId write fId;
+    property Index: Int64 read fIndex write fIndex;
   end;
 
   { TXplVariableValue }
@@ -324,16 +326,18 @@ end;
 
 { TXplGetVariable }
 
-constructor TXplGetVariable.Create(pName: String; pId: Int64);
+constructor TXplGetVariable.Create(pName: String; pId: Int64; pIndex: Integer);
 begin
   fName:=pName;
   fId:=pId;
+  fIndex:=pIndex;
 end;
 
 constructor TXplGetVariable.Create(pStream: TStream);
 begin
   fName := pStream.ReadAnsiString;
   pStream.Read(fId, SizeOf(fId));
+  pStream.Read(fIndex, SizeOf(fIndex));
 end;
 
 destructor TXplGetVariable.Destroy;
@@ -346,6 +350,7 @@ begin
   pStream.WriteByte(HDMC_GET_VAR);
   pStream.WriteAnsiString(fName);
   pStream.Write(fId, SizeOf(fId));
+  pStream.Write(fIndex, SizeOf(fIndex));
 end;
 
 { TXplValue }

@@ -58,31 +58,42 @@ function GetXplVariable(luaState: TLuaState): integer;
 var arg : PAnsiChar;
   lRes: TXplValue;
   lMessage: String;
+  lNumOfParams: Integer;
+  lIndex: Integer;
 begin
-     arg := lua_tostring(luaState, 1);
-     lRes := Glb.XplControl.GetXplVariable(arg);
-     if (lRes = nil) then
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams < 1) then
+    raise LmcException.Create('Wrong number of parameters. Provide at least name.');
+  arg := lua_tostring(luaState, 1);
+  if (lNumOfParams = 2) then
+  begin
+    lIndex := lua_tointeger(luaState, 2);
+    lRes := Glb.XplControl.GetXplVariable(arg, lIndex);
+  end
+  else
+    lRes := Glb.XplControl.GetXplVariable(arg);
+  if (lRes = nil) then
+  begin
+   lMessage:='No value returned from Xplane';
+   lua_pushstring(luaState, PChar(lMessage));
+   Result := 1;
+  end else
+  begin
+   if (lRes.ValueType = vtString) then
+   begin
+     lMessage:=lRes.StringValue;
+     lua_pushstring(luaState, PChar(lMessage));
+   end
+   else if (lRes.ValueType = vtInteger) then lua_pushinteger(luaState, lRes.IntValue)
+   else if (lRes.ValueType = vtDouble) then lua_pushnumber(luaState, lRes.DoubleValue)
+   else
      begin
-       lMessage:='No value returned from Xplane';
-       lua_pushstring(luaState, PChar(lMessage));
-       Result := 1;
-     end else
-     begin
-       if (lRes.ValueType = vtString) then
-       begin
-         lMessage:=lRes.StringValue;
-         lua_pushstring(luaState, PChar(lMessage));
-       end
-       else if (lRes.ValueType = vtInteger) then lua_pushinteger(luaState, lRes.IntValue)
-       else if (lRes.ValueType = vtDouble) then lua_pushnumber(luaState, lRes.DoubleValue)
-       else
-         begin
-           lMessage:='Unexpected type returned from XPL with value ' + lRes.ToString;
-           lua_pushstring(luaState, PChar(lMessage))
-         end;
-       Result := 1;
-       Glb.XplControl.XplVarProcessed;
+       lMessage:='Unexpected type returned from XPL with value ' + lRes.ToString;
+       lua_pushstring(luaState, PChar(lMessage))
      end;
+   Result := 1;
+   Glb.XplControl.XplVarProcessed;
+  end;
 end;
 
 function SetXplVariable(luaState: TLuaState): integer;

@@ -26,7 +26,8 @@ type
     constructor Create;
     destructor Destroy; Override;
     procedure Init;
-    function GetXplVariable(pName: String): TXplValue;
+    function GetXplVariable(pName: String): TXplValue; overload;
+    function GetXplVariable(pName: String; lIndex: Integer): TXplValue; overload;
     procedure SetXplVariable(pName: String; pValue: TXplValue); overload;
     procedure SetXplVariable(pName: String; pValue: TXplValue; lIndex: Integer); overload;
     procedure ExecuteCommand(pCmdName: String);
@@ -102,6 +103,11 @@ begin
     fXplSender.SendMessage(TXplReconnectToServer.Create);
   end;
   //lGlb.DebugLog(Format('Slot size: %d, mem size: %d', [SizeOf(TXplComSlot), SizeOf(TXplComRecord)]), 'XPL');
+end;
+
+function TXPLcontrol.GetXplVariable(pName: String): TXplValue;
+begin
+  Result := GetXplVariable(pName, NO_INDEX);
 end;
 
 procedure TXPLcontrol.DrawText(pText: String; pPos: Single; pSec: Integer);
@@ -256,7 +262,7 @@ begin
   end;
 end;
 
-function TXPLcontrol.GetXplVariable(pName: String): TXplValue;
+function TXPLcontrol.GetXplVariable(pName: String; lIndex: Integer): TXplValue;
 var
   lXplObj: TXplGetVariable;
   lId: Int64;
@@ -264,8 +270,11 @@ var
 begin
   Result := nil;
   lId := Glb.KeyLogService.UnixTimestampMs;
-  lXplObj := TXplGetVariable.Create(pName, lId);
-  DebugLog(Format('Sending GetXplVar command for name %s with id %d.', [pName, lXplObj.Id]));
+  lXplObj := TXplGetVariable.Create(pName, lId, lIndex);
+  if (lIndex = NO_INDEX) then
+    DebugLog(Format('Sending GetXplVar command for name %s with id %d.', [pName, lXplObj.Id]))
+  else
+    DebugLog(Format('Sending GetXplVar command for name %s[%d] with id %d.', [pName, lIndex, lXplObj.Id]));
   fXplSender.SendMessage(lXplObj);
   // wait for XPL answer
   lDataRead := fXplSyncListener.Server.PeekMessage(1000, true); // in ms

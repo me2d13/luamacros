@@ -44,7 +44,8 @@ TXplEngine = class (TObject)
     function GetOrRegisterXplCommand(pName: String): XPLMCommandRef;
     function GetOrRegisterXplVariableCallback(pId: Int64; pName: String): TXplVariableCallbackInfo;
     procedure SetVariable(pDef: TXplVariable; pVal: TXplValue; pIndex: Int64);
-    function GetVariable(pDef: TXplVariable): TXplValue;
+    function GetVariable(pDef: TXplVariable): TXplValue; overload;
+    function GetVariable(pDef: TXplVariable; pIndex: Integer): TXplValue; overload;
     procedure ReconnectSenders;
     procedure CheckVariableCallbacks;
     function UnixTimestampMs: Int64;
@@ -403,11 +404,18 @@ var
   lXV: TXplVariable;
   lValue: TXplValue;
 begin
-  DebugLog(Format('Received request id %d to get variable %s.', [pVar.Id, pVar.Name]));
+  if (pVar.Index = NO_INDEX) then
+  begin
+    DebugLog(Format('Received request id %d to get variable %s.', [pVar.Id, pVar.Name]));
+  end
+  else
+  begin
+    DebugLog(Format('Received request id %d to get variable %s[%d].', [pVar.Id, pVar.Name, pVar.Index]));
+  end;
   lXV := GetOrRegisterXplVariable(pVar.Name);
   if (lXV <> nil) then
   begin
-    lValue := GetVariable(lXV);
+    lValue := GetVariable(lXV, pVar.Index);
     if (lValue <> nil) then
     begin
       fSyncSender.SendMessage(TXplVariableValue.Create(pVar.Name, lValue, pVar.Id));
@@ -625,6 +633,11 @@ begin
 end;
 
 function TXplEngine.GetVariable(pDef: TXplVariable): TXplValue;
+begin
+  Result := GetVariable(pDef, NO_INDEX);
+end;
+
+function TXplEngine.GetVariable(pDef: TXplVariable; pIndex: Integer): TXplValue;
 var
   lBuff: array[0..500] of char;
   lBuffPtr: PChar;
@@ -634,35 +647,47 @@ var
   lInt: Integer;
 begin
   case pDef.DataType of
-  xplmType_Float:
-  begin
-    lSingle:=XPLMGetDataf(pDef.DataRef);
-    //DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
-    Result := TXplValue.Create(lSingle);
-  end;
-  xplmType_Double:
-  begin
-    lReal:=XPLMGetDatad(pDef.DataRef);
-    //DebugLog(Format('Got double value %f of variable %s.', [lReal, pDef.Name]));
-    Result := TXplValue.Create(lReal);
-  end;
-  xplmType_Int:
-  begin
-    lInt:=XPLMGetDatai(pDef.DataRef);
-    //DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
-    Result := TXplValue.Create(lInt);
-  end;
-  xplmType_Data:
-  begin
-    if (pDef.Length > 500) then
-      lLength:=500
-    else
-      lLength:=pDef.Length;
-    lBuffPtr:=lBuff;
-    XPLMGetDatab(pDef.DataRef, lBuffPtr, 0, lLength);
-    //DebugLog('Got string value of variable ' + pDef.Name + ': ' + lBuff);
-    Result := TXplValue.Create(lBuff);
-  end;
+    xplmType_Float:
+    begin
+      lSingle:=XPLMGetDataf(pDef.DataRef);
+      //DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
+      Result := TXplValue.Create(lSingle);
+    end;
+    xplmType_Double:
+    begin
+      lReal:=XPLMGetDatad(pDef.DataRef);
+      //DebugLog(Format('Got double value %f of variable %s.', [lReal, pDef.Name]));
+      Result := TXplValue.Create(lReal);
+    end;
+    xplmType_Int:
+    begin
+      lInt:=XPLMGetDatai(pDef.DataRef);
+      //DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
+      Result := TXplValue.Create(lInt);
+    end;
+    xplmType_Data:
+    begin
+      if (pDef.Length > 500) then
+        lLength:=500
+      else
+        lLength:=pDef.Length;
+      lBuffPtr:=lBuff;
+      XPLMGetDatab(pDef.DataRef, lBuffPtr, 0, lLength);
+      //DebugLog('Got string value of variable ' + pDef.Name + ': ' + lBuff);
+      Result := TXplValue.Create(lBuff);
+    end;
+    xplmType_FloatArray:
+    begin
+      XPLMGetDatavf(pDef.DataRef, @lSingle, pIndex, 1);
+      //DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
+      Result := TXplValue.Create(lSingle);
+    end;
+    xplmType_IntArray:
+    begin
+      XPLMGetDatavi(pDef.DataRef, @lInt, pIndex, 1);
+      //DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
+      Result := TXplValue.Create(lInt);
+    end;
   end;
 end;
 
