@@ -105,7 +105,7 @@ implementation
 {$R *.lfm}
 
 uses
-  uGlobals, uHookCommon;
+  uGlobals, uHookCommon, uConfigService;
 
 const
   cUntitled = 'Untitled';
@@ -160,7 +160,6 @@ begin
   begin
     Glb.LuaEngine.Reset;
     Glb.DeviceService.DetectDevices; // clears device table
-    Glb.InitConfigValues;
     Glb.LuaEngine.runCode(SynEdit1.Lines.GetText);
   end;
 end;
@@ -210,7 +209,7 @@ end;
 
 procedure TLmcMainForm.ManageTrayIcon;
 begin
-  if (Glb.LuaEngine.GetConfigItem('minimizeToTray', false)) then
+  if (Glb.ConfigService.GetBoolean(cParamMinimizeToTray)) then
     TrayIcon1.Show
   else
     TrayIcon1.Hide;
@@ -405,7 +404,7 @@ end;
 
 procedure TLmcMainForm.FormWindowStateChange(Sender: TObject);
 begin
-  if (WindowState = wsMinimized) and (Glb.LuaEngine.GetConfigItem('minimizeToTray', false)) then
+  if (WindowState = wsMinimized) and (Glb.ConfigService.GetBoolean(cParamMinimizeToTray)) then
   begin
     WindowState:=wsNormal;
     Hide;

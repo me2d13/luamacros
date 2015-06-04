@@ -2,8 +2,13 @@
 clear();
 lmc_xpl_text('From LUA macros')
 
+lmc2.ahoj = 1
+print(lmc.ahoj)
+
 --lmc_log_all();
 lmc_log_module('XPL')
+lmc_log_module('LUA')
+lmc_log_module('CFG')
 lmc_log_spool('lmc_spool.log')
 print('Version: ' .. lmc.version)
 lmc.minimizeToTray = true
@@ -122,3 +127,9 @@ lmc_set_handler('KBD2',65, 1, function()
   print('Callback for keyboard 1 key "a" down')
   lmc_send_keys('It rocks!')
 end)
+
+--cleanThisKey=cleanThisKey:gsub("%(","%(")
+lmc_set_handler("LB",function(button, direction)
+      cleanThisKey=cleanThisKey:gsub("%(","%(")
+end)
+

@@ -114,6 +114,7 @@ type
       fInitOk: boolean;
       fTriggers: TTriggerList;
       procedure RegisterFunctions;
+      procedure RegisterConfig;
       procedure CallFunctionByRef(pRef: Integer);overload;
       procedure CallFunctionByRef(pRef: Integer; pData: String);overload;
       procedure CallFunctionByRef(pRef: Integer; pKey: Integer; pDirection: Integer);overload;
@@ -132,10 +133,6 @@ type
       function GetQueueSize: Integer;
       function GetExecutionQueueSize: Integer;
       function IsRunning: Boolean;
-      procedure SetConfigItem(pName: String; pValue: boolean); overload;
-      procedure SetConfigItem(pName: String; pValue: String); overload;
-      function GetConfigItem(pName: String; pDefault: boolean): boolean; overload;
-      function GetConfigItem(pName: String; pDefault: String): String; overload;
       procedure StackDump(pLuaState: TLuaState);
       procedure CallFunctionByRef(pRef: Integer; pValue: TXplVariableValue; pChangeCount: Integer);overload;
   end;
@@ -143,7 +140,7 @@ type
 implementation
 
 uses uMainFrm, uGlobals,
-  uLuaCmdXpl, uLuaCmdDevice, uComDevice, Process, uLuaCmdMainWindow;
+  uLuaCmdXpl, uLuaCmdDevice, uComDevice, Process, uLuaCmdMainWindow, uConfigService;
 
 const
 {$IFDEF UNIX}
@@ -161,8 +158,6 @@ const
 {$ENDIF}
 
   cMaxQueueSize = 30;
-
-  cConfigVariableName = 'lmc';
 
 { TRiRefXplValueInteger }
 
@@ -463,69 +458,16 @@ begin
   fLua.RegisterFunction('lmc_remove_xpl_var_change','',nil,@UnregisterXplVarChange);
 end;
 
-procedure TLuaEngine.SetConfigItem(pName: String; pValue: boolean);
+procedure TLuaEngine.RegisterConfig;
 begin
-  lua_getglobal(fLua.LuaInstance, cConfigVariableName);
-  if (not lua_istable(fLua.LuaInstance, -1)) then
-    lua_newtable(fLua.LuaInstance);
-  lua_pushstring(fLua.LuaInstance, PChar(pName));
-  lua_pushboolean(fLua.LuaInstance, Integer(pValue));
-  lua_settable(fLua.LuaInstance, -3);
-  lua_setglobal(fLua.LuaInstance, cConfigVariableName);
-end;
-
-procedure TLuaEngine.SetConfigItem(pName: String; pValue: String);
-begin
-  lua_getglobal(fLua.LuaInstance, cConfigVariableName);
-  if (not lua_istable(fLua.LuaInstance, -1)) then
-    lua_newtable(fLua.LuaInstance);
-  lua_pushstring(fLua.LuaInstance, PChar(pName));
-  lua_pushstring(fLua.LuaInstance, PChar(pValue));
-  lua_settable(fLua.LuaInstance, -3);
-  lua_setglobal(fLua.LuaInstance, cConfigVariableName);
-end;
-
-function TLuaEngine.GetConfigItem(pName: String; pDefault: boolean): boolean;
-var
-  lLuaResult: Integer;
-begin
-  Result := pDefault;
-  lua_getglobal(fLua.LuaInstance, cConfigVariableName);
-  if (lua_istable(fLua.LuaInstance, -1)) then
-  begin
-    lua_pushstring(fLua.LuaInstance, PChar(pName));
-    lua_gettable(fLua.LuaInstance, -2);
-    if (lua_isboolean(fLua.LuaInstance, -1)) then
-    begin
-      lLuaResult:=lua_toboolean(fLua.LuaInstance, -1);
-      lua_pop(fLua.LuaInstance, 1);
-      Result := boolean(lLuaResult);
-    end
-    else
-      Glb.LogError(pName + ' is not a boolean', cLoggerLua);
-  end
-  else
-    Glb.LogError('Config variable not found for ' + pName, cLoggerLua);
-end;
-
-function TLuaEngine.GetConfigItem(pName: String; pDefault: String): String;
-begin
-  Result := pDefault;
-  lua_getglobal(fLua.LuaInstance, cConfigVariableName);
-  if (lua_istable(fLua.LuaInstance, -1)) then
-  begin
-    lua_pushstring(fLua.LuaInstance, PChar(pName));
-    lua_gettable(fLua.LuaInstance, -2);
-    if (lua_isstring(fLua.LuaInstance, -1) > 0) then
-    begin
-      Result:=lua_tostring(fLua.LuaInstance, -1);
-      lua_pop(fLua.LuaInstance, 1);
-    end
-    else
-      Glb.LogError(pName + ' is not a string', cLoggerLua);
-  end
-  else
-    Glb.LogError('Config variable not found for ' + pName, cLoggerLua);
+  lua_createtable(fLua.LuaInstance, 0, 0); // 1.. table
+  lua_createtable(fLua.LuaInstance, 0, 2); // 1.. table, 2 .. metatable
+  lua_pushcfunction(fLua.LuaInstance, @GetParam); // 1.. table, 2 .. metatable, 3.. getter
+  lua_setfield(fLua.LuaInstance, -2, '__index');  // 1.. table, 2 .. metatable
+  lua_pushcfunction(fLua.LuaInstance, @SetParam); // 1.. table, 2 .. metatable, 3.. setter
+  lua_setfield(fLua.LuaInstance, -2, '__newindex');  // 1.. table, 2 .. metatable
+  lua_setmetatable(fLua.LuaInstance, -2);
+  lua_setglobal(fLua.LuaInstance, 'lmc');
 end;
 
 procedure TLuaEngine.StackDump(pLuaState: TLuaState);
@@ -611,6 +553,7 @@ begin
   //activates the Garbage collector on the Lua side
   lua_gc(fLua.LuaInstance, LUA_GCRESTART, 0);
   RegisterFunctions;
+  RegisterConfig;
 end;
 
 procedure TLuaEngine.UnInit;

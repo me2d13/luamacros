@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, uXplControl, uLuaEngine, uDeviceService, uDevice, uHookService,
-  uKeyLogService, windows, uScanService;
+  uKeyLogService, windows, uScanService, uConfigService;
 
 type
 
@@ -29,6 +29,7 @@ type
       fMainFormHandle: LongInt;
       fPrintBuffer: TStrings;
       fScanService: TScanService;
+      fConfigService: TConfigService;
       fVersion: String;
       procedure SetSpoolFileName(AValue: String);
       procedure AskMainFormToFlushPrintBuffer;
@@ -37,7 +38,6 @@ type
       constructor Create;
       destructor Destroy; Override;
       procedure Init;
-      procedure InitConfigValues;
       procedure DebugLog(pMessage: String; pLogger: String);
       procedure DebugLogFile(pMessage: String; pLogger: String; pFileName: String);
       procedure DebugLogFmt(pMessage: String; const Args : Array of const; pLogger: String);
@@ -58,6 +58,7 @@ type
       property SpoolFileName: String read fSpoolFileName write SetSpoolFileName;
       property MainFormHandle: LongInt read fMainFormHandle write fMainFormHandle;
       property ScanService: TScanService read fScanService;
+      property ConfigService: TConfigService read fConfigService;
       property Version: String read fVersion write SetVersion;
   end;
 
@@ -78,6 +79,7 @@ const
 
   cLoggerXpl = 'XPL';
   cLoggerLua = 'LUA';
+  cLoggerCfg = 'CFG';
 
 
 function Sto_GetFmtFileVersion(const FileName: String = ''; const Fmt: String = '%d.%d.%d.%d'): String;
@@ -150,17 +152,11 @@ begin
     PostMessage(fMainFormHandle, WM_FLUSH_PRINT_BUFFER, 0, 0);
 end;
 
-procedure TGlobals.InitConfigValues;
-begin
-  fLuaEngine.SetConfigItem('minimizeToTray', false);
-  fLuaEngine.SetConfigItem('version', fVersion);
-end;
-
 procedure TGlobals.SetVersion(AValue: String);
 begin
   if fVersion=AValue then Exit;
   fVersion:=AValue;
-  fLuaEngine.SetConfigItem('version', AValue);
+  fConfigService.SetVersion(AValue);
 end;
 
 constructor TGlobals.Create;
@@ -174,10 +170,12 @@ begin
   fDeviceService := TDeviceService.Create;
   fHookService := THookService.Create;
   fKeyLogService := TKeyLogService.Create;
+  fConfigService := TConfigService.Create;
 end;
 
 destructor TGlobals.Destroy;
 begin
+  fConfigService.Free;
   fXplCLcontrol.Free;
   fLuaEngine.Free;
   fDeviceService.Free;
@@ -195,7 +193,6 @@ begin
   fXplCLcontrol.Init;
   fLuaEngine.Init;
   fDeviceService.Init;
-  InitConfigValues;
 end;
 
 procedure TGlobals.DebugLog(pMessage: String; pLogger: String);

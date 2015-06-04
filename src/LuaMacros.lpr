@@ -12,7 +12,7 @@ uses
   udeviceservice, uLuaCmdDevice, uLuaEngine, uComDevice, uComDeviceService,
   uKbdDevice, uKbdDeviceService, uRawInput, uHookService, uHookCommon,
   uKeyLogService, uSendKeys, uScanService, uLuaCmdMainWindow, uXplListener,
-  uxplsender, uXplMessages;
+  uxplsender, uXplMessages, uConfigService;
 
 {$R *.res}
 
