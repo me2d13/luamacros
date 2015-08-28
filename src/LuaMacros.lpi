@@ -18,7 +18,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
-      <BuildNr Value="159"/>
+      <BuildNr Value="174"/>
       <StringTable ProductVersion=""/>
     </VersionInfo>
     <BuildModes Count="1">
@@ -50,7 +50,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="28">
+    <Units Count="30">
       <Unit0>
         <Filename Value="LuaMacros.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -194,6 +194,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uConfigService"/>
       </Unit27>
+      <Unit28>
+        <Filename Value="uhttpserver.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uHttpServer"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="uluacmdhttp.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uLuaCmdHttp"/>
+      </Unit29>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -204,7 +214,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\inc\lua;..\inc\XPL_SDK212_XPLM;..\inc\DirectX_Borland_D9-10;..\inc\AsyncFree104"/>
+      <OtherUnitFiles Value="..\inc\lua;..\inc\XPL_SDK212_XPLM;..\inc\DirectX_Borland_D9-10;..\inc\synapse40;..\inc\LazSerial"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

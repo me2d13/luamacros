@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="30">
+    <Units Count="31">
       <Unit0>
         <Filename Value="XplPlugin.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -18,7 +18,6 @@
         <Filename Value="uXplPluginEngine.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplPluginEngine"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="401"/>
         <CursorPos Y="415"/>
@@ -36,7 +35,7 @@
         <Filename Value="uXplCommon.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplCommon"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="26"/>
         <CursorPos X="3" Y="42"/>
         <UsageCount Value="90"/>
@@ -47,7 +46,7 @@
         <Filename Value="MemMap.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="MemMap"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="29"/>
         <CursorPos X="24" Y="47"/>
         <UsageCount Value="90"/>
@@ -58,7 +57,7 @@
         <Filename Value="uxplsender.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplSender"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="108"/>
         <CursorPos X="31" Y="124"/>
         <UsageCount Value="75"/>
@@ -69,7 +68,7 @@
         <Filename Value="uxplabstractreceiver.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplAbstractReceiver"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="2"/>
         <CursorPos X="54" Y="24"/>
         <UsageCount Value="73"/>
@@ -80,7 +79,7 @@
         <Filename Value="uxplpluginreceiver.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplPluginReceiver"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <CursorPos X="42" Y="8"/>
         <UsageCount Value="72"/>
         <Loaded Value="True"/>
@@ -90,7 +89,7 @@
         <Filename Value="uxplmessages.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplMessages"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="411"/>
         <CursorPos X="35" Y="424"/>
         <UsageCount Value="67"/>
@@ -160,7 +159,6 @@
       </Unit16>
       <Unit17>
         <Filename Value="..\inc\XPL_SDK212_XPLM\XPLMDataAccess.pas"/>
-        <UnitName Value="XPLMDataAccess"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="355"/>
         <CursorPos X="13" Y="377"/>
@@ -175,7 +173,7 @@
       <Unit19>
         <Filename Value="C:\Apps\lazarus14rc2\fpc\2.6.4\source\packages\fcl-process\src\simpleipc.pp"/>
         <UnitName Value="simpleipc"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="361"/>
         <CursorPos X="36" Y="389"/>
         <UsageCount Value="31"/>
@@ -220,7 +218,7 @@
       <Unit25>
         <Filename Value="uluaengine.pas"/>
         <UnitName Value="uLuaEngine"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <CursorPos X="40"/>
         <UsageCount Value="18"/>
         <Loaded Value="True"/>
@@ -255,6 +253,14 @@
         <CursorPos X="11" Y="70"/>
         <UsageCount Value="10"/>
       </Unit29>
+      <Unit30>
+        <Filename Value="C:\Temp\LazSerial\LazSerial\lazserialsetup.lfm"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit30>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>

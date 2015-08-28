@@ -116,7 +116,6 @@ type
       procedure RegisterFunctions;
       procedure RegisterConfig;
       procedure CallFunctionByRef(pRef: Integer);overload;
-      procedure CallFunctionByRef(pRef: Integer; pData: String);overload;
       procedure CallFunctionByRef(pRef: Integer; pKey: Integer; pDirection: Integer);overload;
     public
       constructor Create;
@@ -135,12 +134,14 @@ type
       function IsRunning: Boolean;
       procedure StackDump(pLuaState: TLuaState);
       procedure CallFunctionByRef(pRef: Integer; pValue: TXplVariableValue; pChangeCount: Integer);overload;
+      procedure CallFunctionByRef(pRef: Integer; pData: String);overload;
   end;
 
 implementation
 
 uses uMainFrm, uGlobals,
-  uLuaCmdXpl, uLuaCmdDevice, uComDevice, Process, uLuaCmdMainWindow, uConfigService;
+  uLuaCmdXpl, uLuaCmdDevice, uComDevice, Process, uLuaCmdMainWindow, uConfigService,
+  uLuaCmdHttp;
 
 const
 {$IFDEF UNIX}
@@ -456,6 +457,8 @@ begin
   fLua.RegisterFunction('lmc_xpl_command_end','',nil,@XplCommandEnd);
   fLua.RegisterFunction('lmc_on_xpl_var_change','',nil,@XplVarChange);
   fLua.RegisterFunction('lmc_remove_xpl_var_change','',nil,@UnregisterXplVarChange);
+  // http
+  fLua.RegisterFunction('lmc_http_server','',nil,@HttpServerSimple);
 end;
 
 procedure TLuaEngine.RegisterConfig;

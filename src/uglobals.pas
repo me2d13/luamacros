@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, uXplControl, uLuaEngine, uDeviceService, uDevice, uHookService,
-  uKeyLogService, windows, uScanService, uConfigService;
+  uKeyLogService, windows, uScanService, uConfigService, uHttpServer;
 
 type
 
@@ -24,6 +24,7 @@ type
       fDeviceService: TDeviceService;
       fHookService: THookService;
       fKeyLogService: TKeyLogService;
+      fHttpService: THttpService;
       fSpoolFileName: String;
       fLogCs: TRTLCriticalSection;
       fMainFormHandle: LongInt;
@@ -59,6 +60,7 @@ type
       property MainFormHandle: LongInt read fMainFormHandle write fMainFormHandle;
       property ScanService: TScanService read fScanService;
       property ConfigService: TConfigService read fConfigService;
+      property HttpService: THttpService read fHttpService;
       property Version: String read fVersion write SetVersion;
   end;
 
@@ -80,6 +82,7 @@ const
   cLoggerXpl = 'XPL';
   cLoggerLua = 'LUA';
   cLoggerCfg = 'CFG';
+  cLoggerHtp = 'HTP';
 
 
 function Sto_GetFmtFileVersion(const FileName: String = ''; const Fmt: String = '%d.%d.%d.%d'): String;
@@ -171,10 +174,12 @@ begin
   fHookService := THookService.Create;
   fKeyLogService := TKeyLogService.Create;
   fConfigService := TConfigService.Create;
+  fHttpService := THttpService.Create;
 end;
 
 destructor TGlobals.Destroy;
 begin
+  fHttpService.Free;
   fConfigService.Free;
   fXplCLcontrol.Free;
   fLuaEngine.Free;
