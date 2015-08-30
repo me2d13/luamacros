@@ -16,6 +16,19 @@ type
       WholeDevice: Boolean;
   end;
 
+  TLuaResult = class
+    public
+      StrResult: String;
+  end;
+
+  { TFuncItem }
+
+  TFuncItem = class
+    public
+      function Execute(pLua: TLua): TLuaResult; virtual;
+      function Describe: String; virtual;
+  end;
+
   { TRunItem }
 
   TRunItem = class
@@ -100,7 +113,8 @@ type
       constructor Create(CreateSuspended: Boolean; pLua: TLua);
       destructor Destroy;override;
       function GetQueueSize: Integer;
-      function Run(pItem: TRunItem): Integer;
+      function Run(pItem: TRunItem): Integer; overload;
+      function Run(pItem: TFuncItem): TLuaResult; overload;
       procedure Terminate;
       function IsRunning: Boolean;
   end;
@@ -135,6 +149,7 @@ type
       procedure StackDump(pLuaState: TLuaState);
       procedure CallFunctionByRef(pRef: Integer; pValue: TXplVariableValue; pChangeCount: Integer);overload;
       procedure CallFunctionByRef(pRef: Integer; pData: String);overload;
+      function CallFunctionByRefWithResult(pRef: Integer; pData: String):String;
   end;
 
 implementation
@@ -159,6 +174,19 @@ const
 {$ENDIF}
 
   cMaxQueueSize = 30;
+
+{ TFuncItem }
+
+function TFuncItem.Execute(pLua: TLua): TLuaResult;
+begin
+  if (pLua = nil) then
+    raise LmcException.Create('LUA not initialized');
+end;
+
+function TFuncItem.Describe: String;
+begin
+  Result := '[no info]';
+end;
 
 { TRiRefXplValueInteger }
 
@@ -287,6 +315,14 @@ begin
   end;
   Glb.DebugLogFmt('Item %s added to queue making it %d items big.', [pItem.Describe, Result], cLoggerLua);
   fEvent.SetEvent; // even if it runs already
+end;
+
+function TLuaExecutor.Run(pItem: TFuncItem): TLuaResult;
+begin
+  //TODO: As we need resutl from function some advanced synchronization needs
+  // to be placed into Lua queue. This is not difficult (as currently being
+  // called from http thread only), but requires some coding
+  // Let's implement when it's really needed
 end;
 
 procedure TLuaExecutor.Terminate;
@@ -500,6 +536,12 @@ end;
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pData: String);
 begin
   fExecutor.Run(TRiRefString.Create(pRef, pData));
+end;
+
+function TLuaEngine.CallFunctionByRefWithResult(pRef: Integer; pData: String
+  ): String;
+begin
+
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pKey: Integer;

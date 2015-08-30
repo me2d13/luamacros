@@ -22,6 +22,8 @@ type
     protected
       procedure Execute; override;
       procedure AttendConnection(pSocket: TSocket);
+      function CreateOkAnswer: String;
+      function CreateBackAnswer: String;
   end;
 
   { THttpService }
@@ -86,9 +88,9 @@ var
   timeout: integer;
   s: string;
   method, uri, protocol: string;
-  OutputDataString: string;
   ResultCode: integer;
   lSocket: TTCPBlockSocket;
+  lAnswer: String;
 begin
   lSocket := TTCPBlockSocket.Create;
   lSocket.Socket:=pSocket;
@@ -108,10 +110,20 @@ begin
     lSocket.Free;
     exit;
   end;
+
   Glb.DebugLog('Incoming request: ' + s, cLoggerHtp);
   method := fetch(s, ' ');
   uri := fetch(s, ' ');
   protocol := fetch(s, ' ');
+
+  if (Copy(uri, 1, 5) = '/back') then
+  begin
+    uri := Copy(uri, 6, 100000);
+    lAnswer := CreateBackAnswer;
+  end else begin
+    lAnswer := CreateOkAnswer;
+  end;
+
   //Glb.DebugLog('Received headers+document requesting ' + uri, cLoggerHtp);
 
   //read request headers
@@ -123,25 +135,36 @@ begin
   Glb.DebugLog(Format('Calling Lua function %d with argument %s.', [fHandler, uri]), cLoggerHtp);
   Glb.LuaEngine.CallFunctionByRef(fHandler, uri);
 
-  // Now write the document to the output stream
-    OutputDataString :=
-      '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"'
-      + ' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' + CRLF
-      + '<html>OK</html>' + CRLF;
 
     // Write the headers back to the client
     lSocket.SendString('HTTP/1.0 200' + CRLF);
     lSocket.SendString('Content-type: Text/Html' + CRLF);
-    lSocket.SendString('Content-length: ' + IntTostr(Length(OutputDataString)) + CRLF);
+    lSocket.SendString('Content-length: ' + IntTostr(Length(lAnswer)) + CRLF);
     lSocket.SendString('Connection: close' + CRLF);
     lSocket.SendString('Date: ' + Rfc822DateTime(now) + CRLF);
     lSocket.SendString('Server: LuaMacros' + CRLF);
     lSocket.SendString('Access-Control-Allow-Origin: *' + CRLF);
     lSocket.SendString('' + CRLF);
 
-    lSocket.SendString(OutputDataString);
+    lSocket.SendString(lAnswer);
     //ASocket.SendString('HTTP/1.0 404' + CRLF);
     lSocket.Free;
+end;
+
+function THttpServer.CreateOkAnswer: String;
+begin
+  Result :=
+      '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"'
+      + ' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' + CRLF
+      + '<html>OK</html>' + CRLF;
+end;
+
+function THttpServer.CreateBackAnswer: String;
+begin
+  Result :=
+      '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"'
+      + ' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' + CRLF
+      + '<html><script>window.history.back();</script></html>' + CRLF;
 end;
 
 

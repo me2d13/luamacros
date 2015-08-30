@@ -18,7 +18,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
-      <BuildNr Value="174"/>
+      <BuildNr Value="178"/>
       <StringTable ProductVersion=""/>
     </VersionInfo>
     <BuildModes Count="1">
@@ -214,7 +214,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\inc\lua;..\inc\XPL_SDK212_XPLM;..\inc\DirectX_Borland_D9-10;..\inc\synapse40;..\inc\LazSerial"/>
+      <OtherUnitFiles Value="..\inc\lua;..\inc\XPL_SDK212_XPLM;..\inc\DirectX_Borland_D9-10;..\inc\synapse40;..\inc\LazSerial;..\inc\uniqueinstance-1.0"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
