@@ -83,6 +83,7 @@ const
   cLoggerLua = 'LUA';
   cLoggerCfg = 'CFG';
   cLoggerHtp = 'HTP';
+  cLoggerCom = 'COM';
 
 
 function Sto_GetFmtFileVersion(const FileName: String = ''; const Fmt: String = '%d.%d.%d.%d'): String;

@@ -52,9 +52,6 @@ type
   TSerialException = class (Exception);
   TWrongSerialConfigurationException = class (TSerialException);
 
-const
-  cComLoggerName = 'COM';
-
 
 implementation
 
@@ -71,7 +68,7 @@ var
   lData: String;
 begin
   lData := fComPort.ReadData;
-  Glb.DebugLog('Received data from COM port ' + SystemId + ': ' + lData, cComLoggerName);
+  Glb.DebugLog('Received data from COM port ' + SystemId + ': ' + lData, cLoggerCom);
   if (fSeparator = '') then
   begin
     Glb.LuaEngine.OnDeviceEvent(self, lData);
@@ -80,7 +77,7 @@ begin
   begin
     if (Length(fBuffer) + Length(lData) > cBufferMaxSize) then
     begin
-      Glb.DebugLogFmt('Rx buffer %s overflow, can''t split.', [Name], cComLoggerName);
+      Glb.DebugLogFmt('Rx buffer %s overflow, can''t split.', [Name], cLoggerCom);
       FlushBuffer;
     end;
     fBuffer:=fBuffer + lData;
@@ -125,7 +122,7 @@ end;
 
 procedure TComDevice.SetActive(AValue: Boolean);
 begin
-  Glb.DebugLog('Setting port '+Name+' active ' + BoolToStr(AValue, 'TRUE', 'FALSE'), cComLoggerName);
+  Glb.DebugLog('Setting port '+Name+' active ' + BoolToStr(AValue, 'TRUE', 'FALSE'), cLoggerCom);
   if (fComPort = nil) then
     Init;
   if (fComPort <> nil) then
@@ -171,7 +168,7 @@ begin
   end
   else
   begin
-    Glb.DebugLogFmt('Setting separator of port %s to "%s"', [Name, fSeparator], cComLoggerName);
+    Glb.DebugLogFmt('Setting separator of port %s to "%s"', [Name, fSeparator], cLoggerCom);
   end;
 end;
 
@@ -216,20 +213,20 @@ begin
   while (lPos > 0) do
   begin
     lChunk:=Copy(fBuffer, 1, lPos - 1);
-    Glb.DebugLogFmt('Callback with COM data "%s" separated by splitter.', [lChunk], cComLoggerName);
+    Glb.DebugLogFmt('Callback with COM data "%s" separated by splitter.', [lChunk], cLoggerCom);
     Glb.LuaEngine.OnDeviceEvent(self, lChunk);
     fBuffer:=Copy(fBuffer, lPos + Length(fSeparator), cBufferMaxSize);
     lPos := Pos(fSeparator, fBuffer);
   end;
   if Length(fBuffer) > 0 then
-    Glb.DebugLogFmt('Received data kept in buffer of COM %s. Buffer content: "%s"', [Name, fBuffer], cComLoggerName);
+    Glb.DebugLogFmt('Received data kept in buffer of COM %s. Buffer content: "%s"', [Name, fBuffer], cLoggerCom);
 end;
 
 procedure TComDevice.FlushBuffer;
 begin
   if (Length(fBuffer) > 0) then
   begin
-    Glb.DebugLogFmt('Flushing buffer of port %s with data: %s.', [Name, fBuffer], cComLoggerName);
+    Glb.DebugLogFmt('Flushing buffer of port %s with data: %s.', [Name, fBuffer], cLoggerCom);
     Glb.LuaEngine.OnDeviceEvent(self, fBuffer);
     fBuffer:='';
   end;

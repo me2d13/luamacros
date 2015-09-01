@@ -61,7 +61,7 @@ procedure TComDeviceService.AddComDevice(pName: String; pComPort: String);
 var
   lDevice: TComDevice;
 begin
-  Glb.DebugLog('Adding COM device: ' + pName + ' at port ' + pComPort, cComLoggerName);
+  Glb.DebugLog('Adding COM device: ' + pName + ' at port ' + pComPort, cLoggerCom);
   lDevice := CreateComDevice(pName, pComPort);
   fDevices.Add(lDevice);
   Glb.DeviceService.Devices.Add(lDevice);
@@ -73,7 +73,7 @@ var
   lDevice: TComDevice;
 begin
   Glb.DebugLogFmt('Adding COM device: %s at port %s with speed %d, data bits %d, parity %s and stop bits %d ',
-    [pName, pPortName, pSpeed, pDataBits, pParity, pStopBits], cComLoggerName);
+    [pName, pPortName, pSpeed, pDataBits, pParity, pStopBits], cLoggerCom);
   lDevice := CreateComDevice(pName, pPortName);
   lDevice.Speed := pSpeed;
   lDevice.DataBits:=pDataBits;

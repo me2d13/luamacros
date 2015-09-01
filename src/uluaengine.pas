@@ -663,7 +663,15 @@ begin
   begin
     if (lDevice is TComDevice) then
     begin
+      try
       (lDevice as TComDevice).Active:=true;
+      except
+        On Exception do begin
+          // handle exception to not stop LUA code execution
+          Glb.LogError('Cannot activate COM port', cLoggerCom);
+          exit;
+        end;
+      end;
     end;
     lTrigger := TTrigger.Create;
     lTrigger.Device := lDevice;
