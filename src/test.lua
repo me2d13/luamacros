@@ -138,4 +138,5 @@ lmc_http_server(12345, function(url)
   --lmc_xpl_text('From LUA macros', 0.5)
   --lmc_xpl_command('sim/view/still_spot')
   print('Callback for ' .. url)
+  return '{"HDG" : 123}', 'application/json'
 end)

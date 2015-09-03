@@ -3,7 +3,7 @@ unit uLuaEngine;
 interface
 
 uses
-  Classes, SysUtils, Lua, uDevice, fgl, uKbdDevice, syncobjs, windows, uXplMessages;
+  Classes, SysUtils, Lua, uDevice, fgl, uKbdDevice, syncobjs, windows, uXplMessages, contnrs;
 
 type
 
@@ -16,17 +16,32 @@ type
       WholeDevice: Boolean;
   end;
 
+  TStringArray = Array of String;
+
+  { TLuaResult }
+
   TLuaResult = class
+    private
+      fResult : TStringArray;
     public
-      StrResult: String;
+      procedure AddString(pValue: String);
+      property Value: TStringArray read fResult;
   end;
 
   { TFuncItem }
 
   TFuncItem = class
+    protected
+      fEvent: TEventObject;
+      fResult: TLuaResult;
+      procedure SignalResultReady;
     public
-      function Execute(pLua: TLua): TLuaResult; virtual;
+      constructor Create;
+      destructor Destroy;override;
+      procedure Execute(pLua: TLua); virtual;
       function Describe: String; virtual;
+      procedure WaitForResult;
+      property Result: TLuaResult read fResult;
   end;
 
   { TRunItem }
@@ -95,7 +110,18 @@ type
       function Describe: String; override;
   end;
 
-  TRunItemList = TFPGObjectList<TRunItem>;
+  { TFiRefString }
+
+  TFiRefString = class (TFuncItem)
+    protected
+      fPar1: String;
+      fRef: Integer;
+    public
+      constructor Create(pRef: Integer; p1: String);
+      procedure Execute(pLua: TLua); override;
+      function Describe: String; override;
+  end;
+
 
   TTriggerList = TFPGObjectList<TTrigger>;
 
@@ -104,7 +130,7 @@ type
   TLuaExecutor = class (TThread)
     private
       fLua: TLua;
-      fRunList: TRunItemList;
+      fRunList: TFPObjectList;
       fRlSynchronizer: TMultiReadExclusiveWriteSynchronizer;
       fEvent: TEventObject;
     protected
@@ -121,7 +147,7 @@ type
 
   { TLuaEngine }
 
-  TLuaEngine = class (TThread)
+  TLuaEngine = class
     private
       fLua: TLua;
       fExecutor: TLuaExecutor;
@@ -149,7 +175,7 @@ type
       procedure StackDump(pLuaState: TLuaState);
       procedure CallFunctionByRef(pRef: Integer; pValue: TXplVariableValue; pChangeCount: Integer);overload;
       procedure CallFunctionByRef(pRef: Integer; pData: String);overload;
-      function CallFunctionByRefWithResult(pRef: Integer; pData: String):String;
+      function CallFunctionByRefWithResult(pRef: Integer; pData: String):TLuaResult;
   end;
 
 implementation
@@ -175,9 +201,72 @@ const
 
   cMaxQueueSize = 30;
 
+{ TLuaResult }
+
+procedure TLuaResult.AddString(pValue: String);
+begin
+  SetLength(fResult, Length(fResult) + 1);
+  fResult[Length(fResult) - 1] := pValue;
+end;
+
+{ TFiRefString }
+
+constructor TFiRefString.Create(pRef: Integer; p1: String);
+begin
+  inherited Create;
+  fPar1:=p1;
+  fRef:=pRef;
+end;
+
+procedure TFiRefString.Execute(pLua: TLua);
+begin
+  if (pLua = nil) then
+    raise LmcException.Create('LUA not initialized');
+  lua_rawgeti(pLua.LuaInstance, LUA_REGISTRYINDEX, fRef);
+  lua_pushstring(pLua.LuaInstance, pChar(fPar1));
+  lua_pcall(pLua.LuaInstance, 1, 2, LUA_MULTRET);
+
+  Glb.LuaEngine.StackDump(pLua.LuaInstance);
+
+  fResult := TLuaResult.Create;
+  if (lua_isstring(pLua.LuaInstance, -1) = 1) then
+  begin
+    fResult.AddString(lua_tostring(pLua.LuaInstance, -1));
+  end;
+  lua_pop(pLua.LuaInstance, 1);
+  if (lua_isstring(pLua.LuaInstance, -1) = 1) then
+  begin
+    fResult.AddString(lua_tostring(pLua.LuaInstance, -1));
+  end;
+  lua_pop(pLua.LuaInstance, 1);
+  SignalResultReady;
+end;
+
+function TFiRefString.Describe: String;
+begin
+  Result:=Format('function id %d, string param %s', [fRef, fPar1]);
+end;
+
 { TFuncItem }
 
-function TFuncItem.Execute(pLua: TLua): TLuaResult;
+procedure TFuncItem.SignalResultReady;
+begin
+  fEvent.SetEvent;
+end;
+
+constructor TFuncItem.Create;
+begin
+  fEvent := TEventObject.Create(nil, true, false, 'LuaFunc' + IntToStr(Glb.KeyLogService.UnixTimestampMs));
+end;
+
+destructor TFuncItem.Destroy;
+begin
+  fEvent.Free;
+  // result will be freed by calling thread
+  inherited Destroy;
+end;
+
+procedure TFuncItem.Execute(pLua: TLua);
 begin
   if (pLua = nil) then
     raise LmcException.Create('LUA not initialized');
@@ -186,6 +275,11 @@ end;
 function TFuncItem.Describe: String;
 begin
   Result := '[no info]';
+end;
+
+procedure TFuncItem.WaitForResult;
+begin
+  fEvent.WaitFor(INFINITE);
 end;
 
 { TRiRefXplValueInteger }
@@ -234,6 +328,10 @@ procedure TLuaExecutor.Execute;
 var
   lQSize: Integer;
   lStart, lStop: LongInt;
+  lProc: TRunItem;
+  lFunc: TFuncItem;
+  lResult: TLuaResult;
+  lDesc: String;
 begin
   while (not Terminated) do
   begin
@@ -250,21 +348,37 @@ begin
     end;
     if (lQSize > 0) then
     begin
-      Glb.DebugLogFmt('Lua worker: starting %s, queue size is %d',
-          [fRunList.Items[0].Describe, lQSize], cLoggerLua);
+      if (fRunList.Items[0] is TRunItem) then
+      begin
+        lProc := fRunList.Items[0] as TRunItem;
+        lFunc := nil;
+        lDesc := lProc.Describe;
+        Glb.DebugLogFmt('Lua worker: starting procedure %s, queue size is %d',
+            [lDesc, lQSize], cLoggerLua);
+      end else if (fRunList.Items[0] is TFuncItem) then
+      begin
+        lProc := nil;
+        lFunc := fRunList.Items[0] as TFuncItem;
+        lDesc := lFunc.Describe;
+        Glb.DebugLogFmt('Lua worker: starting function %s, queue size is %d',
+            [lDesc, lQSize], cLoggerLua);
+      end;
       try
         lStart:=Round(Now * 24*60*60*1000);
-        fRunList.Items[0].Execute(fLua);
+        if (lProc <> nil) then lProc.Execute(fLua) else
+        if (lFunc <> nil) then lFunc.Execute(fLua);
         lStop:=Round(Now * 24*60*60*1000);
         Glb.DebugLogFmt('Lua worker: finished %s, execution time: %d ms',
-            [fRunList.Items[0].Describe, lStop - lStart], cLoggerLua);
+            [lDesc, lStop - lStart], cLoggerLua);
+        if (lProc <> nil) then lProc.Free;
       except
         on E: Exception do
         begin
           lStop:=Round(Now * 24*60*60*1000);
           Glb.DebugLogFmt('Lua worker: finished %s with error, execution time: %d ms',
-              [fRunList.Items[0].Describe, lStop - lStart], cLoggerLua);
+              [lDesc, lStop - lStart], cLoggerLua);
           Glb.LogError('Exception in LUA code: ' + E.Message, cLoggerLua);
+          if (lProc <> nil) then lProc.Free;
         end;
       end;
       fRlSynchronizer.Beginwrite;
@@ -281,7 +395,7 @@ constructor TLuaExecutor.Create(CreateSuspended: Boolean; pLua: TLua);
 begin
   inherited Create(CreateSuspended);
   fLua := pLua;
-  fRunList := TRunItemList.Create();
+  fRunList := TFPObjectList.Create(False);
   fRlSynchronizer := TMultiReadExclusiveWriteSynchronizer.Create;
   fEvent:=TEventObject.Create(nil, true, false, 'LuaExe');
   FreeOnTerminate:=False;
@@ -318,11 +432,23 @@ begin
 end;
 
 function TLuaExecutor.Run(pItem: TFuncItem): TLuaResult;
+var
+  lSize: Integer;
 begin
-  //TODO: As we need resutl from function some advanced synchronization needs
-  // to be placed into Lua queue. This is not difficult (as currently being
-  // called from http thread only), but requires some coding
-  // Let's implement when it's really needed
+  if GetQueueSize > cMaxQueueSize then
+    raise LmcException.Create('Maximum execution queue size reached. Make scripts faster or triggers slower.');
+  fRlSynchronizer.Beginwrite;
+  try
+    fRunList.Add(pItem);
+    lSize := fRunList.Count;
+  finally
+    fRlSynchronizer.Endwrite;
+  end;
+  Glb.DebugLogFmt('Item %s added to queue making it %d items big. Waiting for result.', [pItem.Describe, lSize], cLoggerLua);
+  fEvent.SetEvent; // even if it runs already
+  pItem.WaitForResult;
+  Result := pItem.Result;
+  pItem.Free;
 end;
 
 procedure TLuaExecutor.Terminate;
@@ -539,9 +665,10 @@ begin
 end;
 
 function TLuaEngine.CallFunctionByRefWithResult(pRef: Integer; pData: String
-  ): String;
+  ): TLuaResult;
 begin
-
+  Glb.DebugLog('Asking executor to call a function', cLoggerLua);
+  Result := fExecutor.Run(TFiRefString.Create(pRef, pData));
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pKey: Integer;

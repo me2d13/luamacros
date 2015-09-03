@@ -42,7 +42,7 @@ type
 implementation
 
 uses
-  uGlobals;
+  uGlobals, uLuaEngine;
 
 { THttpServer }
 
@@ -91,6 +91,8 @@ var
   ResultCode: integer;
   lSocket: TTCPBlockSocket;
   lAnswer: String;
+  lResult: TLuaResult;
+  lContentType: String;
 begin
   lSocket := TTCPBlockSocket.Create;
   lSocket.Socket:=pSocket;
@@ -133,12 +135,27 @@ begin
 
   // Call LUA code
   Glb.DebugLog(Format('Calling Lua function %d with argument %s.', [fHandler, uri]), cLoggerHtp);
-  Glb.LuaEngine.CallFunctionByRef(fHandler, uri);
+  lResult := Glb.LuaEngine.CallFunctionByRefWithResult(fHandler, uri);
+  Glb.DebugLogFmt('Got function results with %d items.', [Length(lResult.Value)], cLoggerHtp);
 
+  lContentType:='Text/Html';
+  if lResult <> nil then
+  begin
+    if Length(lResult.Value) > 0 then
+    begin
+      lAnswer:=lResult.Value[0];
+      if Length(lResult.Value) > 1 then
+      begin
+        // parameters are returned in reverse order
+        lContentType:=lAnswer;
+        lAnswer:=lResult.Value[1];
+      end;
+    end;
+  end;
 
     // Write the headers back to the client
     lSocket.SendString('HTTP/1.0 200' + CRLF);
-    lSocket.SendString('Content-type: Text/Html' + CRLF);
+    lSocket.SendString('Content-type: '+ lContentType + CRLF);
     lSocket.SendString('Content-length: ' + IntTostr(Length(lAnswer)) + CRLF);
     lSocket.SendString('Connection: close' + CRLF);
     lSocket.SendString('Date: ' + Rfc822DateTime(now) + CRLF);
