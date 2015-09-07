@@ -18,10 +18,9 @@
         <Filename Value="uXplPluginEngine.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplPluginEngine"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="640"/>
-        <CursorPos X="29" Y="653"/>
+        <TopLine Value="628"/>
+        <CursorPos X="22" Y="665"/>
         <UsageCount Value="91"/>
         <Bookmarks Count="4">
           <Item0 Y="444" ID="3"/>
@@ -58,9 +57,10 @@
         <Filename Value="uxplsender.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplSender"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="100"/>
-        <CursorPos X="3" Y="100"/>
+        <CursorPos X="10" Y="107"/>
         <UsageCount Value="76"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>

@@ -101,6 +101,11 @@ procedure TXplSender.SendMessage(pMessage: TXplMessage);
 var
   lStream: TMemoryStream;
 begin
+  if (pMessage = nil) then
+  begin
+    DebugFmt('No message to be sent. Probably XPL reading error, check log.', []);
+    exit;
+  end;
   if (not fClient.Active) then
   begin
     DebugFmt('IPC sender is not connected, will try to connect now', []);
