@@ -140,3 +140,5 @@ lmc_http_server(12345, function(url)
   print('Callback for ' .. url)
   return '{"HDG" : 123}', 'application/json'
 end)
+
+print(lmc_get_xpl_variable('sim/flightmodel/position/latitude'))

@@ -406,7 +406,7 @@ var
 begin
   if (pVar.Index = NO_INDEX) then
   begin
-    DebugLog(Format('Received request id %d to get variable %s.', [pVar.Id, pVar.Name]));
+    DebugLog(Format('Received request id [%d] to get variable %s.', [pVar.Id, pVar.Name]));
   end
   else
   begin
@@ -646,26 +646,27 @@ var
   lReal: Real;
   lInt: Integer;
 begin
-  case pDef.DataType of
-    xplmType_Float:
+
+  case Ord(pDef.DataType) of
+    Ord(xplmType_Float):
     begin
       lSingle:=XPLMGetDataf(pDef.DataRef);
-      //DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
+      DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
       Result := TXplValue.Create(lSingle);
     end;
-    xplmType_Double:
+    Ord(xplmType_Double), Ord(xplmType_Double) + Ord(xplmType_Float):
     begin
       lReal:=XPLMGetDatad(pDef.DataRef);
-      //DebugLog(Format('Got double value %f of variable %s.', [lReal, pDef.Name]));
+      DebugLog(Format('Got double value %f of variable %s.', [lReal, pDef.Name]));
       Result := TXplValue.Create(lReal);
     end;
-    xplmType_Int:
+    Ord(xplmType_Int):
     begin
       lInt:=XPLMGetDatai(pDef.DataRef);
-      //DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
+      DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
       Result := TXplValue.Create(lInt);
     end;
-    xplmType_Data:
+    Ord(xplmType_Data):
     begin
       if (pDef.Length > 500) then
         lLength:=500
@@ -673,20 +674,24 @@ begin
         lLength:=pDef.Length;
       lBuffPtr:=lBuff;
       XPLMGetDatab(pDef.DataRef, lBuffPtr, 0, lLength);
-      //DebugLog('Got string value of variable ' + pDef.Name + ': ' + lBuff);
+      DebugLog('Got string value of variable ' + pDef.Name + ': ' + lBuff);
       Result := TXplValue.Create(lBuff);
     end;
-    xplmType_FloatArray:
+    Ord(xplmType_FloatArray):
     begin
       XPLMGetDatavf(pDef.DataRef, @lSingle, pIndex, 1);
-      //DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
+      DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
       Result := TXplValue.Create(lSingle);
     end;
-    xplmType_IntArray:
+    Ord(xplmType_IntArray):
     begin
       XPLMGetDatavi(pDef.DataRef, @lInt, pIndex, 1);
-      //DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
+      DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
       Result := TXplValue.Create(lInt);
+    end;
+    else
+    begin
+      DebugLog(Format('Unknown type %d of variable %s.', [pDef.DataType, pDef.Name]));
     end;
   end;
 end;
