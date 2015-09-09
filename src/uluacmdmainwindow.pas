@@ -15,6 +15,7 @@ function LogSpool(luaState : TLuaState) : integer;
 function SendKeys(luaState : TLuaState) : integer;
 function Spawn(luaState : TLuaState) : integer;
 function MinimizeMainWindow(luaState : TLuaState) : integer;
+function LoadScript(luaState : TLuaState) : integer;
 
 implementation
 
@@ -107,6 +108,25 @@ end;
 function MinimizeMainWindow(luaState: TLuaState): integer;
 begin
   SendMessage(Glb.MainFormHandle, WM_MAIN_WINDOW_COMMAND, MWC_MINIMIZE, 0);
+end;
+
+function LoadScript(luaState: TLuaState): integer;
+var
+  arg : PAnsiChar;
+  lNumOfParams: Integer;
+begin
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams <> 1) then
+    raise LmcException.Create('Wrong number of arguments. Provide script name.');
+  arg := lua_tostring(luaState, 1);
+  if (FileExists(arg)) then
+  begin
+    Glb.DebugLog('Loading scrpt ' + arg, cLoggerLua);
+    Glb.LuaEngine.ScriptToRun:=arg;
+  end
+  else
+    Glb.LogError('Cannot load scrpt ' + arg + '. File not found.', cLoggerLua);
+  Result := 0;
 end;
 
 

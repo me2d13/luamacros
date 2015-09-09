@@ -78,6 +78,7 @@ const
   WM_MAIN_WINDOW_COMMAND = WM_USER + 340;
 
   MWC_MINIMIZE = 1;
+  MWC_LOAD = 2;
 
   cLoggerXpl = 'XPL';
   cLoggerLua = 'LUA';

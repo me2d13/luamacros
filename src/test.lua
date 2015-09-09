@@ -142,3 +142,5 @@ lmc_http_server(12345, function(url)
 end)
 
 print(lmc_get_xpl_variable('sim/flightmodel/position/latitude'))
+
+lmc_load('E:\\lmc.lua')

@@ -1,3 +1,6 @@
 out
 src/lib
 src/backup
+inc/LazSerial/lib/
+inc/synapse40/lib/
+inc/uniqueinstance-1.0/lib/

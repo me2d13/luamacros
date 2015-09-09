@@ -159,6 +159,7 @@ begin
   else
   begin
     Glb.LuaEngine.Reset;
+    Glb.HttpService.StopServer;
     Glb.DeviceService.DetectDevices; // clears device table
     Glb.LuaEngine.runCode(SynEdit1.Lines.GetText);
   end;
@@ -250,6 +251,12 @@ begin
   begin
     WindowState:=wsMinimized;
     FormWindowStateChange(self);
+  end;
+  if (wParam = MWC_LOAD) then
+  begin
+    LoadFile(Glb.LuaEngine.ScriptToRun);
+    Glb.LuaEngine.ScriptToRun := '';
+    RunScriptActionExecute(nil);
   end;
 end;
 

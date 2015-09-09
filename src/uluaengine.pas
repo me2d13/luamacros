@@ -153,6 +153,7 @@ type
       fExecutor: TLuaExecutor;
       fInitOk: boolean;
       fTriggers: TTriggerList;
+      fScriptToRun: String;
       procedure RegisterFunctions;
       procedure RegisterConfig;
       procedure CallFunctionByRef(pRef: Integer);overload;
@@ -176,6 +177,7 @@ type
       procedure CallFunctionByRef(pRef: Integer; pValue: TXplVariableValue; pChangeCount: Integer);overload;
       procedure CallFunctionByRef(pRef: Integer; pData: String);overload;
       function CallFunctionByRefWithResult(pRef: Integer; pData: String):TLuaResult;
+      property ScriptToRun: String read fScriptToRun write fScriptToRun;
   end;
 
 implementation
@@ -384,6 +386,12 @@ begin
       fRlSynchronizer.Beginwrite;
       try
         fRunList.Delete(0);
+        if (Glb.LuaEngine.ScriptToRun > '') then
+        begin
+          // do not run anything else, terminate and signal load to main window
+          fRunList.Clear;
+          PostMessage(Glb.MainFormHandle, WM_MAIN_WINDOW_COMMAND, MWC_LOAD, 0);
+        end;
       finally
         fRlSynchronizer.Endwrite;
       end;
@@ -601,6 +609,7 @@ begin
   fLua.RegisterFunction('lmc_send_keys','',nil,@SendKeys);
   fLua.RegisterFunction('lmc_spawn','',nil,@Spawn);
   fLua.RegisterFunction('lmc_minimize','',nil,@MinimizeMainWindow);
+  fLua.RegisterFunction('lmc_load','',nil,@LoadScript);
   // devices
   fLua.RegisterFunction('lmc_print_devices','',nil,@PrintDevices);
   fLua.RegisterFunction('lmc_assign_keyboard','',nil,@CheckDeviceNameWithAsk);
