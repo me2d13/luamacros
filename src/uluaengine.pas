@@ -610,6 +610,7 @@ begin
   fLua.RegisterFunction('lmc_spawn','',nil,@Spawn);
   fLua.RegisterFunction('lmc_minimize','',nil,@MinimizeMainWindow);
   fLua.RegisterFunction('lmc_load','',nil,@LoadScript);
+  fLua.RegisterFunction('lmc_say','',nil,@Say);
   // devices
   fLua.RegisterFunction('lmc_print_devices','',nil,@PrintDevices);
   fLua.RegisterFunction('lmc_assign_keyboard','',nil,@CheckDeviceNameWithAsk);
@@ -713,7 +714,6 @@ begin
   end;
   fExecutor := TLuaExecutor.Create(True, fLua);
   fTriggers := TTriggerList.Create();
-  fExecutor.Start;
 end;
 
 destructor TLuaEngine.Destroy;
@@ -733,6 +733,7 @@ begin
   luaL_openlibs(fLua.LuaInstance);
   //activates the Garbage collector on the Lua side
   lua_gc(fLua.LuaInstance, LUA_GCRESTART, 0);
+  fExecutor.Start;
   RegisterFunctions;
   RegisterConfig;
 end;

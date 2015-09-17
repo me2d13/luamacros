@@ -105,7 +105,7 @@ implementation
 {$R *.lfm}
 
 uses
-  uGlobals, uHookCommon, uConfigService;
+  uGlobals, uHookCommon, uConfigService, comobj;
 
 const
   cUntitled = 'Untitled';
@@ -246,6 +246,8 @@ end;
 
 function TLmcMainForm.WmMainWindowCommand(wParam: WParam; lParam: LParam
   ): LRESULT;
+var
+  lText: String;
 begin
   if (wParam = MWC_MINIMIZE) then
   begin

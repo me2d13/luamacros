@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, uXplControl, uLuaEngine, uDeviceService, uDevice, uHookService,
-  uKeyLogService, windows, uScanService, uConfigService, uHttpServer;
+  uKeyLogService, windows, uScanService, uConfigService, uHttpServer, uSpeechService;
 
 type
 
@@ -31,6 +31,7 @@ type
       fPrintBuffer: TStrings;
       fScanService: TScanService;
       fConfigService: TConfigService;
+      fSpeechService: TSpeechService;
       fVersion: String;
       procedure SetSpoolFileName(AValue: String);
       procedure AskMainFormToFlushPrintBuffer;
@@ -61,6 +62,7 @@ type
       property ScanService: TScanService read fScanService;
       property ConfigService: TConfigService read fConfigService;
       property HttpService: THttpService read fHttpService;
+      property SpeechService: TSpeechService read fSpeechService;
       property Version: String read fVersion write SetVersion;
   end;
 
@@ -79,12 +81,14 @@ const
 
   MWC_MINIMIZE = 1;
   MWC_LOAD = 2;
+  MWC_SAY = 3;
 
   cLoggerXpl = 'XPL';
   cLoggerLua = 'LUA';
   cLoggerCfg = 'CFG';
   cLoggerHtp = 'HTP';
   cLoggerCom = 'COM';
+  cLoggerSpe = 'SPE';
 
 
 function Sto_GetFmtFileVersion(const FileName: String = ''; const Fmt: String = '%d.%d.%d.%d'): String;
@@ -177,10 +181,12 @@ begin
   fKeyLogService := TKeyLogService.Create;
   fConfigService := TConfigService.Create;
   fHttpService := THttpService.Create;
+  fSpeechService := TSpeechService.Create;
 end;
 
 destructor TGlobals.Destroy;
 begin
+  fSpeechService.Free;
   fHttpService.Free;
   fConfigService.Free;
   fXplCLcontrol.Free;

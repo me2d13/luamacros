@@ -18,7 +18,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
-      <BuildNr Value="206"/>
+      <BuildNr Value="225"/>
       <StringTable ProductVersion=""/>
     </VersionInfo>
     <BuildModes Count="1">
@@ -53,7 +53,7 @@
         <PackageName Value="LCL"/>
       </Item6>
     </RequiredPackages>
-    <Units Count="30">
+    <Units Count="31">
       <Unit0>
         <Filename Value="LuaMacros.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -200,6 +200,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uLuaCmdHttp"/>
       </Unit29>
+      <Unit30>
+        <Filename Value="uspeechservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uSpeechService"/>
+      </Unit30>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

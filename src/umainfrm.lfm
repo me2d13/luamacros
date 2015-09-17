@@ -1,7 +1,7 @@
 object LmcMainForm: TLmcMainForm
-  Left = 1784
+  Left = 102
   Height = 701
-  Top = 262
+  Top = 161
   Width = 918
   Caption = 'Lua Macros'
   ClientHeight = 701

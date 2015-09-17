@@ -2,13 +2,14 @@
 clear();
 lmc_xpl_text('From LUA macros')
 
-lmc2.ahoj = 1
+--lmc2.ahoj = 1
 print(lmc.ahoj)
 
 --lmc_log_all();
 lmc_log_module('XPL')
 lmc_log_module('LUA')
 lmc_log_module('CFG')
+lmc_log_module('SPE')
 lmc_log_module('HTP')
 lmc_log_spool('lmc_spool.log')
 print('Version: ' .. lmc.version)
@@ -144,3 +145,6 @@ end)
 print(lmc_get_xpl_variable('sim/flightmodel/position/latitude'))
 
 lmc_load('E:\\lmc.lua')
+
+lmc_say('Flaps 45')
+lmc_say('Flaps 50')

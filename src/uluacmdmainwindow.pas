@@ -16,6 +16,7 @@ function SendKeys(luaState : TLuaState) : integer;
 function Spawn(luaState : TLuaState) : integer;
 function MinimizeMainWindow(luaState : TLuaState) : integer;
 function LoadScript(luaState : TLuaState) : integer;
+function Say(luaState : TLuaState) : integer;
 
 implementation
 
@@ -126,6 +127,20 @@ begin
   end
   else
     Glb.LogError('Cannot load scrpt ' + arg + '. File not found.', cLoggerLua);
+  Result := 0;
+end;
+
+function Say(luaState: TLuaState): integer;
+var
+  arg : PAnsiChar;
+  lNumOfParams: Integer;
+begin
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams <> 1) then
+    raise LmcException.Create('Wrong number of arguments. Provide string.');
+  arg := lua_tostring(luaState, 1);
+  Glb.DebugLog('Saying ' + arg, cLoggerLua);
+  Glb.SpeechService.Say(arg);
   Result := 0;
 end;
 
