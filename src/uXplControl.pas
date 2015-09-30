@@ -37,6 +37,7 @@ type
     procedure XplVarProcessed;
     procedure SetVariableHook(pVarName: String; pHandlerRef: Integer; pIntervalMs: Integer);
     procedure UnhookVariable(pVarName: String);
+    procedure Reset;
   end;
 
   TXPLRefHolder = class
@@ -175,6 +176,11 @@ begin
     else
       Inc(i);
   end;
+end;
+
+procedure TXPLcontrol.Reset;
+begin
+  //TODO: Send unhook-all command to XPL
 end;
 
 procedure TXPLcontrol.OnXplSyncMessage(Sender: TObject);

@@ -5,7 +5,7 @@ unit uHttpServer;
 interface
 
 uses
-  blcksock, sockets, Synautil, Classes, SysUtils;
+  blcksock, sockets, Synautil, Classes, SysUtils, lnet, lhttp, lHTTPUtil;
 
 type
 
@@ -36,13 +36,74 @@ type
       destructor Destroy;override;
       procedure StartServer(pPort: Integer; pHandlerRef: Integer);
       procedure StopServer;
+      function HttpGet(pUrl: String; pTimeout: Integer): String;
+  end;
+
+  { THTTPHandler }
+
+  THTTPHandler = class
+  private
+    fResult: String;
+    fDone: Boolean;
+  public
+    constructor Create;
+    procedure ClientDisconnect(ASocket: TLSocket);
+    procedure ClientDoneInput(ASocket: TLHTTPClientSocket);
+    procedure ClientError(const Msg: string; aSocket: TLSocket);
+    function ClientInput(ASocket: TLHTTPClientSocket; ABuffer: pchar;
+      ASize: Integer): Integer;
+    procedure ClientProcessHeaders(ASocket: TLHTTPClientSocket);
+    property Result: String read fResult;
+    property Done: Boolean read fDone;
   end;
 
 
 implementation
 
 uses
-  uGlobals, uLuaEngine;
+  uGlobals, uLuaEngine,lnetSSL, URIParser;
+
+{ THTTPHandler }
+
+constructor THTTPHandler.Create;
+begin
+  fDone := False;
+end;
+
+procedure THTTPHandler.ClientDisconnect(ASocket: TLSocket);
+begin
+  Glb.DebugLog('Http client disconnected', cLoggerHtp);
+  fDone:=True;
+end;
+
+procedure THTTPHandler.ClientDoneInput(ASocket: TLHTTPClientSocket);
+begin
+  Glb.DebugLog('Http client done input reading', cLoggerHtp);
+  ASocket.Disconnect;
+end;
+
+procedure THTTPHandler.ClientError(const Msg: string; aSocket: TLSocket);
+begin
+  Glb.LogError('Http client error ' + Msg, cLoggerHtp);
+  fDone:=True;
+end;
+
+function THTTPHandler.ClientInput(ASocket: TLHTTPClientSocket; ABuffer: pchar;
+  ASize: Integer): Integer;
+var
+  lChunk: String;
+begin
+  // add to result string
+  SetString(lChunk, ABuffer, ASize);
+  Glb.DebugLogFmt('Received part size %d: %s', [ASize, lChunk], cLoggerHtp);
+  fResult:=fResult+lChunk;
+  Result := ASize;
+end;
+
+procedure THTTPHandler.ClientProcessHeaders(ASocket: TLHTTPClientSocket);
+begin
+  Glb.DebugLogFmt('Response %d %s', [HTTPStatusCodes[ASocket.ResponseStatus], ASocket.ResponseReason], cLoggerHtp);
+end;
 
 { THttpServer }
 
@@ -214,6 +275,43 @@ begin
     fHttpServer.WaitFor;
     fHttpServer.Free;
   end;
+end;
+
+function THttpService.HttpGet(pUrl: String; pTimeout: Integer): String;
+var
+  lHttpHandler: THTTPHandler;
+  Host, URI: string;
+  Port: Word;
+  UseSSL: Boolean;
+  SSLSession: TLSSLSession;
+  HttpClient: TLHTTPClient;
+begin
+  UseSSL := DecomposeURL(pUrl, Host, URI, Port);
+  HttpClient := TLHTTPClient.Create(nil);
+  lHttpHandler := THTTPHandler.Create;
+  if (UseSSL) then
+  begin
+    SSLSession := TLSSLSession.Create(HttpClient);
+    HttpClient.Session := SSLSession;
+    SSLSession.SSLActive := UseSSL;
+  end;
+  HttpClient.Host := Host;
+  HttpClient.Method := hmGet;
+  HttpClient.Port := Port;
+  HttpClient.URI := URI;
+  HttpClient.Timeout := pTimeout;
+  HttpClient.OnDisconnect := lHttpHandler.ClientDisconnect;
+  HttpClient.OnDoneInput := lHttpHandler.ClientDoneInput;
+  HttpClient.OnError := lHttpHandler.ClientError;
+  HttpClient.OnInput := lHttpHandler.ClientInput;
+  HttpClient.OnProcessHeaders := lHttpHandler.ClientProcessHeaders;
+  HttpClient.SendRequest;
+
+  while not lHttpHandler.Done do
+    HttpClient.CallAction;
+  Result := lHttpHandler.Result;
+  lHttpHandler.Free;
+  HttpClient.Free;
 end;
 
 end.

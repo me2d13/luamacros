@@ -40,6 +40,7 @@ type
       constructor Create;
       destructor Destroy; Override;
       procedure Init;
+      procedure Reset;
       procedure DebugLog(pMessage: String; pLogger: String);
       procedure DebugLogFile(pMessage: String; pLogger: String; pFileName: String);
       procedure DebugLogFmt(pMessage: String; const Args : Array of const; pLogger: String);
@@ -206,6 +207,16 @@ begin
   fXplCLcontrol.Init;
   fLuaEngine.Init;
   fDeviceService.Init;
+end;
+
+procedure TGlobals.Reset;
+begin
+  fLuaEngine.Reset;
+  fHttpService.StopServer;
+  fDeviceService.DetectDevices; // clears device table
+  fLoggedModules.Clear;
+  fLogAll:=False;
+  fXplCLcontrol.Reset;
 end;
 
 procedure TGlobals.DebugLog(pMessage: String; pLogger: String);

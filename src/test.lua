@@ -137,9 +137,14 @@ end)
 
 lmc_http_server(12345, function(url)
   --lmc_xpl_text('From LUA macros', 0.5)
-  --lmc_xpl_command('sim/view/still_spot')
-  print('Callback for ' .. url)
-  return '{"HDG" : 123}', 'application/json'
+  if url:match("^/command/.+") then
+    lmc_xpl_command(url:sub(10))
+  elseif url:match("^/get/.+") then
+    return lmc_get_xpl_variable(url:sub(6))
+  else
+    print('Unknown request ' .. url)
+  end
+  --return '{"HDG" : 123}', 'application/json'
 end)
 
 print(lmc_get_xpl_variable('sim/flightmodel/position/latitude'))
@@ -148,3 +153,5 @@ lmc_load('E:\\lmc.lua')
 
 lmc_say('Flaps 45')
 lmc_say('Flaps 50')
+
+print(lmc_http_get('http://www.hidmacros.eu/forum/'))

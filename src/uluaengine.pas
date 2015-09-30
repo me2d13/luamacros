@@ -183,7 +183,7 @@ type
 implementation
 
 uses uMainFrm, uGlobals,
-  uLuaCmdXpl, uLuaCmdDevice, uComDevice, Process, uLuaCmdMainWindow, uConfigService,
+  uLuaCmdXpl, uLuaCmdDevice, uComDevice, uLuaCmdMainWindow, uConfigService,
   uLuaCmdHttp;
 
 const
@@ -631,6 +631,7 @@ begin
   fLua.RegisterFunction('lmc_remove_xpl_var_change','',nil,@UnregisterXplVarChange);
   // http
   fLua.RegisterFunction('lmc_http_server','',nil,@HttpServerSimple);
+  fLua.RegisterFunction('lmc_http_get','',nil,@HttpGet);
 end;
 
 procedure TLuaEngine.RegisterConfig;

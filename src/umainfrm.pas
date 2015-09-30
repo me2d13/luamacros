@@ -17,6 +17,7 @@ type
   { TLmcMainForm }
 
   TLmcMainForm = class(TForm)
+    ResetAction: TAction;
     MenuItem2: TMenuItem;
     ShowAction: TAction;
     ExitAction: TAction;
@@ -46,8 +47,11 @@ type
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
     ToolButton5: TToolButton;
+    ToolButton6: TToolButton;
+    ToolButton7: TToolButton;
     TrayIcon1: TTrayIcon;
     UniqueInstance1: TUniqueInstance;
+    procedure ResetActionExecute(Sender: TObject);
     procedure ExitActionExecute(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
@@ -158,9 +162,7 @@ begin
       Glb.LuaEngine.runCode(lSel)
   else
   begin
-    Glb.LuaEngine.Reset;
-    Glb.HttpService.StopServer;
-    Glb.DeviceService.DetectDevices; // clears device table
+    Glb.Reset;
     Glb.LuaEngine.runCode(SynEdit1.Lines.GetText);
   end;
 end;
@@ -429,6 +431,11 @@ end;
 procedure TLmcMainForm.ExitActionExecute(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TLmcMainForm.ResetActionExecute(Sender: TObject);
+begin
+  Glb.Reset;
 end;
 
 procedure TLmcMainForm.OpenFileActionExecute(Sender: TObject);
