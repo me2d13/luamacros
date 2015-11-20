@@ -1,5 +1,7 @@
 unit uHookCommon;
 
+{$mode delphi}
+
 interface
 
 uses Messages, Windows;
@@ -14,6 +16,7 @@ type
     MainWinHandle: HWND;
     LmcPID: DWORD;
     Debug: DWORD;  // 0 = no debug
+    HookKbd: HHOOK;
   end;
 
 

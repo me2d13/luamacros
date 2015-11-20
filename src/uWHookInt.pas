@@ -1,12 +1,12 @@
 unit uWHookInt;
 
+{$mode delphi}
+
 interface
 
 uses
   Windows, Messages, SysUtils, uHookCommon;
 
-function SetHook: Boolean; stdcall; export;
-function FreeHook: Boolean; stdcall; export;
 function MsgFilterFuncKbd(Code: longint; wParam: WPARAM; lParam: LPARAM): LRESULT stdcall; export;
 
 
@@ -51,7 +51,7 @@ var
   gMemMap: TMemMap;
   gSharedPtr: PMMFData;
   gPid: DWORD;
-  gHookKbd: HHOOK;
+
 
 {
   The SetWindowsHookEx function installs an application-defined
@@ -65,11 +65,13 @@ var
 procedure DebugLog(Value: String);
 var
   lFile: TextFile;
+  lDebug: Boolean;
 begin
-  if (gSharedPtr <> nil) and (gSharedPtr^.Debug > 0) then
+  lDebug:= false and ((gSharedPtr <> nil) and (gSharedPtr^.Debug > 0));
+  if lDebug then
   begin
-    AssignFile(lFile, 'LmcDll.log');
-    if FileExists('LmcDll.log') then
+    AssignFile(lFile, 'C:\Temp\LmcDll.log');
+    if FileExists('C:\Temp\LmcDll.log') then
       Append(lFile)
     else
       Rewrite(lFile);
@@ -97,35 +99,6 @@ begin
     RaiseLastOSError;
 end;
 
-function SetHook: Boolean; stdcall;
-begin
-  Result := False;
-  if gSharedPtr = nil then
-    exit;
-
-  gHookKbd := SetWindowsHookEx(WH_KEYBOARD, @MsgFilterFuncKbd, HInstance, 0);
-  if (gHookKbd = 0) then
-    FreeHook  // free is something was not ok
-  else
-    Result := True;
-  DebugLog(Format('Hook set for process %d', [gPid]));
-end;
-
-
-{
-  The UnhookWindowsHookEx function removes the hook procedure installed
-  in a hook chain by the SetWindowsHookEx function.
-}
-
-function FreeHook: Boolean; stdcall;
-var b1: Boolean;
-begin
-  Result := False;
-  b1 := True;
-  if (gHookKbd <> 0) then
-    b1 := UnHookWindowsHookEx(gHookKbd);
-  Result := b1;
-end;
 
 
 
@@ -144,9 +117,10 @@ var
   Kill: boolean;
   what2do : Integer;
 begin
+  DebugLog(Format('Code %d, lpar (vk_code) %d, flag %d', [Code, wParam, lParam]));
   if (Code < 0) or (Code <> HC_ACTION) or (gSharedPtr = nil) then
   begin
-    Result := CallNextHookEx(gHookKbd {ignored in API}, Code, wParam, lParam);
+    Result := CallNextHookEx(gSharedPtr^.HookKbd, Code, wParam, lParam);
     exit;
   end;
   Result := 0;
@@ -157,7 +131,7 @@ begin
   if Kill then
     Result := 1
   else
-    Result := CallNextHookEx(gHookKbd {ignored in API}, Code, wParam, lParam);
+    Result := CallNextHookEx(gSharedPtr^.HookKbd, Code, wParam, lParam);
 end;
 
 
@@ -179,7 +153,6 @@ begin
 end;
 
 finalization
-  FreeHook;
   if gMemMap <> nil then
     try
       gMemMap.Free;

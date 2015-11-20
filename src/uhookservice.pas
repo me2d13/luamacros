@@ -19,6 +19,8 @@ type
       procedure InitSharedMemory(pMainFormHandle: THandle);
       function DescribeHookMessage(pMessage: TMessage): String;
       function ConvertHookMessageToKeyStroke(pMessage: TMessage): TKeyStroke;
+      function SetHook: boolean;
+      function FreeHook: Boolean;
     public
       constructor Create;
       destructor Destroy; virtual;
@@ -28,17 +30,13 @@ type
 
 const
   HookLib = 'WinHook.dll';
-  cHookLoggerName = 'HOOK';
 
-
-  function SetHook: Boolean; stdcall; external HookLib;
-  function FreeHook: Boolean; stdcall; external HookLib;
-
+  //function MsgFilterFuncKbd(Code: longint; wParam: WPARAM; lParam: LPARAM): LRESULT stdcall; external HookLib;
 
 implementation
 
 uses
-  uGlobals, uDevice;
+  uGlobals, uDevice, dynlibs;
 
 { THookService }
 
@@ -51,7 +49,7 @@ begin
   except
     on EMemMapException do
     begin
-      Glb.LogError('Can''t create shared memory.', cHookLoggerName);
+      Glb.LogError('Can''t create shared memory.', cLoggerHook);
       fSharedMemory := nil;
     end;
   end;
@@ -94,6 +92,37 @@ begin
     Result.Direction:=cDirectionDown;
 end;
 
+function THookService.SetHook: boolean;
+var
+  lDllHandle: HINST;
+begin
+    Result := False;
+    if fSMPtr = nil then
+      exit;
+
+    lDllHandle := LoadLibrary(HookLib);
+
+    fSMPtr^.HookKbd := SetWindowsHookEx(WH_KEYBOARD, GetProcedureAddress(lDllHandle, 'MsgFilterFuncKbd'), lDllHandle, 0);
+    if (fSMPtr^.HookKbd = 0) then
+      FreeHook  // free is something was not ok
+    else
+      Result := True;
+    Glb.DebugLog('Hook set', cLoggerHook);
+end;
+
+function THookService.FreeHook: Boolean;
+var b1: Boolean;
+begin
+  Result := False;
+  b1 := True;
+  if (fSMPtr^.HookKbd <> 0) then
+  begin
+    b1 := UnHookWindowsHookEx(fSMPtr^.HookKbd);
+    fSMPtr^.HookKbd := 0;
+  end;
+  Result := b1;
+end;
+
 constructor THookService.Create;
 begin
   fHookSet:=False;
@@ -110,7 +139,7 @@ begin
   InitSharedMemory(pMainFormHandle);
   if (not fHookSet) then
   begin
-    fHookSet := LongBool(SetHook);
+    fHookSet := SetHook;
   end;
 end;
 
@@ -118,7 +147,7 @@ procedure THookService.OnHookMessage(var pMessage: TMessage);
 var
   lKS: TKeyStroke;
 begin
-  Glb.DebugLog('Hook message: ' + DescribeHookMessage(pMessage), cHookLoggerName);
+  Glb.DebugLog('Hook message: ' + DescribeHookMessage(pMessage), cLoggerHook);
   lKS := ConvertHookMessageToKeyStroke(pMessage);
   Glb.KeyLogService.AssignDevice(lKS);
   // scanning ends on key down message (ups are ignored during scan - see raw handling)
@@ -134,9 +163,9 @@ begin
     pMessage.Result:=-1; // block
     if (lKS.Direction = cDirectionDown) then
     begin
-      Glb.DebugLog('Scanning, message DOWN is blocked', cHookLoggerName);
+      Glb.DebugLog('Scanning, message DOWN is blocked', cLoggerHook);
     end else begin
-      Glb.DebugLog('Scanning, message UP is blocked', cHookLoggerName);
+      Glb.DebugLog('Scanning, message UP is blocked', cLoggerHook);
       Glb.KeyLogService.ResetScanned;
     end;
   end else begin

@@ -113,13 +113,13 @@ end;
 procedure TKbdDeviceService.OrderRawInputMessagesToBeReceived(pForHandle: HWND
   );
 var
-  ids: array[0..0] of RAWINPUTDEVICE;
+  ids: RAWINPUTDEVICE;
 begin
-  ids[0].usUsagePage := 1;
-  ids[0].usUsage := 6;  // keyboard
-  ids[0].dwFlags := RIDEV_INPUTSINK; // + RIDEV_NOLEGACY;
-  ids[0].hwndTarget := pForHandle;
-  if (not RegisterRawInputDevices(@ids, 1, sizeOf(RAWINPUTDEVICE))) then
+  ids.usUsagePage := 1;
+  ids.usUsage := 6;  // keyboard
+  ids.dwFlags := RIDEV_INPUTSINK; // + RIDEV_NOLEGACY;
+  ids.hwndTarget := pForHandle;
+  if (not RegisterRawInputDevices(@ids, 1, sizeOf(ids))) then
   begin
     Glb.LogError('Failed to register keyboard input messages.', cKbdLoggerName);
   end;
@@ -174,6 +174,12 @@ begin
   Message.Result:=0;
 end;
 
+{
+!!!!
+GetKeyboardState destroys current hook setup & raw message, leads to unpredictable
+characters e.g. on alt+arrow
+10+ hours of investigation :-(((
+
 function TKbdDeviceService.GetCharFromVirtualKey(Key: Word): String;
 var
   keyboardState: TKeyboardState;
@@ -190,6 +196,11 @@ begin
     else
       Result := '';
   end;
+end;}
+
+function TKbdDeviceService.GetCharFromVirtualKey(Key: Word): String;
+begin
+  Result := IntToStr(Key);
 end;
 
 function TKbdDeviceService.ProcessWaitingRawMessages: Integer;

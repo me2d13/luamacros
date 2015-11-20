@@ -4,7 +4,8 @@ clear()
 --lmc_log_module('LUA')
 --lmc_log_module('CFG')
 lmc_device_set_name('LB', 'BU0836A')
-lmc_device_set_name('KBD1', '826BD90')
+--lmc_device_set_name('KBD1', '826BD90') this is my regular
+lmc_device_set_name('KBD1', '1515ADE7')
 lmc_device_set_name('KBD2', '1BDC3055')
 lmc_print_devices()
 
@@ -13,9 +14,13 @@ lmc.minimizeToTray = true
 gPlane = ''
 gIsHeli = false
 gIsPlane = false
+gPitot = false
+gTranspoder = false
+gRotorBrake = true
+gHeadphone = true
 
 gLastRAltInterval = 0
-gRAltCalls = {5, 10, 20, 50, 100, 200, 500}
+gRAltCalls = {2, 5, 10, 20, 50, 100, 200, 500}
 
 function getRAltInterval(value)
   if value < gRAltCalls[1] then
@@ -47,12 +52,38 @@ commands2[192]='sim/view/still_spot' -- 192 is vkey code of '`'
 commands2[string.byte('1')]='SRS/X-Camera/Select_View_ID_1'
 commands2[string.byte('2')]='SRS/X-Camera/Select_View_ID_2'
 commands2[string.byte('S')]='SRS/X-Camera/Select_View_ID_3'
+commands2[string.byte('G')]='sim/electrical/batteries_toggle'
+commands2[string.byte('H')]='sim/electrical/generators_toggle'
+commands2[string.byte('V')]='sim/lights/landing_lights_toggle'
+commands2[string.byte('C')]='sim/lights/taxi_lights_toggle'
+commands2[string.byte('M')]='sim/systems/avionics_toggle' -- TODO: sticker
+commands2[string.byte('N')]='sim/lights/nav_lights_toggle'
+commands2[string.byte('B')]='sim/lights/beacon_lights_toggle'
+commands2[226]='sim/lights/beacon_lights_toggle'  -- anti col
+commands2[string.byte('K')]='sim/fuel/fuel_pumps_tog'
+commands2[188]='sim/flight_controls/rotor_brake_toggle' -- rotor brake
+--lmc_xpl_command('sim/starters/shut_down')
+--lmc_set_xpl_variable('AS350/Rotor_Brake', 0)
+--lmc_set_xpl_variable('AS350/Headphone', 1)
+
+commands2_as350={}
+commands2_as350[string.byte('7')]='sim/starters/shut_down' --starter off
+commands2_as350[string.byte('8')]='sim/engines/engage_starters' --starter on
+
+commands1={}
+commands1[string.byte('R')]='sim/transponder/transponder_ident'
+
+commands1_as350={}
+commands1_as350[string.byte('P')]='AS350/SCU/Horn' --horn
+commands1_as350[string.byte('J')]='AS350/Trim/Pitch_Toggle'
+commands1_as350[string.byte('K')]='AS350/Trim/Roll_Toggle'
+commands1_as350[string.byte('L')]='AS350/Trim/Trim_Release'
+commands1_as350[string.byte('Z')]='AS350/SCU/Inst_l1' -- light1
+commands1_as350[string.byte('X')]='AS350/SCU/Inst_l2' -- light2
 
 function lb_common(button, direction)
   if (button == 3) then
     lmc_xpl_command('sim/view/still_spot')
-  elseif (button == 2) then
-    lmc_xpl_command('SRS/X-Camera/Center_Camera')
   elseif (button == 8) then
     if (direction == 1) then
       lmc_set_xpl_variable('sim/time/sim_speed', 0)
@@ -62,8 +93,34 @@ function lb_common(button, direction)
   elseif (button == 10) then
     lmc_xpl_command('sim/replay/replay_toggle')
   else
-    print('Callback for LB unused: button ' .. button .. ', direction '..direction)
+    return false
   end
+  return true --handled
+end
+
+function lb_as350(button, direction)
+  if (button == 2) then
+    if (direction == 1) then
+      lmc_xpl_command_begin('AS350/Trim/Force_Trim')
+    else
+      lmc_xpl_command_end('AS350/Trim/Force_Trim')
+    end
+  else
+    return false
+  end
+  return true
+end
+
+
+function lb_handler(button, direction)
+  if (lb_common(button, direction)) then
+    return
+  elseif (gName == 'N994VA') then
+    if (lb_as350(button, direction)) then
+      return
+    end
+  end
+  print('Callback for LB unused: button ' .. button .. ', direction '..direction)
 end
 
 function keyb2_common(button, direction)
@@ -74,9 +131,95 @@ function keyb2_common(button, direction)
   if (com ~= nil) then
     print('Calling XPL command ' .. com)
     lmc_xpl_command(com)
+  elseif button == 74 then
+    if (gPitot) then
+      lmc_xpl_command('sim/ice/pitot_heat0_off')
+    else
+      lmc_xpl_command('sim/ice/pitot_heat0_on')
+    end
+    gPitot = not gPitot
   else
-    print('Callback for keyboard2 unused : button ' .. button .. ', direction '..direction)
+    return false
   end
+  return true --handled
+end
+
+function keyb1_common(button, direction)
+  if (direction ~= 1) then
+    return
+  end
+  com = commands1[button]
+  if (com ~= nil) then
+    print('Calling XPL command ' .. com)
+    lmc_xpl_command(com)
+  elseif button == 52 then
+    if (gTranspoder) then
+      lmc_xpl_command('sim/transponder/transponder_off')
+    else
+      lmc_xpl_command('sim/transponder/transponder_on')
+    end
+    gTranspoder = not gTranspoder
+  else
+    return false
+  end
+  return true --handled
+end
+
+function keyb1_as350(button, direction)
+  if (direction ~= 1) then
+    return
+  end
+  com = commands1_as350[button]
+  if (com ~= nil) then
+    print('Calling XPL command ' .. com)
+    lmc_xpl_command(com)
+  elseif (button == 192) then --headphone: key `
+    lmc_set_xpl_variable('AS350/Headphone', (gHeadphone) and 0 or 1)
+    gHeadphone = not gHeadphone
+  else
+    return false
+  end
+  return true --handled
+end
+
+function keyb2_as350(button, direction)
+  if (direction ~= 1) then
+    return true
+  end
+  com = commands2_as350[button]
+  if (com ~= nil) then
+    print('Calling XPL command ' .. com)
+    lmc_xpl_command(com)
+  elseif (button == 188) then --rotor brake
+    lmc_set_xpl_variable('AS350/Rotor_Brake', (gRotorBrake) and 0 or 1)
+    gRotorBrake = not gRotorBrake
+  else
+    return false
+  end
+  return true --handled
+end
+
+function keyb1(button, direction)
+  if (keyb1_common(button, direction)) then
+    return
+  elseif (gName == 'N994VA') then
+    if (keyb1_as350(button, direction)) then
+      return
+    end
+  end
+  print('Callback for keyb1 unused: button ' .. button .. ', direction '..direction)
+end
+
+function keyb2(button, direction)
+  if (gName == 'N994VA') then
+    if (keyb2_as350(button, direction)) then
+      return
+    end
+  end
+  if (keyb2_common(button, direction)) then
+    return
+  end
+  print('Callback for keyb2 unused: button ' .. button .. ', direction '..direction)
 end
 
 function setPlane(name)
@@ -104,6 +247,7 @@ function setPlane(name)
 end
 
 lmc_on_xpl_var_change('sim/aircraft/view/acf_tailnum', setPlane)
-lmc_set_handler('LB',lb_common)
-lmc_set_handler('KBD2',keyb2_common)
+lmc_set_handler('LB',lb_handler)
+lmc_set_handler('KBD2',keyb2)
+lmc_set_handler('KBD1',keyb1)
 lmc_on_xpl_var_change('sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot', checkRAlt, 1000)

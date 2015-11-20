@@ -439,16 +439,16 @@ begin
     if (pComm is TXplExecuteCommandBegin) then
     begin
       XPLMCommandBegin(lCom);
-      DebugLog(Format('Executed command begin %s.', [pComm]));
+      DebugLog(Format('Executed command begin %s.', [pComm.Name]));
     end else
     if (pComm is TXplExecuteCommandEnd) then
     begin
       XPLMCommandEnd(lCom);
-      DebugLog(Format('Executed command end %s.', [pComm]));
+      DebugLog(Format('Executed command end %s.', [pComm.Name]));
     end else
     begin
       XPLMCommandOnce(lCom);
-      DebugLog(Format('Executed command %s.', [pComm]));
+      DebugLog(Format('Executed command %s.', [pComm.Name]));
     end;
   end;
   pComm.Free;

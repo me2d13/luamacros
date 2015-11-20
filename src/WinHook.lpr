@@ -1,13 +1,12 @@
 library WinHook;
 
-{$mode objfpc}{$H+}
+{$mode delphi}
 
 uses
   Classes, uHookCommon, uWHookInt
   { you can add units after this };
 
 exports
-  SetHook index 1,
-  FreeHook index 2;
+  MsgFilterFuncKbd index 1;
 end.
 

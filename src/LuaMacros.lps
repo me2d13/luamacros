@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="83">
+    <Units Count="84">
       <Unit0>
         <Filename Value="LuaMacros.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -20,10 +20,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uMainFrm"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="428"/>
-        <CursorPos X="3" Y="438"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="110"/>
+        <CursorPos Y="136"/>
         <UsageCount Value="202"/>
+        <Bookmarks Count="1">
+          <Item0 X="24" Y="129" ID="1"/>
+        </Bookmarks>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -57,16 +60,13 @@
         <Filename Value="uglobals.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uGlobals"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="211"/>
-        <CursorPos X="17" Y="218"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="79"/>
+        <CursorPos X="3" Y="93"/>
         <UsageCount Value="201"/>
-        <Bookmarks Count="2">
-          <Item0 X="17" Y="19" ID="1"/>
-          <Item1 X="3" Y="214" ID="2"/>
+        <Bookmarks Count="1">
+          <Item0 X="3" Y="215" ID="2"/>
         </Bookmarks>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit5>
       <Unit6>
@@ -173,16 +173,19 @@
         <Filename Value="ukbddeviceservice.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uKbdDeviceService"/>
-        <TopLine Value="142"/>
-        <CursorPos X="89" Y="172"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="179"/>
+        <CursorPos X="14" Y="199"/>
         <UsageCount Value="202"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit16>
       <Unit17>
         <Filename Value="uRawInput.pas"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="268"/>
-        <CursorPos X="45" Y="284"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="430"/>
+        <CursorPos X="3" Y="444"/>
         <UsageCount Value="201"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit17>
@@ -190,9 +193,9 @@
         <Filename Value="uhookservice.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uHookService"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="129"/>
-        <CursorPos X="3" Y="121"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="145"/>
+        <CursorPos X="3" Y="150"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -200,6 +203,7 @@
       <Unit19>
         <Filename Value="uHookCommon.pas"/>
         <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="16" Y="17"/>
         <UsageCount Value="200"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -208,9 +212,11 @@
         <Filename Value="ukeylogservice.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uKeyLogService"/>
-        <TopLine Value="122"/>
-        <CursorPos X="29" Y="145"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="16"/>
+        <CursorPos X="19" Y="33"/>
         <UsageCount Value="202"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit20>
       <Unit21>
@@ -218,7 +224,7 @@
         <IsPartOfProject Value="True"/>
         <TopLine Value="356"/>
         <CursorPos X="35" Y="375"/>
-        <UsageCount Value="197"/>
+        <UsageCount Value="199"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit21>
       <Unit22>
@@ -228,7 +234,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="25"/>
         <CursorPos Y="48"/>
-        <UsageCount Value="149"/>
+        <UsageCount Value="151"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit22>
       <Unit23>
@@ -238,7 +244,7 @@
         <EditorIndex Value="7"/>
         <TopLine Value="122"/>
         <CursorPos X="3" Y="138"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="136"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit23>
@@ -248,7 +254,7 @@
         <UnitName Value="uXplListener"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="3" Y="14"/>
-        <UsageCount Value="132"/>
+        <UsageCount Value="134"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit24>
       <Unit25>
@@ -257,7 +263,7 @@
         <UnitName Value="uXplSender"/>
         <TopLine Value="57"/>
         <CursorPos X="25" Y="74"/>
-        <UsageCount Value="128"/>
+        <UsageCount Value="130"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit25>
       <Unit26>
@@ -266,7 +272,7 @@
         <UnitName Value="uXplMessages"/>
         <TopLine Value="328"/>
         <CursorPos X="38" Y="344"/>
-        <UsageCount Value="122"/>
+        <UsageCount Value="124"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit26>
       <Unit27>
@@ -276,7 +282,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="22"/>
         <CursorPos X="3" Y="35"/>
-        <UsageCount Value="52"/>
+        <UsageCount Value="54"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit27>
       <Unit28>
@@ -286,7 +292,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="291"/>
         <CursorPos X="57" Y="301"/>
-        <UsageCount Value="47"/>
+        <UsageCount Value="49"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit28>
       <Unit29>
@@ -296,7 +302,7 @@
         <EditorIndex Value="6"/>
         <TopLine Value="51"/>
         <CursorPos X="3" Y="53"/>
-        <UsageCount Value="45"/>
+        <UsageCount Value="47"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit29>
@@ -304,10 +310,10 @@
         <Filename Value="uspeechservice.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uSpeechService"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="119"/>
         <CursorPos X="35" Y="136"/>
-        <UsageCount Value="30"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="32"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit30>
       <Unit31>
@@ -675,88 +681,134 @@
         <CursorPos X="26" Y="516"/>
         <UsageCount Value="10"/>
       </Unit82>
+      <Unit83>
+        <Filename Value="C:\Apps\lazarus142\lcl\controls.pp"/>
+        <UnitName Value="Controls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2100"/>
+        <CursorPos X="14" Y="2112"/>
+        <UsageCount Value="10"/>
+      </Unit83>
     </Units>
-    <JumpHistory Count="20" HistoryIndex="19">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="uluacmdhttp.pas"/>
-        <Caret Line="73" Column="34" TopLine="51"/>
+        <Filename Value="uhookservice.pas"/>
+        <Caret Line="144" Column="33" TopLine="98"/>
       </Position1>
       <Position2>
-        <Filename Value="uluacmdhttp.pas"/>
-        <Caret Line="53" Column="3" TopLine="51"/>
+        <Filename Value="uhookservice.pas"/>
+        <Caret Line="26" TopLine="13"/>
       </Position2>
       <Position3>
-        <Filename Value="uglobals.pas"/>
-        <Caret Line="43" Column="21" TopLine="29"/>
+        <Filename Value="uhookservice.pas"/>
+        <Caret Line="115" TopLine="93"/>
       </Position3>
       <Position4>
-        <Filename Value="umainfrm.pas"/>
-        <Caret Line="161" TopLine="152"/>
+        <Filename Value="uhookservice.pas"/>
+        <Caret Line="99" Column="43" TopLine="82"/>
       </Position4>
       <Position5>
-        <Filename Value="umainfrm.pas"/>
-        <Caret Line="163" TopLine="154"/>
+        <Filename Value="uhookservice.pas"/>
+        <Caret Line="136" Column="23" TopLine="131"/>
       </Position5>
       <Position6>
-        <Filename Value="umainfrm.pas"/>
-        <Caret Line="53" Column="15" TopLine="39"/>
+        <Filename Value="uhookservice.pas"/>
+        <Caret Line="104" TopLine="93"/>
       </Position6>
       <Position7>
-        <Filename Value="umainfrm.pas"/>
-        <Caret Line="54" Column="15" TopLine="39"/>
+        <Filename Value="uhookservice.pas"/>
+        <Caret Line="133" Column="3" TopLine="131"/>
       </Position7>
       <Position8>
-        <Filename Value="umainfrm.pas"/>
-        <Caret Line="55" Column="15" TopLine="39"/>
+        <Filename Value="uhookservice.pas"/>
+        <Caret Line="100" TopLine="93"/>
       </Position8>
       <Position9>
-        <Filename Value="umainfrm.pas"/>
-        <Caret Line="54" Column="15" TopLine="39"/>
+        <Filename Value="uhookservice.pas"/>
+        <Caret Line="34" Column="5" TopLine="31"/>
       </Position9>
       <Position10>
-        <Filename Value="uglobals.pas"/>
-        <Caret Line="33" Column="17" TopLine="31"/>
+        <Filename Value="uhookservice.pas"/>
+        <Caret Line="97" Column="21" TopLine="87"/>
       </Position10>
       <Position11>
-        <Filename Value="uglobals.pas"/>
-        <Caret Line="19" Column="17" TopLine="17"/>
+        <Filename Value="uhookservice.pas"/>
+        <Caret Line="105" TopLine="91"/>
       </Position11>
       <Position12>
-        <Filename Value="uglobals.pas"/>
-        <Caret Line="218" Column="22" TopLine="211"/>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="76" Column="15" TopLine="63"/>
       </Position12>
       <Position13>
-        <Filename Value="uglobals.pas"/>
-        <Caret Line="24" Column="17" TopLine="5"/>
+        <Filename Value="umainfrm.pas"/>
       </Position13>
       <Position14>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="632" Column="29" TopLine="617"/>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="369" Column="3" TopLine="366"/>
       </Position14>
       <Position15>
-        <Filename Value="uglobals.pas"/>
-        <Caret Line="25" Column="17" TopLine="5"/>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="369" Column="3" TopLine="366"/>
       </Position15>
       <Position16>
-        <Filename Value="uhookservice.pas"/>
-        <Caret Line="121" Column="3" TopLine="129"/>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="120" Column="21" TopLine="116"/>
       </Position16>
       <Position17>
         <Filename Value="umainfrm.pas"/>
-        <Caret Line="55" Column="15" TopLine="39"/>
       </Position17>
       <Position18>
         <Filename Value="umainfrm.pas"/>
-        <Caret Line="438" Column="3" TopLine="428"/>
+        <Caret Line="120" Column="21" TopLine="97"/>
       </Position18>
       <Position19>
-        <Filename Value="uglobals.pas"/>
-        <Caret Line="217" Column="3" TopLine="211"/>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="407" Column="3" TopLine="384"/>
       </Position19>
       <Position20>
         <Filename Value="umainfrm.pas"/>
-        <Caret Line="438" Column="3" TopLine="428"/>
+        <Caret Line="125" TopLine="118"/>
       </Position20>
+      <Position21>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="184" Column="60" TopLine="162"/>
+      </Position21>
+      <Position22>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="133" Column="12" TopLine="124"/>
+      </Position22>
+      <Position23>
+        <Filename Value="uhookservice.pas"/>
+        <Caret Line="150" Column="3" TopLine="145"/>
+      </Position23>
+      <Position24>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="128" TopLine="120"/>
+      </Position24>
+      <Position25>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="231" Column="3" TopLine="228"/>
+      </Position25>
+      <Position26>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="129" Column="24" TopLine="114"/>
+      </Position26>
+      <Position27>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="231" Column="3" TopLine="228"/>
+      </Position27>
+      <Position28>
+        <Filename Value="ukbddeviceservice.pas"/>
+        <Caret Line="148" Column="9" TopLine="142"/>
+      </Position28>
+      <Position29>
+        <Filename Value="ukbddeviceservice.pas"/>
+        <Caret Line="239" Column="51" TopLine="219"/>
+      </Position29>
+      <Position30>
+        <Filename Value="umainfrm.pas"/>
+        <Caret Line="229" Column="16" TopLine="213"/>
+      </Position30>
     </JumpHistory>
   </ProjectSession>
   <Debugging>

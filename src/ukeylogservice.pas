@@ -67,7 +67,7 @@ begin
   if (Glb.ScanService.Scanning) and (fLog[fIndex].KeyStroke.Direction=cDirectionDown) then
   begin
     fJustScannedKs := fLog[fIndex].KeyStroke;
-    Glb.DebugLog('Recorder scanned keystroke', cHookLoggerName);
+    Glb.DebugLog('Recorder scanned keystroke', cLoggerHook);
   end;
   fIndex:=(fIndex+1) mod cLogArrayLength;
 end;
@@ -83,12 +83,12 @@ begin
     exit;
   end;
   Glb.DebugLogFmt('Raw message not yet arrived for key %d direction %d, trying PeekMessage.',
-    [pKS.VKeyCode,pKS.Direction], cHookLoggerName);
+    [pKS.VKeyCode,pKS.Direction], cLoggerHook);
   // if not found, check main window message queue for incoming messages
   lNewItemsCount := Glb.DeviceService.KbdDeviceService.ProcessWaitingRawMessages;
   if (lNewItemsCount > 0) then
   begin
-    Glb.DebugLogFmt('PeekMessage got %d messages.', [lNewItemsCount], cHookLoggerName);
+    Glb.DebugLogFmt('PeekMessage got %d messages.', [lNewItemsCount], cLoggerHook);
     AssignDeviceInLogRange(pKS, lNewItemsCount);
     if (pKS.DeviceHandle > 0) then
     begin
@@ -96,7 +96,7 @@ begin
     end;
   end;
   Glb.DebugLogFmt('Key NOT FOUND in key log for key %d direction %d.',
-    [pKS.VKeyCode,pKS.Direction], cHookLoggerName);
+    [pKS.VKeyCode,pKS.Direction], cLoggerHook);
 end;
 
 procedure TKeyLogService.AssignDeviceInLogRange(var pKS: TKeyStroke; pSearchCount: Integer);
@@ -119,7 +119,7 @@ begin
       begin
         lTimeDiff:=UnixTimestampMs - fLog[lIndex].TimeStamp;
         Glb.DebugLogFmt('Key log match for key %d direction %d, time diff %d ms.',
-          [pKS.VKeyCode,pKS.Direction, lTimeDiff], cHookLoggerName);
+          [pKS.VKeyCode,pKS.Direction, lTimeDiff], cLoggerHook);
         pKS.DeviceHandle:=fLog[lIndex].KeyStroke.DeviceHandle;
         // reset buffer pos
         ZeroMemory(@fLog[lIndex], SizeOf(TKeyLogItem));
@@ -152,7 +152,7 @@ begin
     if (lNow - fLog[lIndex].TimeStamp > cGarbageDelayMs) then
     begin
       Glb.DebugLogFmt('WARNING: Removing unmatched raw message after %d ms. The key was %d, direction %d.',
-        [lNow - fLog[lIndex].TimeStamp, lKsPtr^.VKeyCode, lKsPtr^.Direction], cHookLoggerName);
+        [lNow - fLog[lIndex].TimeStamp, lKsPtr^.VKeyCode, lKsPtr^.Direction], cLoggerHook);
       // reset buffer pos
       ZeroMemory(@fLog[lIndex], SizeOf(TKeyLogItem));
     end;
