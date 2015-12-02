@@ -17,6 +17,7 @@ function Spawn(luaState : TLuaState) : integer;
 function MinimizeMainWindow(luaState : TLuaState) : integer;
 function LoadScript(luaState : TLuaState) : integer;
 function Say(luaState : TLuaState) : integer;
+function GetActiveWindowTitle(luaState : TLuaState) : integer;
 
 implementation
 
@@ -142,6 +143,30 @@ begin
   Glb.DebugLog('Saying ' + arg, cLoggerLua);
   Glb.SpeechService.Say(arg);
   Result := 0;
+end;
+
+function GetActiveWindowTitle(luaState: TLuaState): integer;
+var
+  lNumOfParams: Integer;
+  lHandle: THandle;
+  lLen: LongInt;
+  lTitle: string;
+begin
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams > 0) then
+    raise LmcException.Create('Wrong number of parameters. No argument expected.');
+  lHandle := GetForegroundWindow;
+  if lHandle <> 0 then
+  begin
+    lLen := GetWindowTextLength(lHandle) + 1;
+    SetLength(lTitle, lLen);
+    GetWindowText(lHandle, PChar(lTitle), lLen);
+    lTitle := TrimRight(lTitle);
+  end
+  else
+    lTitle:= '';
+  lua_pushstring(luaState, PChar(lTitle));
+  Result := 1;
 end;
 
 

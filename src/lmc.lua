@@ -5,7 +5,7 @@ clear()
 --lmc_log_module('CFG')
 lmc_device_set_name('LB', 'BU0836A')
 --lmc_device_set_name('KBD1', '826BD90') this is my regular
-lmc_device_set_name('KBD1', '1515ADE7')
+lmc_device_set_name('KBD1', '3AE1BAFF')
 lmc_device_set_name('KBD2', '1BDC3055')
 lmc_print_devices()
 

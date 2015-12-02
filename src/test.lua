@@ -3,7 +3,6 @@ clear();
 lmc_xpl_text('From LUA macros')
 
 --lmc2.ahoj = 1
-print(lmc.ahoj)
 
 --lmc_log_all();
 lmc_log_module('XPL')
@@ -49,7 +48,8 @@ lmc_print_devices();
 
 --define callback function
 handler = function()
-  print('cus bus');
+  --print('cus bus');
+  print(lmc_get_window_title())
 end
 
 --test it
@@ -149,9 +149,9 @@ end)
 
 print(lmc_get_xpl_variable('sim/flightmodel/position/latitude'))
 
-lmc_load('E:\\lmc.lua')
+--lmc_load('E:\\lmc.lua')
 
 lmc_say('Flaps 45')
 lmc_say('Flaps 50')
 
-print(lmc_http_get('http://www.hidmacros.eu/forum/'))
+--print(lmc_http_get('http://www.hidmacros.eu/forum/'))
