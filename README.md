@@ -26,7 +26,7 @@ To compile & extend Luamacros yourself you need to
   * LazSerialPort - for COM device communication
 * Those packages have zip files in lib subdirectory. Just extract those zip files, open lpk file from extracted location and choose Use - Install.
 * Now you should be able to open all 3 projects. These are
-  * LuaMacros - the main application exe
+  * LuaMacros - the main application exe. Important: if you need to execute compiled exe don't forget to copy lua dlls from lib directory to the same place as exe file
   * XplPlugin - dll used as XPlane plugin. Note this is 64b project so you need to adapt FPC compiler accordingly
   * WinHook - dll to set global keyboard hook
   
