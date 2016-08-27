@@ -41,17 +41,14 @@
       <Unit1>
         <Filename Value="uXplPluginEngine.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="uXplPluginEngine"/>
       </Unit1>
       <Unit2>
         <Filename Value="uXplCommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="uXplCommon"/>
       </Unit2>
       <Unit3>
         <Filename Value="MemMap.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="MemMap"/>
       </Unit3>
       <Unit4>
         <Filename Value="uxplsender.pas"/>

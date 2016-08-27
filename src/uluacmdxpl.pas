@@ -149,6 +149,7 @@ function XplVarChange(luaState: TLuaState): integer;
 var
   lVarName : PAnsiChar;
   lIntervalMs : Integer;
+  lDelta : Integer;
   lHandlerRef: Integer;
   lNumOfParams: Integer;
 begin
@@ -156,7 +157,19 @@ begin
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams < 2) then
     raise LmcException.Create('Wrong number of parameters. Provide at least name and handler.');
-  if (lNumOfParams = 3) then
+  if (lNumOfParams = 4) then
+  begin
+    if (lua_isnumber(luaState, -1) = 1) then
+    begin
+      lDelta:=Trunc(lua_tonumber(luaState, -1));
+      lua_settop(luaState, 3);
+    end
+    else
+      raise LmcException.Create('4th parameter is supposed to be a number.');
+  end
+  else
+    lDelta:=0;
+  if (lNumOfParams >= 3) then
   begin
     if (lua_isnumber(luaState, -1) = 1) then
     begin
@@ -171,7 +184,7 @@ begin
   lHandlerRef := luaL_ref(luaState, LUA_REGISTRYINDEX);
   Glb.DebugLog(Format('Got function reference with key %d', [lHandlerRef]), cLoggerLua);
   lVarName := lua_tostring(luaState, 1);
-  Glb.XplControl.SetVariableHook(lVarName, lHandlerRef, lIntervalMs);
+  Glb.XplControl.SetVariableHook(lVarName, lHandlerRef, lIntervalMs, lDelta);
   Result := 0;
 end;
 

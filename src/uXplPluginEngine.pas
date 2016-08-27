@@ -463,8 +463,9 @@ begin
   if (lXVC <> nil) then
   begin
     lXVC.Interval:=pVar.IntervalMs;
+    lXVC.Delta:=pVar.Delta;
     lXVC.Id:=pVar.Id;
-    DebugLog(Format('Variable %s registered with id %d and interval %d ms.', [pVar.Name, pVar.Id, pVar.IntervalMs]));
+    DebugLog(Format('Variable %s registered with id %d, interval %d ms and delta %d.', [pVar.Name, pVar.Id, pVar.IntervalMs, pVar.Delta]));
   end
   else
     DebugLog('Variable ' + pVar.Name + ' not found.');
@@ -719,8 +720,15 @@ begin
     if (lValue = nil) then
       Continue; // can not find out variable value
     // compare with last from info
-    lChanged:= (lXVC.LastValue = nil) or // first assignment
-      (not lValue.Equals(lXVC.LastValue)); // different value
+
+    lChanged:= (lXVC.LastValue = nil); // first assignment
+    if (not lChanged) then
+    begin
+      if (lXVC.Delta = 0) then
+        lChanged := not lValue.Equals(lXVC.LastValue) // different value
+      else
+        lChanged := not lValue.EqualsWithDelta(lXVC.LastValue, lXVC.Delta) // different value
+    end;
     if (lChanged) or (lXVC.ChangeCount > 0) then
     begin
       if lChanged then

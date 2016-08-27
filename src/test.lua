@@ -7,9 +7,9 @@ lmc_xpl_text('From LUA macros')
 --lmc_log_all();
 lmc_log_module('XPL')
 lmc_log_module('LUA')
-lmc_log_module('CFG')
-lmc_log_module('SPE')
-lmc_log_module('HTP')
+--lmc_log_module('CFG')
+--lmc_log_module('SPE')
+--lmc_log_module('HTP')
 lmc_log_spool('lmc_spool.log')
 print('Version: ' .. lmc.version)
 lmc.minimizeToTray = true
@@ -30,7 +30,7 @@ end
 print('This is LuaMacros. Listing detected devices...');
 
 -- print device table
-lmc_print_devices();
+--lmc_print_devices();
 
 -- assign logical name to game device by regexp
 -- 1st arg: logical name
@@ -38,13 +38,13 @@ lmc_print_devices();
 -- returns: Found directX name
 print(lmc_device_set_name('LB', 'BU0836A'));
 print(lmc_device_set_name('KBD1', '826BD90'));
---print(lmc_device_set_name('KBD2', '1BDC3055'));
+print(lmc_device_set_name('KBD2', '31BB05D2'));
 --lmc_assign_keyboard('KBD2');
 -- remember 2nd param is regexp, so any unique part from that ugly keyboard system id works
 
 
 -- now logical name is assigned to game device
-lmc_print_devices();
+--lmc_print_devices();
 
 --define callback function
 handler = function()
@@ -135,6 +135,23 @@ lmc_set_handler("LB",function(button, direction)
       cleanThisKey=cleanThisKey:gsub("%(","%(")
 end)
 
+--print(lmc_get_xpl_variable('sim/flightmodel/position/latitude'))
+
+--lmc_load('E:\\lmc.lua')
+
+--lmc_say('Flaps 45')
+--lmc_say('Flaps 50')
+
+--print(lmc_http_get('http://www.hidmacros.eu/forum/'))
+
+
+varName='sim/cockpit2/radios/actuators/adf1_frequency_hz'
+lmc_on_xpl_var_change(varName,
+  function(value, count)
+    print(varName .. ' changed to ' .. value .. ' with ' .. count .. ' changes')
+  end, 1000, 5)
+print('XPL Callback set')
+
 lmc_http_server(12345, function(url)
   --lmc_xpl_text('From LUA macros', 0.5)
   if url:match("^/command/.+") then
@@ -147,11 +164,4 @@ lmc_http_server(12345, function(url)
   --return '{"HDG" : 123}', 'application/json'
 end)
 
-print(lmc_get_xpl_variable('sim/flightmodel/position/latitude'))
 
---lmc_load('E:\\lmc.lua')
-
-lmc_say('Flaps 45')
-lmc_say('Flaps 50')
-
---print(lmc_http_get('http://www.hidmacros.eu/forum/'))

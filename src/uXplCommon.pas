@@ -61,6 +61,7 @@ type
     LastValue: TXplValue;
     ChangeCount: Integer;
     Interval: Int64;
+    Delta: Int64;
     destructor Destroy; Override;
   end;
 
@@ -69,6 +70,7 @@ type
     Id: Int64;
     Name: String;
     Interval: Int64;
+    Delta: Int64;
     LuaHandlerRef: Integer;
   end;
 

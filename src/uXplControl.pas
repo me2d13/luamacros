@@ -35,7 +35,7 @@ type
     procedure ExecuteCommandEnd(pCmdName: String);
     procedure DrawText(pText: String; pPos: Single = 0; pSec: Integer = 5);
     procedure XplVarProcessed;
-    procedure SetVariableHook(pVarName: String; pHandlerRef: Integer; pIntervalMs: Integer);
+    procedure SetVariableHook(pVarName: String; pHandlerRef: Integer; pIntervalMs: Integer; pDelta: Integer);
     procedure UnhookVariable(pVarName: String);
     procedure Reset;
   end;
@@ -134,23 +134,24 @@ begin
 end;
 
 procedure TXPLcontrol.SetVariableHook(pVarName: String; pHandlerRef: Integer;
-  pIntervalMs: Integer);
+  pIntervalMs: Integer; pDelta: Integer);
 var
   lXplObj: TXplVariableCallback;
   lCbInfo: TLmcVariableCallbackInfo;
   lId: Int64;
 begin
   lId:=Glb.KeyLogService.UnixTimestampMs;
-  lXplObj := TXplVariableCallback.Create(pVarName, pIntervalMs, lId);
+  lXplObj := TXplVariableCallback.Create(pVarName, pIntervalMs, pDelta, lId);
   fXplSender.SendMessage(lXplObj);
   lCbInfo := TLmcVariableCallbackInfo.Create;
   lCbInfo.Id:=lId;
   lCbInfo.Interval:=pIntervalMs;
+  lCbInfo.Delta:=pDelta;
   lCbInfo.Name:=pVarName;
   lCbInfo.LuaHandlerRef:=pHandlerRef;
   fCallbacks.Add(lId, lCbInfo);
-  Glb.DebugLog(Format('Registered variable callback for %s with id %d and interval %d',
-    [pVarName, lId, pIntervalMs]), cLoggerXpl);
+  Glb.DebugLog(Format('Registered variable callback for %s with id %d, interval %d and delta %d',
+    [pVarName, lId, pIntervalMs, pDelta]), cLoggerXpl);
   lXplObj.Free;
 end;
 

@@ -56,6 +56,7 @@ type
     procedure MakeString;
     function ToString: ansistring;override;
     function Equals(pVar: TXplValue): boolean;
+    function EqualsWithDelta(pVar: TXplValue; pDelta:Int64): boolean;
     property IntValue: Int64 read fIntValue write SetIntValue;
     property DoubleValue: Double read fDoubleValue write SetDoubleValue;
     property StringValue: String read fStringValue write SetStringValue;
@@ -162,13 +163,15 @@ type
   private
     fName: String;
     fIntervalMs: Int64;
+    fDelta: Int64;
     fId: Int64;
   public
-    constructor Create(pName: String; pIntervalMs: Int64; pId: Int64);overload;
+    constructor Create(pName: String; pIntervalMs: Int64; pDelta: Int64; pId: Int64);overload;
     constructor Create(pStream: TStream);overload;
     procedure SerializeToStream(pStream: TStream);override;
     property Name: String read fName write fName;
     property IntervalMs: Int64 read fIntervalMs write fIntervalMs;
+    property Delta: Int64 read fDelta write fDelta;
     property Id: Int64 read fId write fId;
   end;
 
@@ -211,11 +214,12 @@ end;
 
 { TXplVariableCallback }
 
-constructor TXplVariableCallback.Create(pName: String; pIntervalMs: Int64; pId: Int64);
+constructor TXplVariableCallback.Create(pName: String; pIntervalMs: Int64; pDelta: Int64; pId: Int64);
 begin
   fName:=pName;
   fIntervalMs:=pIntervalMs;
   fId := pId;
+  fDelta:=pDelta;
 end;
 
 constructor TXplVariableCallback.Create(pStream: TStream);
@@ -223,6 +227,7 @@ begin
   fName:=pStream.ReadAnsiString;
   pStream.Read(fId, SizeOf(fId));
   pStream.Read(fIntervalMs, SizeOf(fIntervalMs));
+  pStream.Read(fDelta, SizeOf(fDelta));
 end;
 
 procedure TXplVariableCallback.SerializeToStream(pStream: TStream);
@@ -231,6 +236,7 @@ begin
   pStream.WriteAnsiString(fName);
   pStream.Write(fId, SizeOf(fId));
   pStream.Write(fIntervalMs, SizeOf(fIntervalMs));
+  pStream.Write(fDelta, SizeOf(fDelta));
 end;
 
 { TXplExecuteCommandEnd }
@@ -465,6 +471,18 @@ begin
   Result :=
     ((fType = vtInteger) and (fIntValue = pVar.IntValue)) or
     ((fType = vtDouble) and (fDoubleValue = pVar.DoubleValue)) or
+    ((fType = vtString) and (fStringValue = pVar.StringValue)) or
+    ((fType = vtNull));
+end;
+
+function TXplValue.EqualsWithDelta(pVar: TXplValue; pDelta: Int64): boolean;
+begin
+  Result := False;
+  if (pVar = nil) then exit;
+  if (fType <> pVar.ValueType) then exit;
+  Result :=
+    ((fType = vtInteger) and (Abs(fIntValue - pVar.IntValue) < pDelta)) or
+    ((fType = vtDouble) and (Abs(fDoubleValue - pVar.DoubleValue) < pDelta)) or
     ((fType = vtString) and (fStringValue = pVar.StringValue)) or
     ((fType = vtNull));
 end;
