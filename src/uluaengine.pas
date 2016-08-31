@@ -630,6 +630,7 @@ begin
   fLua.RegisterFunction('lmc_xpl_command_end','',nil,@XplCommandEnd);
   fLua.RegisterFunction('lmc_on_xpl_var_change','',nil,@XplVarChange);
   fLua.RegisterFunction('lmc_remove_xpl_var_change','',nil,@UnregisterXplVarChange);
+  fLua.RegisterFunction('lmc_xpl_log_file','',nil,@SetXplLogFile);
   // http
   fLua.RegisterFunction('lmc_http_server','',nil,@HttpServerSimple);
   fLua.RegisterFunction('lmc_http_get','',nil,@HttpGet);

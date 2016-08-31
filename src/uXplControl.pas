@@ -38,6 +38,7 @@ type
     procedure SetVariableHook(pVarName: String; pHandlerRef: Integer; pIntervalMs: Integer; pDelta: Integer);
     procedure UnhookVariable(pVarName: String);
     procedure Reset;
+    procedure SetLogFile(pLogFileName: String);
   end;
 
   TXPLRefHolder = class
@@ -182,6 +183,16 @@ end;
 procedure TXPLcontrol.Reset;
 begin
   //TODO: Send unhook-all command to XPL
+end;
+
+procedure TXPLcontrol.SetLogFile(pLogFileName: String);
+var
+  lXplObj: TXplCallWithName;
+begin
+  lXplObj := TXplSetLogFile.Create(pLogFileName);
+  Glb.DebugLog(Format('Setting XPL plugin log file to %s', [pLogFileName]), cLoggerXpl);
+  fXplSender.SendMessage(lXplObj);
+  lXplObj.Free;
 end;
 
 procedure TXPLcontrol.OnXplSyncMessage(Sender: TObject);

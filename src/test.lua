@@ -6,11 +6,12 @@ lmc_xpl_text('From LUA macros')
 
 --lmc_log_all();
 lmc_log_module('XPL')
+lmc_xpl_log_file('luamacros1.log')
 lmc_log_module('LUA')
 --lmc_log_module('CFG')
 --lmc_log_module('SPE')
 --lmc_log_module('HTP')
-lmc_log_spool('lmc_spool.log')
+--lmc_log_spool('lmc_spool.log')
 print('Version: ' .. lmc.version)
 lmc.minimizeToTray = true
 if (lmc.minimizeToTray) then
@@ -146,9 +147,12 @@ end)
 
 
 varName='sim/cockpit2/radios/actuators/adf1_frequency_hz'
+--varName='sim/cockpit/radios/gps_dme_time_secs'
 lmc_on_xpl_var_change(varName,
   function(value, count)
-    print(varName .. ' changed to ' .. value .. ' with ' .. count .. ' changes')
+    --print(varName .. ' changed to ' .. value .. ' with ' .. count .. ' changes')
+    print('callback')
+    print(string.format('Value is %d', math.huge))
   end, 1000, 5)
 print('XPL Callback set')
 

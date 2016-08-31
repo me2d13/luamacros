@@ -182,6 +182,12 @@ type
     procedure WriteIdentByte(pStream: TStream);override;
   end;
 
+  { TXplSetLogFile }
+
+  TXplSetLogFile = class (TXplCallWithName)
+  protected
+    procedure WriteIdentByte(pStream: TStream);override;
+  end;
 
 
 implementation
@@ -196,6 +202,13 @@ begin
   //GetLocaleFormatSettings(GetThreadLocale, myFormatSettings);
   DecimalSeparator := '.';
   Result := StrToFloat(Value);
+end;
+
+{ TXplSetLogFile }
+
+procedure TXplSetLogFile.WriteIdentByte(pStream: TStream);
+begin
+  pStream.WriteByte(HDMC_SET_LOG_FILE);
 end;
 
 { TXplUnhookVariable }

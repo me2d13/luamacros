@@ -15,6 +15,7 @@ function SetXplVariable(luaState : TLuaState) : integer;
 function XplDrawText(luaState : TLuaState) : integer;
 function XplVarChange(luaState : TLuaState) : integer;
 function UnregisterXplVarChange(luaState : TLuaState) : integer;
+function SetXplLogFile(luaState : TLuaState) : integer;
 
 
 implementation
@@ -205,6 +206,22 @@ begin
     raise LmcException.Create('1st parameter is supposed to be a string.');
   Glb.XplControl.UnhookVariable(lVarName);
   Result := 0;
+end;
+
+function SetXplLogFile(luaState: TLuaState): integer;
+var arg : PAnsiChar;
+begin
+     //reads the first parameter passed to Increment as an integer
+     arg := lua_tostring(luaState, 1);
+
+     //print
+     Glb.XplControl.SetLogFile(arg);
+
+     //clears current Lua stack
+     Lua_Pop(luaState, Lua_GetTop(luaState));
+
+     //Result : number of results to give back to Lua
+     Result := 0;
 end;
 
 end.

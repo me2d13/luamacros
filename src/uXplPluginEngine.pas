@@ -14,6 +14,7 @@ TCallbackInfoMap = TFPGMap<Int64,TXplVariableCallbackInfo>;
 
 TXplEngine = class (TObject)
     fDebugging: Boolean;
+    fDebugLogFileName: String;
     fTextToBeDrawn: String;
     fScreenWidth: Integer;
     fScreenHeight: Integer;
@@ -40,12 +41,13 @@ TXplEngine = class (TObject)
     procedure RunAndFreeCommand(pComm: TXplCallWithName);
     procedure RunAndFree(pVar: TXplVariableCallback); overload;
     procedure RunAndFree(pVar: TXplUnhookVariable); overload;
+    procedure RunAndFree(pVar: TXplSetLogFile); overload;
     function GetOrRegisterXplVariable(pName: String): TXplVariable;
     function GetOrRegisterXplCommand(pName: String): XPLMCommandRef;
     function GetOrRegisterXplVariableCallback(pId: Int64; pName: String): TXplVariableCallbackInfo;
     procedure SetVariable(pDef: TXplVariable; pVal: TXplValue; pIndex: Int64);
-    function GetVariable(pDef: TXplVariable): TXplValue; overload;
-    function GetVariable(pDef: TXplVariable; pIndex: Integer): TXplValue; overload;
+    function GetVariable(pDef: TXplVariable; pProduceLog: Boolean): TXplValue; overload;
+    function GetVariable(pDef: TXplVariable; pIndex: Integer; pProduceLog: Boolean): TXplValue; overload;
     procedure ReconnectSenders;
     procedure CheckVariableCallbacks;
     function UnixTimestampMs: Int64;
@@ -65,9 +67,18 @@ uses SysUtils, XPLMGraphics, gl, glu, XPLMDisplay, dateutils;
 
 { TXplEngine }
 
+const
+  cLogFileTriggerName = 'lmc_log_file_trigger.log';
+
 constructor TXplEngine.Create;
 begin
-  fDebugging := FileExists('luamacros.log');
+  if (FileExists(cLogFileTriggerName)) then
+  begin
+    fDebugging:=true;
+    fDebugLogFileName:=cLogFileTriggerName;
+  end
+  else
+    fDebugging := false;
   fTextToBeDrawn:='';
   fTextFloatPosition := 0;
   fSyncSender := TXplSender.Create(cXplToLmcPipeName);
@@ -100,8 +111,8 @@ begin
     exit;
   lVal := Format('%s [XPLLUMplugin]: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), Value]);
   // to file
-  AssignFile(logFile, 'luamacros.log');
-  if FileExists('luamacros.log') then
+  AssignFile(logFile, fDebugLogFileName);
+  if FileExists(fDebugLogFileName) then
       Append(logFile)
     else
       Rewrite(logFile);
@@ -338,6 +349,7 @@ begin
         HDMC_RECONNECT: ReconnectSenders;
         HDMC_VAR_CALLBACK: RunAndFree(TXplVariableCallback.Create(lStream));
         HDMC_UNHOOK_VAR: RunAndFree(TXplUnhookVariable.Create(lStream));
+        HDMC_SET_LOG_FILE: RunAndFree(TXplSetLogFile.Create(lStream));
       end;
     except
       on E:Exception do
@@ -415,7 +427,7 @@ begin
   lXV := GetOrRegisterXplVariable(pVar.Name);
   if (lXV <> nil) then
   begin
-    lValue := GetVariable(lXV, pVar.Index);
+    lValue := GetVariable(lXV, pVar.Index, True);
     if (lValue <> nil) then
     begin
       fSyncSender.SendMessage(TXplVariableValue.Create(pVar.Name, lValue, pVar.Id));
@@ -490,6 +502,14 @@ begin
     else
       Inc(i);
   end;
+  pVar.Free;
+end;
+
+procedure TXplEngine.RunAndFree(pVar: TXplSetLogFile);
+begin
+  fDebugging:=True;
+  fDebugLogFileName:=pVar.Name;
+  DebugLogFmt('Received log file name %s', [fDebugLogFileName]);
   pVar.Free;
 end;
 
@@ -633,12 +653,12 @@ begin
   DebugLogFmt('Setting done %d of variable %s', [Ord(pDef.DataType), pDef.Name]);
 end;
 
-function TXplEngine.GetVariable(pDef: TXplVariable): TXplValue;
+function TXplEngine.GetVariable(pDef: TXplVariable; pProduceLog: Boolean): TXplValue;
 begin
-  Result := GetVariable(pDef, NO_INDEX);
+  Result := GetVariable(pDef, NO_INDEX, pProduceLog);
 end;
 
-function TXplEngine.GetVariable(pDef: TXplVariable; pIndex: Integer): TXplValue;
+function TXplEngine.GetVariable(pDef: TXplVariable; pIndex: Integer; pProduceLog: Boolean): TXplValue;
 var
   lBuff: array[0..500] of char;
   lBuffPtr: PChar;
@@ -652,19 +672,22 @@ begin
     Ord(xplmType_Float):
     begin
       lSingle:=XPLMGetDataf(pDef.DataRef);
-      DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
+      if pProduceLog then
+        DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
       Result := TXplValue.Create(lSingle);
     end;
     Ord(xplmType_Double), Ord(xplmType_Double) + Ord(xplmType_Float):
     begin
       lReal:=XPLMGetDatad(pDef.DataRef);
-      DebugLog(Format('Got double value %f of variable %s.', [lReal, pDef.Name]));
+      if pProduceLog then
+        DebugLog(Format('Got double value %f of variable %s.', [lReal, pDef.Name]));
       Result := TXplValue.Create(lReal);
     end;
     Ord(xplmType_Int):
     begin
       lInt:=XPLMGetDatai(pDef.DataRef);
-      DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
+      if pProduceLog then
+        DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
       Result := TXplValue.Create(lInt);
     end;
     Ord(xplmType_Data):
@@ -675,19 +698,22 @@ begin
         lLength:=pDef.Length;
       lBuffPtr:=lBuff;
       XPLMGetDatab(pDef.DataRef, lBuffPtr, 0, lLength);
-      DebugLog('Got string value of variable ' + pDef.Name + ': ' + lBuff);
+      if pProduceLog then
+        DebugLog('Got string value of variable ' + pDef.Name + ': ' + lBuff);
       Result := TXplValue.Create(lBuff);
     end;
     Ord(xplmType_FloatArray):
     begin
       XPLMGetDatavf(pDef.DataRef, @lSingle, pIndex, 1);
-      DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
+      if pProduceLog then
+        DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
       Result := TXplValue.Create(lSingle);
     end;
     Ord(xplmType_IntArray):
     begin
       XPLMGetDatavi(pDef.DataRef, @lInt, pIndex, 1);
-      DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
+      if pProduceLog then
+        DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
       Result := TXplValue.Create(lInt);
     end;
     else
@@ -716,7 +742,7 @@ begin
   begin
     lXVC := TXplVariableCallbackInfo(fVarCallbacks.Data[I]);
     // get value
-    lValue := GetVariable(lXVC.XplVariable);
+    lValue := GetVariable(lXVC.XplVariable, False);
     if (lValue = nil) then
       Continue; // can not find out variable value
     // compare with last from info
