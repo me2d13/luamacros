@@ -15,6 +15,9 @@ Macro action can be anything scripted in Lua language with some extensions
 
 For details see http://www.hidmacros.eu/forum/
 
+# binary download
+Download [luamacros.zip](http://www.hidmacros.eu/luamacros.zip)
+
 # developers guide
 To compile & extend Luamacros yourself you need to
 * Download & install the lates Lazarus environment: http://www.lazarus-ide.org/
