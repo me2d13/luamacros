@@ -146,15 +146,20 @@ end)
 --print(lmc_http_get('http://www.hidmacros.eu/forum/'))
 
 
-varName='sim/cockpit2/radios/actuators/adf1_frequency_hz'
---varName='sim/cockpit/radios/gps_dme_time_secs'
+--varName='sim/cockpit2/radios/actuators/adf1_frequency_hz'
+varName='sim/cockpit/radios/gps_dme_time_secs'
 lmc_on_xpl_var_change(varName,
   function(value, count)
-    --print(varName .. ' changed to ' .. value .. ' with ' .. count .. ' changes')
-    print('callback')
-    print(string.format('Value is %d', math.huge))
+    print(varName .. ' changed to ' .. value .. ' with ' .. count .. ' changes')
+    print(string.format('Value is %d', value))
   end, 1000, 5)
 print('XPL Callback set')
+
+lmc_on_xpl_var_change('sim/cockpit2/radios/indicators/gps_bearing_deg_mag', function(value, count)
+     str = 'GP6_' .. string.format("%d", value) .. '|'
+      print("LUA > Arduino: " .. str .. " (GPS bearing)")
+   end, 1000, 1)
+print('XPL Callback2 set')
 
 lmc_http_server(12345, function(url)
   --lmc_xpl_text('From LUA macros', 0.5)

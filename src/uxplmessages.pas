@@ -57,6 +57,7 @@ type
     function ToString: ansistring;override;
     function Equals(pVar: TXplValue): boolean;
     function EqualsWithDelta(pVar: TXplValue; pDelta:Int64): boolean;
+    function SameDouble(pVal1, pVal2, pEpsilon: double): boolean;
     property IntValue: Int64 read fIntValue write SetIntValue;
     property DoubleValue: Double read fDoubleValue write SetDoubleValue;
     property StringValue: String read fStringValue write SetStringValue;
@@ -193,7 +194,7 @@ type
 implementation
 
 uses
-  uXplCommon;
+  uXplCommon, math;
 
 function StrToFloatWithDecimalPoint(const Value: String): Double;
 var
@@ -483,7 +484,7 @@ begin
   if (fType <> pVar.ValueType) then exit;
   Result :=
     ((fType = vtInteger) and (fIntValue = pVar.IntValue)) or
-    ((fType = vtDouble) and (fDoubleValue = pVar.DoubleValue)) or
+    ((fType = vtDouble) and (SameDouble(fDoubleValue, pVar.DoubleValue, 0))) or
     ((fType = vtString) and (fStringValue = pVar.StringValue)) or
     ((fType = vtNull));
 end;
@@ -495,9 +496,16 @@ begin
   if (fType <> pVar.ValueType) then exit;
   Result :=
     ((fType = vtInteger) and (Abs(fIntValue - pVar.IntValue) < pDelta)) or
-    ((fType = vtDouble) and (Abs(fDoubleValue - pVar.DoubleValue) < pDelta)) or
+    ((fType = vtDouble) and (SameDouble(fDoubleValue, pVar.DoubleValue, pDelta))) or
     ((fType = vtString) and (fStringValue = pVar.StringValue)) or
     ((fType = vtNull));
+end;
+
+function TXplValue.SameDouble(pVal1, pVal2, pEpsilon: double): boolean;
+begin
+  Result := (IsNan(pVal1) and IsNan(pVal2))
+         or (IsInfinite(pVal1) and IsInfinite(pVal2))
+         or (SameValue(pVal1, pVal2, pEpsilon));
 end;
 
 { TXplSetVariable }
