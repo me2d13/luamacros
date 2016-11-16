@@ -215,7 +215,7 @@ begin
       if fSequence[I+1] = '<' then
         ShiftIndex := 5;
       if fSequence[I+1] = '>' then
-        ShiftIndex := 9;
+        ShiftIndex := 10;
     end;
     case fSequence[I] of
     '(' : begin
