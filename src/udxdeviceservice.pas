@@ -81,9 +81,9 @@ begin
   Glb.DebugLog('Found game device: ' + pDeviceName + ', no of buttons: ' + IntToStr(caps.dwButtons), cDxLoggerName);
   // create kbd object
   newDevice := TDxDevice.Create;
-  newDevice.SystemId:=GUID2Str(pGUID);
+  //newDevice.SystemId:=GUID2Str(pGUID);
   //newJoy.Name := 'Game'+IntToStr(GameDevCounter+1);
-  newDevice.SystemId := pDeviceName;
+  newDevice.SystemId := pDeviceName + ' ' + GUID2Str(pGUID);
   newDevice.ButtonsCount := caps.dwButtons;
   newDevice.DiDevice := Data;
   fDevices.Add(newDevice);
