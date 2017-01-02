@@ -32,5 +32,6 @@ To compile & extend Luamacros yourself you need to
   * LuaMacros - the main application exe. Important: if you need to execute compiled exe don't forget to copy lua dlls from lib directory to the same place as exe file
   * XplPlugin - dll used as XPlane plugin. Note this is 64b project so you need to adapt FPC compiler accordingly
   * WinHook - dll to set global keyboard hook
-  
+* When starting from your build environment make sure you copy LUA dlls (see lib folder) into your output directory. These dlls must be in the same directory as LuaMacros.exe. Without them program even won't start at all or crashes with some segmentation error (in IDE)
+
 Hope it helps, have fun, feel free to extend this guide
