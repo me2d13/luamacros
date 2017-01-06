@@ -36,7 +36,7 @@ USES   XPLMDefs;
    PROCEDURE XPLMSetUsersAircraft(
                                         inAircraftPath      : Pchar);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -49,7 +49,7 @@ USES   XPLMDefs;
    PROCEDURE XPLMPlaceUserAtAirport(
                                         inAirportCode       : Pchar);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -120,7 +120,7 @@ TYPE
                                         outActiveAircraft   : Pinteger;    
                                         outController       : PXPLMPluginID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -137,7 +137,7 @@ TYPE
                                         outFileName         : Pchar;    
                                         outPath             : Pchar);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -180,7 +180,7 @@ TYPE
                                         inCallback          : XPLMPlanesAvailable_f;    
                                         inRefcon            : pointer) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -193,7 +193,7 @@ TYPE
    }
    PROCEDURE XPLMReleasePlanes;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -208,7 +208,7 @@ TYPE
    PROCEDURE XPLMSetActiveAircraftCount(
                                         inCount             : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -225,7 +225,7 @@ TYPE
                                         inIndex             : integer;    
                                         inAircraftPath      : Pchar);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -239,7 +239,7 @@ TYPE
    PROCEDURE XPLMDisableAIForPlane(
                                         inPlaneIndex        : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -264,7 +264,7 @@ TYPE
                                         inFullDraw          : integer;    
                                         inDrawStateInfo     : PXPLMPlaneDrawState_t);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -285,7 +285,7 @@ TYPE
    }
    PROCEDURE XPLMReinitUsersPlane;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}

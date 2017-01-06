@@ -81,7 +81,7 @@ TYPE
    }
    FUNCTION XPLMFindPluginsMenu: XPLMMenuID;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -107,7 +107,7 @@ TYPE
                                         inHandler           : XPLMMenuHandler_f;    
                                         inMenuRef           : pointer) : XPLMMenuID;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -121,7 +121,7 @@ TYPE
    PROCEDURE XPLMDestroyMenu(
                                         inMenuID            : XPLMMenuID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -135,7 +135,7 @@ TYPE
    PROCEDURE XPLMClearAllMenuItems(
                                         inMenuID            : XPLMMenuID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -157,7 +157,7 @@ TYPE
                                         inItemRef           : pointer;    
                                         inForceEnglish      : integer) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -170,7 +170,7 @@ TYPE
    PROCEDURE XPLMAppendMenuSeparator(
                                         inMenu              : XPLMMenuID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -187,7 +187,7 @@ TYPE
                                         inItemName          : Pchar;    
                                         inForceEnglish      : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -202,7 +202,7 @@ TYPE
                                         index               : integer;    
                                         inCheck             : XPLMMenuCheck);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -218,7 +218,7 @@ TYPE
                                         index               : integer;    
                                         outCheck            : PXPLMMenuCheck);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -233,7 +233,7 @@ TYPE
                                         index               : integer;    
                                         enabled             : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -249,7 +249,7 @@ TYPE
                                         inMenu              : XPLMMenuID;    
                                         inIndex             : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}

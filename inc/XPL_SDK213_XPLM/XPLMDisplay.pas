@@ -220,7 +220,7 @@ TYPE
                                         inWantsBefore       : integer;    
                                         inRefcon            : pointer) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -239,7 +239,7 @@ TYPE
                                         inWantsBefore       : integer;    
                                         inRefcon            : pointer) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -260,7 +260,7 @@ TYPE
                                         inBeforeWindows     : integer;    
                                         inRefcon            : pointer) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -277,7 +277,7 @@ TYPE
                                         inBeforeWindows     : integer;    
                                         inRefcon            : pointer) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -491,7 +491,7 @@ TYPE
                                         outWidth            : Pinteger;    { Can be nil }
                                         outHeight           : Pinteger);    { Can be nil }
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -507,7 +507,7 @@ TYPE
                                         outX                : Pinteger;    { Can be nil }
                                         outY                : Pinteger);    { Can be nil }
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -536,7 +536,7 @@ TYPE
                                         inMouseCallback     : XPLMHandleMouseClick_f;    
                                         inRefcon            : pointer) : XPLMWindowID;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -556,7 +556,7 @@ TYPE
    FUNCTION XPLMCreateWindowEx(
                                         inParams            : PXPLMCreateWindow_t) : XPLMWindowID;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -571,7 +571,7 @@ TYPE
    PROCEDURE XPLMDestroyWindow(
                                         inWindowID          : XPLMWindowID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -589,7 +589,7 @@ TYPE
                                         outRight            : Pinteger;    { Can be nil }
                                         outBottom           : Pinteger);    { Can be nil }
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -606,7 +606,7 @@ TYPE
                                         inRight             : integer;    
                                         inBottom            : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -619,7 +619,7 @@ TYPE
    FUNCTION XPLMGetWindowIsVisible(
                                         inWindowID          : XPLMWindowID) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -633,7 +633,7 @@ TYPE
                                         inWindowID          : XPLMWindowID;    
                                         inIsVisible         : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -647,7 +647,7 @@ TYPE
    FUNCTION XPLMGetWindowRefCon(
                                         inWindowID          : XPLMWindowID) : pointer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -662,7 +662,7 @@ TYPE
                                         inWindowID          : XPLMWindowID;    
                                         inRefcon            : pointer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -677,7 +677,7 @@ TYPE
    PROCEDURE XPLMTakeKeyboardFocus(
                                         inWindow            : XPLMWindowID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -692,7 +692,7 @@ TYPE
    PROCEDURE XPLMBringWindowToFront(
                                         inWindow            : XPLMWindowID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -706,7 +706,7 @@ TYPE
    FUNCTION XPLMIsWindowInFront(
                                         inWindow            : XPLMWindowID) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -754,7 +754,7 @@ TYPE
                                         inCallback          : XPLMHotKey_f;    
                                         inRefcon            : pointer) : XPLMHotKeyID;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -767,7 +767,7 @@ TYPE
    PROCEDURE XPLMUnregisterHotKey(
                                         inHotKey            : XPLMHotKeyID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -779,7 +779,7 @@ TYPE
    }
    FUNCTION XPLMCountHotKeys: integer;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -792,7 +792,7 @@ TYPE
    FUNCTION XPLMGetNthHotKey(
                                         inIndex             : integer) : XPLMHotKeyID;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -810,7 +810,7 @@ TYPE
                                         outDescription      : Pchar;    { Can be nil }
                                         outPlugin           : PXPLMPluginID);    { Can be nil }
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -826,7 +826,7 @@ TYPE
                                         inVirtualKey        : char;    
                                         inFlags             : XPLMKeyFlags);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}

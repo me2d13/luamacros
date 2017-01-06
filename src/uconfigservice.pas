@@ -15,6 +15,7 @@ const
 
   cParamMinimizeToTray = 'MINIMIZETOTRAY';
   cParamVersion = 'VERSION';
+  cParamDxTimerIntervalMs = 'DXTIMERINTERVALMS';
 
 type
 
@@ -34,17 +35,20 @@ type
 
   TConfigService = class
     private
-      fParams: array[0..1] of TInternalParamDescriptor;
+      fParams: array[0..2] of TInternalParamDescriptor;
       fMinimizeToTray: boolean;
       fVersion: String;
+      fDxTimerIntervalMs: Integer;
     public
       constructor Create;
       procedure InitParams;
       function GetDescriptor(pName: String): TParamDescriptor;
       function GetBoolean(pName: String): boolean;
       function GetString(pName: String): String;
+      function GetInteger(pName: String): Integer;
       procedure SetBoolean(pName: String; pValue: Boolean);
       procedure SetVersion(pVersion: String);
+      procedure SetInteger(pName: String; pValue: Integer);
   end;
 
 implementation
@@ -57,6 +61,7 @@ var
   lNumOfParams: Integer;
   arg : PAnsiChar;
   lBoolean: Boolean;
+  lInteger: Integer;
   lDesc: TParamDescriptor;
 begin
   lNumOfParams:=lua_gettop(L);
@@ -75,6 +80,15 @@ begin
     end
     else
       raise LmcException.Create('Parameter ' + arg + ' is supposed to be a boolean.');
+  end else if (lDesc.ParamType = vtInteger) then
+  begin
+    if (lua_isnumber(L, 3) <> 0) then
+    begin
+      lInteger := lua_tointeger(L, 3);
+      Glb.ConfigService.SetInteger(arg, lInteger);
+    end
+    else
+      raise LmcException.Create('Parameter ' + arg + ' is supposed to be an integer.');
   end
   else
     raise LmcException.Create('Unsupported type of parameter ' + arg);
@@ -103,6 +117,9 @@ begin
   end else if (lDesc.ParamType = vtString) then
   begin
     lua_pushstring(L, PChar(Glb.ConfigService.GetString(arg)));
+  end else if (lDesc.ParamType = vtInteger) then
+  begin
+    lua_pushinteger(L, Glb.ConfigService.GetInteger(arg));
   end
   else
     raise LmcException.Create('Unsupported type of parameter ' + arg);
@@ -115,6 +132,7 @@ constructor TConfigService.Create;
 begin
   fMinimizeToTray:=False;
   fVersion:='?';
+  fDxTimerIntervalMs:=50;
   InitParams;
 end;
 
@@ -129,6 +147,11 @@ begin
   fParams[1].ParamType:=vtString;
   fParams[1].ReadOnly:=True;
   fParams[1].Value:=@fVersion;
+
+  fParams[2].Name:=cParamDxTimerIntervalMs;
+  fParams[2].ParamType:=vtInteger;
+  fParams[2].ReadOnly:=False;
+  fParams[2].Value:=@fDxTimerIntervalMs;
 end;
 
 function TConfigService.GetDescriptor(pName: String): TParamDescriptor;
@@ -193,6 +216,27 @@ begin
   raise LmcException.Create('Unknown parameter ' + pName);
 end;
 
+function TConfigService.GetInteger(pName: String): Integer;
+var
+  lNameUpper: String;
+  lPar: TInternalParamDescriptor;
+begin
+  lNameUpper:=UpperCase(pName);
+  for lPar in fParams do
+  begin
+    if (lPar.Name = lNameUpper) then
+    begin
+      if (lPar.ParamType = vtInteger) then
+      begin
+        Result := PInteger(lPar.Value)^;
+        exit;
+      end else
+        raise LmcException.Create('Parameter ' + pName + ' is not an integer.');
+    end;
+  end;
+  raise LmcException.Create('Unknown parameter ' + pName);
+end;
+
 procedure TConfigService.SetBoolean(pName: String; pValue: Boolean);
 var
   lNameUpper: String;
@@ -218,6 +262,28 @@ end;
 procedure TConfigService.SetVersion(pVersion: String);
 begin
   fVersion:=pVersion;
+end;
+
+procedure TConfigService.SetInteger(pName: String; pValue: Integer);
+var
+  lNameUpper: String;
+  lPar: TInternalParamDescriptor;
+begin
+  Glb.DebugLog('Setting integer ' + pName, cLoggerCfg);
+  lNameUpper:=UpperCase(pName);
+  for lPar in fParams do
+  begin
+    if (lPar.Name = lNameUpper) then
+    begin
+      if (lPar.ParamType = vtInteger) then
+      begin
+        PInteger(lPar.Value)^ := pValue;
+        exit;
+      end else
+        raise LmcException.Create('Parameter ' + pName + ' is not an integer.');
+    end;
+  end;
+  raise LmcException.Create('Unknown parameter ' + pName);
 end;
 
 end.

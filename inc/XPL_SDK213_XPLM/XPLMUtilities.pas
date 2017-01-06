@@ -365,7 +365,7 @@ TYPE
                                         inKeyType           : integer;    
                                         inKey               : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -380,7 +380,7 @@ TYPE
    PROCEDURE XPLMSpeakString(
                                         inString            : Pchar);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -396,7 +396,7 @@ TYPE
    PROCEDURE XPLMCommandKeyStroke(
                                         inKey               : XPLMCommandKeyID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -413,7 +413,7 @@ TYPE
    PROCEDURE XPLMCommandButtonPress(
                                         inButton            : XPLMCommandButtonID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -427,7 +427,7 @@ TYPE
    PROCEDURE XPLMCommandButtonRelease(
                                         inButton            : XPLMCommandButtonID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -443,7 +443,7 @@ TYPE
    FUNCTION XPLMGetVirtualKeyDescription(
                                         inVirtualKey        : char) : Pchar;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -468,7 +468,7 @@ TYPE
    }
    PROCEDURE XPLMReloadScenery;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -483,7 +483,7 @@ TYPE
    PROCEDURE XPLMGetSystemPath(
                                         outSystemPath       : Pchar);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -498,7 +498,7 @@ TYPE
    PROCEDURE XPLMGetPrefsPath(
                                         outPrefsPath        : Pchar);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -513,7 +513,7 @@ TYPE
    }
    FUNCTION XPLMGetDirectorySeparator: Pchar;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -530,7 +530,7 @@ TYPE
    FUNCTION XPLMExtractFileAndPath(
                                         inFullPath          : Pchar) : Pchar;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -587,7 +587,7 @@ TYPE
                                         outTotalFiles       : Pinteger;    { Can be nil }
                                         outReturnedFiles    : Pinteger) : integer;    { Can be nil }
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -606,7 +606,7 @@ TYPE
    }
    FUNCTION XPLMInitialized: integer;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -627,7 +627,7 @@ TYPE
                                         outXPLMVersion      : Pinteger;    
                                         outHostID           : PXPLMHostApplicationID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -639,7 +639,7 @@ TYPE
    }
    FUNCTION XPLMGetLanguage: XPLMLanguageCode;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -654,7 +654,7 @@ TYPE
    PROCEDURE XPLMDebugString(
                                         inString            : Pchar);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -681,7 +681,7 @@ TYPE
    PROCEDURE XPLMSetErrorCallback(
                                         inCallback          : XPLMError_f);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -698,7 +698,7 @@ TYPE
    FUNCTION XPLMFindSymbol(
                                         inString            : Pchar) : pointer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -716,7 +716,7 @@ TYPE
                                         inFileType          : XPLMDataFileType;    
                                         inFilePath          : Pchar) : integer;    { Can be nil }
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -733,7 +733,7 @@ TYPE
                                         inFileType          : XPLMDataFileType;    
                                         inFilePath          : Pchar) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -817,7 +817,7 @@ TYPE
    FUNCTION XPLMFindCommand(
                                         inName              : Pchar) : XPLMCommandRef;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -832,7 +832,7 @@ TYPE
    PROCEDURE XPLMCommandBegin(
                                         inCommand           : XPLMCommandRef);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -846,7 +846,7 @@ TYPE
    PROCEDURE XPLMCommandEnd(
                                         inCommand           : XPLMCommandRef);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -860,7 +860,7 @@ TYPE
    PROCEDURE XPLMCommandOnce(
                                         inCommand           : XPLMCommandRef);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -877,7 +877,7 @@ TYPE
                                         inName              : Pchar;    
                                         inDescription       : Pchar) : XPLMCommandRef;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -900,7 +900,7 @@ TYPE
                                         inBefore            : integer;    
                                         inRefcon            : pointer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -917,7 +917,7 @@ TYPE
                                         inBefore            : integer;    
                                         inRefcon            : pointer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}

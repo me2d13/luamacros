@@ -5,11 +5,25 @@ unit uDxDeviceService;
 interface
 
 uses
-  Classes, SysUtils, uDxDevice, fgl, DirectInput;
+  Classes, SysUtils, uDxDevice, fgl, DirectInput, Lua;
 
 type
   TDxDeviceList = TFPGObjectList<TDxDevice>;
   TNewDxDeviceCallback = procedure(pDevice: TDxDevice) of object;
+
+  TAxisHandlerInfo = class
+    public
+      Device: TDxDevice;
+      AxisNumber: Integer;
+      Interval: Integer;
+      Tolerance: Integer;
+      LuaRef: Integer;
+      LastEventTs: Int64;
+      LastEventValue: Integer;
+  end;
+
+  TAxisHandlerInfoList = TFPGObjectList<TAxisHandlerInfo>;
+
 
   { TDxDeviceService }
 
@@ -18,21 +32,28 @@ type
       fDevices: TDxDeviceList;
       fDInput : IDIRECTINPUT8; //DirectInput
       fOnNewDevice: TNewDxDeviceCallback;
+      fAxisHandlers: TAxisHandlerInfoList;
       procedure AddGameDevice(pDeviceName: String; Data: IDIRECTINPUTDEVICE8; pGUID: TGUID); // called by Dx Detect
       function GUID2Str(pGUID: TGUID): String;
+      procedure SetBufferSize(pDevice: TDxDevice);
+      procedure CheckAxisChangesInIntervalAfterPassingIntervalWindow(pDevice: TDxDevice);
     public
       constructor Create;
       destructor Destroy; virtual;
       procedure Init;
       function DetectDevices: Integer;
+      procedure HandleAxisEvent(pDevice: TDxDevice; event: DIDEVICEOBJECTDATA; pAxisIndex: Integer);
       procedure TickMe;
+      procedure SetAxisHandler(pDeviceName: String; pAxisNumber: Integer; pInterval: Integer; pTolerance: Integer; pHandlerRef: Integer);
       property OnNewDevice: TNewDxDeviceCallback read fOnNewDevice write fOnNewDevice;
   end;
+
+  function LuaCmdSetAxisHandler(luaState : TLuaState) : integer;
 
 implementation
 
 uses
-  uGlobals, uMainFrm, Windows;
+  uGlobals, uMainFrm, Windows, uDevice;
 
 function EnumJoysticksCallback(const lpddi: TDIDeviceInstanceA;
   pvRef: Pointer): HRESULT; stdcall;
@@ -63,6 +84,45 @@ begin
   end;
 end;
 
+function LuaCmdSetAxisHandler(luaState: TLuaState): integer;
+var
+  lDeviceName : PAnsiChar;
+  lAxisNumber : Integer;
+  lAxisNumberString : String;
+  lInterval : Integer;
+  lTolerance: Integer;
+  lHandlerRef: Integer;
+  lNumOfParams: Integer;
+begin
+  // Device name
+  // Axis number
+  // Interval
+  // Tolerance
+  // handler
+  lNumOfParams:=lua_gettop(luaState);
+  lDeviceName := lua_tostring(luaState, 1);
+  if (lNumOfParams = 5) then
+  begin
+    if lua_isnumber(luaState, 2) = 1 then
+      lAxisNumber:= Trunc(lua_tonumber(luaState, 2))
+    else if lua_isstring(luaState, 2) = 1 then
+    begin
+      lAxisNumberString := lua_tostring(luaState, 2);
+      if (Length(lAxisNumberString) <> 1) then
+        raise LmcException.Create('Wrong length of 2nd parameter. It must be 1 char');
+      lAxisNumber:=Ord(lAxisNumberString[1]);
+    end else
+      raise LmcException.Create('Wrong type of 2nd parameter. Provide int or char.');
+    lInterval:= Trunc(lua_tonumber(luaState, 3));
+    lTolerance:= Trunc(lua_tonumber(luaState, 4));
+    lHandlerRef := luaL_ref(luaState, LUA_REGISTRYINDEX);
+    Glb.DebugLog(Format('Got function reference with key %d', [lHandlerRef]), cLoggerLua);
+    Glb.DeviceService.DxDeviceService.SetAxisHandler(lDeviceName,lAxisNumber, lInterval, lTolerance, lHandlerRef);
+  end else
+    raise LmcException.Create('5 parameters expected: device, axis_number, interval[0], tolerance[1], handler');
+  Result := 0;
+end;
+
 
 { TDxDeviceService }
 
@@ -78,15 +138,18 @@ begin
   if FAILED(hr) then
     exit;
   // add string to log
-  Glb.DebugLog('Found game device: ' + pDeviceName + ', no of buttons: ' + IntToStr(caps.dwButtons), cDxLoggerName);
-  // create kbd object
   newDevice := TDxDevice.Create;
-  //newDevice.SystemId:=GUID2Str(pGUID);
-  //newJoy.Name := 'Game'+IntToStr(GameDevCounter+1);
   newDevice.SystemId := pDeviceName + ' ' + GUID2Str(pGUID);
+  Glb.DebugLogFmt('Found game device: %s, %d buttons, %d axis, %d POVs.',
+     [newDevice.SystemId, caps.dwButtons, caps.dwAxes, caps.dwPOVs], cLoggerDx);
+  // create kbd object
+  newDevice.Name:=newDevice.SystemId;
   newDevice.ButtonsCount := caps.dwButtons;
+  newDevice.AxisCount := caps.dwAxes;
+  newDevice.POVsCount := caps.dwPOVs;
   newDevice.DiDevice := Data;
   fDevices.Add(newDevice);
+  SetBufferSize(newDevice);
   Glb.DeviceService.Devices.Add(newDevice);
   if Assigned(fOnNewDevice) then
     fOnNewDevice(newDevice);
@@ -102,14 +165,58 @@ begin
     Result := Result + IntToHex(pGUID.D4[I], 2);
 end;
 
+procedure TDxDeviceService.SetBufferSize(pDevice: TDxDevice);
+var
+  dipdw : DIPROPDWORD;
+begin
+  dipdw.diph.dwSize := SizeOf(DIPROPDWORD);
+  dipdw.diph.dwHeaderSize := SizeOf(DIPROPHEADER);
+  dipdw.diph.dwObj := 0;
+  dipdw.diph.dwHow := DIPH_DEVICE;
+  dipdw.dwData := pDevice.BufferSize;
+  if (pDevice.DIDevice.SetProperty(DIPROP_BUFFERSIZE, dipdw.diph) <> DI_OK) then
+  begin
+    Glb.LogError('Cannot set buffered mode for device ' + pDevice.Name, cLoggerDx);
+  end else begin
+    Glb.DebugLogFmt('Set buffered mode for device %s', [pDevice.Name], cLoggerDx);
+  end;
+end;
+
+procedure TDxDeviceService.CheckAxisChangesInIntervalAfterPassingIntervalWindow(
+  pDevice: TDxDevice);
+var
+  lAxisHandlerInfo: TAxisHandlerInfo;
+  lNow: Int64;
+  lData: Int64;
+begin
+  for lAxisHandlerInfo in fAxisHandlers do
+  begin
+    if (pDevice = lAxisHandlerInfo.Device) then
+    begin
+      lNow:=GetTickCount64;
+      lData:=pDevice.AxisValue[lAxisHandlerInfo.AxisNumber];
+      if (lNow - lAxisHandlerInfo.LastEventTs >= lAxisHandlerInfo.Interval) and
+         (Abs(lAxisHandlerInfo.LastEventValue - lData) >= lAxisHandlerInfo.Tolerance) then
+      begin
+        Glb.DebugLogFmt('Device %s axis pending value triggerred lua handler call, axis %d, data %d', [pDevice.Name, lAxisHandlerInfo.AxisNumber, lData], cLoggerDx);
+        lAxisHandlerInfo.LastEventValue:=lData;
+        lAxisHandlerInfo.LastEventTs:=lNow;
+        Glb.LuaEngine.CallFunctionByRef(lAxisHandlerInfo.LuaRef, lData, lNow);
+      end;
+    end;
+  end;
+end;
+
 constructor TDxDeviceService.Create;
 begin
   fDevices := TDxDeviceList.Create();
+  fAxisHandlers := TAxisHandlerInfoList.Create();
 end;
 
 destructor TDxDeviceService.Destroy;
 begin
   fDevices.Free;
+  fAxisHandlers.Free;
   if fDInput <> nil then
     fDInput._Release;
 end;
@@ -122,12 +229,12 @@ begin
   hr := DirectInput8Create(GetModuleHandle(nil),DIRECTINPUT_VERSION,IID_IDirectInput8,fDInput,nil);
   if (FAILED(hr)) then
   begin
-    Glb.LogError('Can not init Direct input. Error ' + IntToHex(hr, 8), cDxLoggerName);
+    Glb.LogError('Can not init Direct input. Error ' + IntToHex(hr, 8), cLoggerDx);
     exit;
   end;
   if (fDInput = nil) then
   begin
-    Glb.LogError('Direct input initialization error', cDxLoggerName);
+    Glb.LogError('Direct input initialization error', cLoggerDx);
     exit;
   end;
 end;
@@ -139,12 +246,66 @@ begin
   Result := fDevices.Count;
 end;
 
+procedure TDxDeviceService.HandleAxisEvent(pDevice: TDxDevice;
+  event: DIDEVICEOBJECTDATA; pAxisIndex: Integer);
+var
+  lAxisHandlerInfo: TAxisHandlerInfo;
+  lNow: Int64;
+  lData: Int64;
+begin
+  //Glb.DebugLogFmt('Device %s axis event, axis %d, data %d', [pDevice.Name, pAxisIndex, event.dwData], cLoggerDx);
+  for lAxisHandlerInfo in fAxisHandlers do
+  begin
+    if (pDevice = lAxisHandlerInfo.Device) and (lAxisHandlerInfo.AxisNumber = pAxisIndex) then
+    begin
+      lNow:=GetTickCount64;
+      if (lNow - lAxisHandlerInfo.LastEventTs >= lAxisHandlerInfo.Interval) and
+         (Abs(lAxisHandlerInfo.LastEventValue - event.dwData) >= lAxisHandlerInfo.Tolerance) then
+      begin
+        Glb.DebugLogFmt('Device %s axis event triggerred lua handler call, axis %d, data %d', [pDevice.Name, pAxisIndex, event.dwData], cLoggerDx);
+        lAxisHandlerInfo.LastEventValue:=event.dwData;
+        lAxisHandlerInfo.LastEventTs:=lNow;
+        lData := event.dwData;
+        Glb.LuaEngine.CallFunctionByRef(lAxisHandlerInfo.LuaRef, lData, event.dwTimeStamp);
+      end;
+    end;
+  end;
+end;
+
 procedure TDxDeviceService.TickMe;
 var
   lDev : TDxDevice;
 begin
   for lDev in fDevices do
-    lDev.DetectChanges;
+  begin
+    lDev.ReadEventBuffer;
+    CheckAxisChangesInIntervalAfterPassingIntervalWindow(lDev);
+  end;
+end;
+
+procedure TDxDeviceService.SetAxisHandler(pDeviceName: String;
+  pAxisNumber: Integer; pInterval: Integer; pTolerance: Integer;
+  pHandlerRef: Integer);
+var
+  lDevice: TDevice;
+  lHandler: TAxisHandlerInfo;
+begin
+  lDevice := Glb.DeviceService.GetByName(pDeviceName);
+  if (lDevice = nil) then
+    Glb.LogError('Device with name ' + pDeviceName + ' not found', cLoggerDx)
+  else if (not (lDevice is TDxDevice)) then
+    Glb.LogError('Device ' + pDeviceName + ' is not game device. Axis are supposed to be handled for game devices only.', cLoggerDx)
+  else begin
+    lHandler := TAxisHandlerInfo.Create;
+    lHandler.Device := lDevice as TDxDevice;
+    lHandler.AxisNumber:=pAxisNumber;
+    lHandler.Interval:=pInterval;
+    lHandler.Tolerance:=pTolerance;
+    lHandler.LuaRef:=pHandlerRef;
+    fAxisHandlers.Add(lHandler);
+    Glb.DebugLog(Format('Added handler %d for axes %d of device %s, interval %d, tolerance %d',
+        [pHandlerRef, pAxisNumber, lDevice.Name, pInterval, pTolerance]), cLoggerDx);
+  end;
 end;
 
 

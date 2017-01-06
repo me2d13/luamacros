@@ -89,10 +89,30 @@ type
 
   TRiRefIntegerInteger = class (TRiRef)
     protected
-      fPar1: Integer;
-      fPar2: Integer;
+      fPar1: Int64;
+      fPar2: Int64;
     public
-      constructor Create(pRef: Integer; p1, p2: Integer);
+      constructor Create(pRef: Integer; p1, p2: Int64);
+      procedure Execute(pLua: TLua); override;
+      function Describe: String; override;
+  end;
+
+  { TRiRefIntegerIntegerInt64 }
+
+  TRiRefIntegerIntegerInt64 = class (TRiRefIntegerInteger)
+    protected
+      fPar3: Int64;
+    public
+      constructor Create(pRef: Integer; p1, p2: Integer; p3: Int64);
+      procedure Execute(pLua: TLua); override;
+      function Describe: String; override;
+  end;
+
+  TRiRefInteger = class (TRiRef)
+    protected
+      fPar1: Integer;
+    public
+      constructor Create(pRef: Integer; p1: Integer);
       procedure Execute(pLua: TLua); override;
       function Describe: String; override;
   end;
@@ -157,7 +177,7 @@ type
       procedure RegisterFunctions;
       procedure RegisterConfig;
       procedure CallFunctionByRef(pRef: Integer);overload;
-      procedure CallFunctionByRef(pRef: Integer; pKey: Integer; pDirection: Integer);overload;
+      procedure CallFunctionByRef(pRef: Integer; pKey: Int64; pDirection: Int64; pTimeStamp: Int64);overload;
     public
       constructor Create;
       destructor Destroy;override;
@@ -168,6 +188,7 @@ type
       procedure SetCallback(pDeviceName: String; pButton: Integer; pDirection: Integer; pHandlerRef: Integer);
       procedure SetDeviceCallback(pDeviceName: String; pHandlerRef: Integer);
       procedure OnDeviceEvent(pDevice: TDevice; pButton: Integer; pDirection: Integer);overload;
+      procedure OnDeviceEvent(pDevice: TDevice; pButton: Integer; pDirection: Integer; pTimeStamp: Int64);overload;
       procedure OnDeviceEvent(pDevice: TDevice; pData: String);overload;
       function IsKeyHandled(pKsPtr: TKeyStrokePtr): boolean;
       function GetQueueSize: Integer;
@@ -176,6 +197,8 @@ type
       procedure StackDump(pLuaState: TLuaState);
       procedure CallFunctionByRef(pRef: Integer; pValue: TXplVariableValue; pChangeCount: Integer);overload;
       procedure CallFunctionByRef(pRef: Integer; pData: String);overload;
+      procedure CallFunctionByRef(pRef: Integer; pData: Integer);overload;
+      procedure CallFunctionByRef(pRef: Integer; pKey: Int64; pDirection: Int64);overload;
       function CallFunctionByRefWithResult(pRef: Integer; pData: String):TLuaResult;
       property ScriptToRun: String read fScriptToRun write fScriptToRun;
   end;
@@ -184,7 +207,7 @@ implementation
 
 uses uMainFrm, uGlobals,
   uLuaCmdXpl, uLuaCmdDevice, uComDevice, uLuaCmdMainWindow, uConfigService,
-  uLuaCmdHttp;
+  uLuaCmdHttp, uDxDeviceService;
 
 const
 {$IFDEF UNIX}
@@ -202,6 +225,53 @@ const
 {$ENDIF}
 
   cMaxQueueSize = 30;
+
+{ TRiRefIntegerIntegerInt64 }
+
+constructor TRiRefIntegerIntegerInt64.Create(pRef: Integer; p1, p2: Integer;
+  p3: Int64);
+begin
+  inherited Create(pRef, p1, p2);
+  fPar3:=p3;
+end;
+
+procedure TRiRefIntegerIntegerInt64.Execute(pLua: TLua);
+begin
+  if (pLua = nil) then
+    raise LmcException.Create('LUA not initialized');
+  lua_rawgeti(pLua.LuaInstance, LUA_REGISTRYINDEX, fRef);
+  lua_pushinteger(pLua.LuaInstance, fPar1);
+  lua_pushinteger(pLua.LuaInstance, fPar2);
+  lua_pushinteger(pLua.LuaInstance, fPar3);
+  lua_pcall(pLua.LuaInstance, 3, 0, LUA_MULTRET);
+end;
+
+function TRiRefIntegerIntegerInt64.Describe: String;
+begin
+  Result:=Format('callback id %d, int params %d, %d, %d', [fRef, fPar1, fPar2, fPar3]);
+end;
+
+{ TRiRefInteger }
+
+constructor TRiRefInteger.Create(pRef: Integer; p1: Integer);
+begin
+  inherited Create(pRef);
+  fPar1:=p1;
+end;
+
+procedure TRiRefInteger.Execute(pLua: TLua);
+begin
+  if (pLua = nil) then
+    raise LmcException.Create('LUA not initialized');
+  lua_rawgeti(pLua.LuaInstance, LUA_REGISTRYINDEX, fRef);
+  lua_pushinteger(pLua.LuaInstance, fPar1);
+  lua_pcall(pLua.LuaInstance, 1, 0, LUA_MULTRET);
+end;
+
+function TRiRefInteger.Describe: String;
+begin
+  Result:=Format('callback id %d, int param %d', [fRef, fPar1]);
+end;
 
 { TLuaResult }
 
@@ -258,7 +328,7 @@ end;
 
 constructor TFuncItem.Create;
 begin
-  fEvent := TEventObject.Create(nil, true, false, 'LuaFunc' + IntToStr(Glb.KeyLogService.UnixTimestampMs));
+  fEvent := TEventObject.Create(nil, true, false, 'LuaFunc' + IntToStr(Glb.UnixTimestampMs));
 end;
 
 destructor TFuncItem.Destroy;
@@ -474,7 +544,7 @@ end;
 
 { TRiRefIntegerInteger }
 
-constructor TRiRefIntegerInteger.Create(pRef: Integer; p1, p2: Integer);
+constructor TRiRefIntegerInteger.Create(pRef: Integer; p1, p2: Int64);
 begin
   inherited Create(pRef);
   fPar1:=p1;
@@ -617,6 +687,7 @@ begin
   fLua.RegisterFunction('lmc_assign_keyboard','',nil,@CheckDeviceNameWithAsk);
   fLua.RegisterFunction('lmc_device_set_name','',nil,@AssignDeviceNameByRegexp);
   fLua.RegisterFunction('lmc_set_handler','',nil,@LuaCmdSetCallback);
+  fLua.RegisterFunction('lmc_set_axis_handler','',nil,@LuaCmdSetAxisHandler);
   // serial
   fLua.RegisterFunction('lmc_add_com','',nil,@AddCom);
   fLua.RegisterFunction('lmc_send_to_com','',nil,@SendCom);
@@ -677,6 +748,11 @@ begin
   fExecutor.Run(TRiRefString.Create(pRef, pData));
 end;
 
+procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pData: Integer);
+begin
+  fExecutor.Run(TRiRefInteger.Create(pRef, pData));
+end;
+
 function TLuaEngine.CallFunctionByRefWithResult(pRef: Integer; pData: String
   ): TLuaResult;
 begin
@@ -684,10 +760,16 @@ begin
   Result := fExecutor.Run(TFiRefString.Create(pRef, pData));
 end;
 
-procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pKey: Integer;
-  pDirection: Integer);
+procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pKey: Int64;
+  pDirection: Int64);
 begin
   fExecutor.Run(TRiRefIntegerInteger.Create(pRef, pKey, pDirection));
+end;
+
+procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pKey: Int64;
+  pDirection: Int64; pTimeStamp: Int64);
+begin
+  fExecutor.Run(TRiRefIntegerIntegerInt64.Create(pRef, pKey, pDirection, pTimeStamp));
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer;
@@ -825,6 +907,12 @@ end;
 
 procedure TLuaEngine.OnDeviceEvent(pDevice: TDevice; pButton: Integer;
   pDirection: Integer);
+begin
+  OnDeviceEvent(pDevice, pButton, pDirection, 0);
+end;
+
+procedure TLuaEngine.OnDeviceEvent(pDevice: TDevice; pButton: Integer;
+  pDirection: Integer; pTimeStamp: Int64);
 var
   lTrigger: TTrigger;
 begin
@@ -844,7 +932,10 @@ begin
       begin
         Glb.DebugLog(Format('Calling handler %d for device %s with params key %d, direction %d',
             [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), cLoggerLua);
-        CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection);
+        if (pTimeStamp > 0) then
+          CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection, pTimeStamp)
+        else
+          CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection);
       end;
     end;
   end;

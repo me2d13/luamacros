@@ -50,6 +50,7 @@ type
       function IsModuleLogged(pLogger: String) : boolean;
       procedure TickMe;
       procedure FlushBuffer;
+      function UnixTimestampMs: Int64;
 
       property XplControl: TXPLcontrol read fXplCLcontrol;
       property LogFunction: TLogFunction read fLogFunction write fLogFunction;
@@ -91,6 +92,7 @@ const
   cLoggerCom = 'COM';
   cLoggerSpe = 'SPE';
   cLoggerHook = 'HOOK';
+  cLoggerDx = 'DX';
 
 
 function Sto_GetFmtFileVersion(const FileName: String = ''; const Fmt: String = '%d.%d.%d.%d'): String;
@@ -325,6 +327,13 @@ begin
       LeaveCriticalSection(fLogCs);
     end;
   end;
+end;
+
+function TGlobals.UnixTimestampMs: Int64;
+begin
+  //Result := Round(Now * 24*60*60*1000);
+  //Result := Trunc((Now - EncodeDate(1970, 1 ,1)) * 24 * 60 * 60);
+  Result := Round((Now - 25569) * 86400)*1000;
 end;
 
 initialization

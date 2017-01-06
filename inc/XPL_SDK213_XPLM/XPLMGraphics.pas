@@ -126,7 +126,7 @@ TYPE
                                         inEnableDepthTesting: integer;    
                                         inEnableDepthWriting: integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -152,7 +152,7 @@ TYPE
                                         inTextureNum        : integer;    
                                         inTextureUnit       : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -173,7 +173,7 @@ TYPE
                                         outTextureIDs       : Pinteger;    
                                         inCount             : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -194,7 +194,7 @@ TYPE
    FUNCTION XPLMGetTexture(
                                         inTexture           : XPLMTextureID) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -215,7 +215,7 @@ TYPE
                                         outY                : Preal;    
                                         outZ                : Preal);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -239,7 +239,7 @@ TYPE
                                         outLongitude        : Preal;    
                                         outAltitude         : Preal);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -257,7 +257,7 @@ TYPE
                                         inRight             : integer;    
                                         inBottom            : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -367,7 +367,7 @@ TYPE
                                         inWordWrapWidth     : Pinteger;    { Can be nil }
                                         inFontID            : XPLMFontID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -392,7 +392,7 @@ TYPE
                                         inShowSign          : integer;    
                                         inFontID            : XPLMFontID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -411,7 +411,7 @@ TYPE
                                         outCharHeight       : Pinteger;    { Can be nil }
                                         outDigitsOnly       : Pinteger);    { Can be nil }
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -431,7 +431,7 @@ TYPE
                                         inChar              : Pchar;    
                                         inNumChars          : integer) : single;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}

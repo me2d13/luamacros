@@ -38,7 +38,7 @@ USES   XPLMDefs;
    }
    FUNCTION XPLMGetMyID: XPLMPluginID;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -51,7 +51,7 @@ USES   XPLMDefs;
    }
    FUNCTION XPLMCountPlugins: integer;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -66,7 +66,7 @@ USES   XPLMDefs;
    FUNCTION XPLMGetNthPlugin(
                                         inIndex             : integer) : XPLMPluginID;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -81,7 +81,7 @@ USES   XPLMDefs;
    FUNCTION XPLMFindPluginByPath(
                                         inPath              : Pchar) : XPLMPluginID;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -99,7 +99,7 @@ USES   XPLMDefs;
    FUNCTION XPLMFindPluginBySignature(
                                         inSignature         : Pchar) : XPLMPluginID;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -123,7 +123,7 @@ USES   XPLMDefs;
                                         outSignature        : Pchar;    { Can be nil }
                                         outDescription      : Pchar);    { Can be nil }
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -146,7 +146,7 @@ USES   XPLMDefs;
    FUNCTION XPLMIsPluginEnabled(
                                         inPluginID          : XPLMPluginID) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -162,7 +162,7 @@ USES   XPLMDefs;
    FUNCTION XPLMEnablePlugin(
                                         inPluginID          : XPLMPluginID) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -175,7 +175,7 @@ USES   XPLMDefs;
    PROCEDURE XPLMDisablePlugin(
                                         inPluginID          : XPLMPluginID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -191,7 +191,7 @@ USES   XPLMDefs;
    }
    PROCEDURE XPLMReloadPlugins;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -280,7 +280,7 @@ CONST
                                         inMessage           : integer;    
                                         inParam             : pointer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -324,7 +324,7 @@ TYPE
    FUNCTION XPLMHasFeature(
                                         inFeature           : Pchar) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -339,7 +339,7 @@ TYPE
    FUNCTION XPLMIsFeatureEnabled(
                                         inFeature           : Pchar) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -355,7 +355,7 @@ TYPE
                                         inFeature           : Pchar;    
                                         inEnable            : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -371,7 +371,7 @@ TYPE
                                         inEnumerator        : XPLMFeatureEnumerator_f;    
                                         inRef               : pointer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}

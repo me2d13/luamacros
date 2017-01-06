@@ -300,6 +300,10 @@ begin
     if (UpperCase(Application.Params[i]) = '-R') then
     begin
       fAutoExecute := True; // start after complete init is done
+    end else if (UpperCase(Application.Params[i]) = '-L') and (i < Application.ParamCount) then
+    begin
+      Inc(i);
+      Glb.LogModule(Application.Params[i]);
     end else if FileExists(Application.Params[i]) then
     begin
       LoadFile(Application.Params[i]);
@@ -407,6 +411,7 @@ begin
   PrevWndProc:=Windows.WNDPROC(SetWindowLongPtr(Self.Handle,GWL_WNDPROC,PtrInt(@WndCallback)));
   Glb.Version:=Sto_GetFmtFileVersion();
   StatusBar1.Panels.Items[1].Text:= 'Version: ' + Glb.Version;
+  Timer1.Interval:=Glb.ConfigService.GetInteger(cParamDxTimerIntervalMs);
 end;
 
 procedure TLmcMainForm.FormDestroy(Sender: TObject);

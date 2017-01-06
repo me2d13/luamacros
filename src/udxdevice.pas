@@ -7,6 +7,9 @@ interface
 uses
   Classes, SysUtils, uDevice, DirectInput;
 
+const
+  cMaxAxisCount = 8;
+
 type
 
   { TDxDevice }
@@ -14,76 +17,150 @@ type
   TDxDevice = class(TDevice)
     private
       fButtonsCount: Integer;
+      fAxisCount: Integer;
+      fPOVsCount: Integer;
       fDIDevice: IDIRECTINPUTDEVICE8;
-      fJoyState: DIJOYSTATE2;
-
+      fBufferSize: Integer;
+      fAxisValue: array[0..cMaxAxisCount] of DWORD;
+      function GetAxisValue(I: Integer): DWORD;
+      procedure HandleEvent(event: DIDEVICEOBJECTDATA);
+      function getAxisIndex(pOffset: DWORD): Integer;
+      function getPovIndex(pOffset: DWORD): Integer;
     public
       function TypeCaption: String; override;
-      procedure DetectChanges;
-
+      procedure ReadEventBuffer;
+      constructor Create;
       property ButtonsCount : Integer read fButtonsCount write fButtonsCount;
+      property AxisCount : Integer read fAxisCount write fAxisCount;
+      property POVsCount : Integer read fPOVsCount write fPOVsCount;
+      property BufferSize: Integer read fBufferSize;
       property DIDevice : IDIRECTINPUTDEVICE8 read fDIDevice write fDIDevice;
+      property AxisValue[I:Integer]: DWORD read GetAxisValue;
   end;
-
-const
-  cDxLoggerName = 'DX';
 
 implementation
 
 uses
   Windows, uGlobals;
 
+const
+  cBufferSize = 1000;
+  cPov0Offset = 32;
+
 { TDxDevice }
+
+procedure TDxDevice.HandleEvent(event: DIDEVICEOBJECTDATA);
+var
+  lAxisIndex : Integer;
+  lPovIndex : Integer;
+begin
+  if (event.dwOfs >= DIJOFS_BUTTON0) and (event.dwOfs <= DIJOFS_BUTTON31) then
+  begin
+    Glb.DebugLogFmt('Device %s button event, offset %d, data %d', [Name, event.dwOfs, event.dwData], cLoggerDx);
+    if (event.dwData > 0) then
+    begin
+      Glb.LuaEngine.OnDeviceEvent(self, event.dwOfs - DIJOFS_BUTTON0, cDirectionDown, event.dwTimeStamp);
+    end else begin
+      Glb.LuaEngine.OnDeviceEvent(self, event.dwOfs - DIJOFS_BUTTON0, cDirectionUp, event.dwTimeStamp);
+    end;
+  end else begin
+    lAxisIndex := getAxisIndex(event.dwOfs);
+    lPovIndex := getPovIndex(event.dwOfs);
+    if (lAxisIndex >= 0) then begin
+      Glb.DeviceService.DxDeviceService.HandleAxisEvent(self, event, lAxisIndex);
+      fAxisValue[lAxisIndex] := event.dwData;
+      {
+      Glb.DebugLogFmt('Device %s axis: %05d  %05d  %05d  %05d  %05d  %05d  %05d  %05d', [Name,
+      fAxisValue[0],
+      fAxisValue[1],
+      fAxisValue[2],
+      fAxisValue[3],
+      fAxisValue[4],
+      fAxisValue[5],
+      fAxisValue[6],
+      fAxisValue[7]
+      ], cLoggerDx);}
+    end else if (lPovIndex >= 0) then begin
+      Glb.DebugLogFmt('Device %s POV event, offset %d, data %d', [Name, event.dwOfs, event.dwData], cLoggerDx);
+      Glb.LuaEngine.OnDeviceEvent(self, 1000+lPovIndex, event.dwData);
+    end else begin
+         Glb.DebugLogFmt('Device %s unknown event, offset %d, data %d', [Name, event.dwOfs, event.dwData], cLoggerDx);
+    end;
+  end;
+end;
+
+function TDxDevice.GetAxisValue(I: Integer): DWORD;
+begin
+  Result := fAxisValue[I];
+end;
+
+function TDxDevice.getAxisIndex(pOffset: DWORD): Integer;
+begin
+  if (pOffset >= 0) and (pOffset <= 28) and (pOffset mod 4 = 0) then
+    result := pOffset div 4
+  else
+    result := -1;
+end;
+
+function TDxDevice.getPovIndex(pOffset: DWORD): Integer;
+begin
+  if (pOffset >= cPov0Offset) and (pOffset <= cPov0Offset+3*SizeOf(DWORD)) and (pOffset mod SizeOf(DWORD) = 0) then
+    result := (pOffset - cPov0Offset) mod SizeOf(DWORD)
+  else
+    result := -1;
+end;
 
 function TDxDevice.TypeCaption: String;
 begin
   Result := 'game';
 end;
 
-procedure TDxDevice.DetectChanges;
+procedure TDxDevice.ReadEventBuffer;
 var
   I: Integer;
-  lOldState: DIJoyState2;
   hr: HRESULT;
+  events: array[0..cBufferSize] of DIDEVICEOBJECTDATA;
+  dwItems: DWORD;
 begin
   if fDIDevice = nil then
     exit;
 
-  lOldState := fJoyState;
-  // Get Buttons
   hr := fDIDevice.Poll;
   if (FAILED(hr)) then
   begin
     hr := fDIDevice.Acquire;
     if FAILED(hr) then
     begin
-      Glb.DebugLog('Warning: Can''t acquire joy ' + Name, cDxLoggerName);
+      Glb.DebugLog('Warning: Can''t acquire game device ' + Name, cLoggerDx);
       exit;
     end;
   end;
-  hr := fDIDevice.GetDeviceState(SizeOf(DIJOYSTATE2), @fJoyState);
-  if FAILED(hr) then
+  dwItems:=cBufferSize;
+  hr := fDIDevice.GetDeviceData(SizeOf(DIDEVICEOBJECTDATA), events, dwItems, 0);
+  if (hr = DI_BUFFEROVERFLOW) then
   begin
-    Glb.DebugLog('Warning: Can''t acquire joy ' + Name, cDxLoggerName);
+    Glb.DebugLog('DX event buffer overflow for device ' + Name + '. Increase buffer size or decrease polling interval', cLoggerDx);
+  end;
+  if (hr = DI_BUFFEROVERFLOW) or (hr = DI_OK) then
+  begin
+    //if (Name = 'LB2') then
+    //Glb.DebugLogFmt('Device %s read %d events', [Name, dwItems], cLoggerDx);
+    for I := 0 to dwItems - 1 do
+    begin
+      HandleEvent(events[i]);
+      //Glb.DebugLogFmt('Device %s event, offset %d, data %d, sequence %d ', [Name, events[i].dwOfs, events[i].dwData, events[i].dwSequence], cLoggerDx);
+    end;
+  end else begin
+    Glb.DebugLog('Can''t read buffered events for device ' + Name, cLoggerDx);
     exit;
   end;
+end;
 
-  for I := 0 to fButtonsCount - 1 do
-  begin
-    if fJoyState.rgbButtons[I] <> lOldState.rgbButtons[I] then
-    begin
-      if lOldState.rgbButtons[I] = 0 then
-      begin
-        Glb.DebugLog(Format('Event: %s button %d DOWN', [LogIdent, I]), cDxLoggerName);
-        Glb.LuaEngine.OnDeviceEvent(self, I, cDirectionDown);
-      end
-      else
-      begin
-        Glb.DebugLog(Format('Event: %s button %d UP', [LogIdent, I]), cDxLoggerName);
-        Glb.LuaEngine.OnDeviceEvent(self, I, cDirectionUp);
-      end;
-    end;
-  end;
+constructor TDxDevice.Create;
+var
+  I : Integer;
+begin
+  fBufferSize:=cBufferSize;
 end;
 
 end.

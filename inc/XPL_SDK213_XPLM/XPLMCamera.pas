@@ -120,7 +120,7 @@ TYPE
                                         inControlFunc       : XPLMCameraControl_f;    
                                         inRefcon            : pointer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -137,7 +137,7 @@ TYPE
    }
    PROCEDURE XPLMDontControlCamera;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -152,7 +152,7 @@ TYPE
    FUNCTION XPLMIsCameraBeingControlled(
                                         outCameraControlDuration: PXPLMCameraControlDuration) : integer;    { Can be nil }
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -165,7 +165,7 @@ TYPE
    PROCEDURE XPLMReadCameraPosition(
                                         outCameraPosition   : PXPLMCameraPosition_t);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}

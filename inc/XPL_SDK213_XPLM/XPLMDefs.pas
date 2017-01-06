@@ -26,25 +26,7 @@ INTERFACE
 {$IFDEF LINUX}
    {$DEFINE KYLIX}
 {$ENDIF}
-
-{$IFDEF WIN64}
-CONST
-   DLL_name = 'XPLM_64.DLL';
-{$ELSE}
-CONST
-   DLL_name = 'XPLM.DLL';
-{$ENDIF}
-
 TYPE
-{$IFDEF WIN64}
-   intptr_t = intptr;
-{$ENDIF}
-
-{$IFDEF UNICODE}
-TYPE
-   pchar = pansichar;
-{$ENDIF}
-
 {$IFNDEF DELPHI}
 {$IFNDEF KYLIX}
    Pchar = ^char;

@@ -30,7 +30,6 @@ type
       constructor Create;
       function AddRaw(pRawdata: PRAWINPUT): TKeyStrokePtr;
       procedure AssignDevice(var pKS: TKeyStroke);
-      function UnixTimestampMs: Int64;
       procedure RemoveOldItems;
       procedure ResetScanned;
       property JustScannedKs: TKeyStroke read fJustScannedKs;
@@ -60,7 +59,7 @@ begin
     WM_KEYDOWN, WM_SYSKEYDOWN: fLog[fIndex].KeyStroke.Direction:=cDirectionDown;
     WM_KEYUP, WM_SYSKEYUP: fLog[fIndex].KeyStroke.Direction:=cDirectionUp;
   end;
-  fLog[fIndex].TimeStamp:=UnixTimestampMs;
+  fLog[fIndex].TimeStamp:=Glb.UnixTimestampMs;
   fLog[fIndex].KeyStroke.DeviceHandle:=pRawdata^.header.hDevice;
   fLog[fIndex].KeyStroke.VKeyCode:=pRawdata^.keyboard.VKey;
   Result := @(fLog[fIndex].KeyStroke);
@@ -117,7 +116,7 @@ begin
     begin
       if (KeyStrokeEqual(fLog[lIndex].KeyStroke, pKS)) then
       begin
-        lTimeDiff:=UnixTimestampMs - fLog[lIndex].TimeStamp;
+        lTimeDiff:=Glb.UnixTimestampMs - fLog[lIndex].TimeStamp;
         Glb.DebugLogFmt('Key log match for key %d direction %d, time diff %d ms.',
           [pKS.VKeyCode,pKS.Direction, lTimeDiff], cLoggerHook);
         pKS.DeviceHandle:=fLog[lIndex].KeyStroke.DeviceHandle;
@@ -129,11 +128,6 @@ begin
   end;
 end;
 
-function TKeyLogService.UnixTimestampMs: Int64;
-begin
-  Result := Round(Now * 24*60*60*1000);
-end;
-
 procedure TKeyLogService.RemoveOldItems;
 var
   I: Integer;
@@ -142,7 +136,7 @@ var
   lFiredCnt: Integer;
   lNow: LongInt;
 begin
-  lNow := UnixTimestampMs;
+  lNow := Glb.UnixTimestampMs;
   lFiredCnt := 0;
   for I := 1 to cLogArrayLength do
   begin

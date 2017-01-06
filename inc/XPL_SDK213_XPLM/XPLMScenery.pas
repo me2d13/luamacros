@@ -139,7 +139,7 @@ TYPE
    FUNCTION XPLMCreateProbe(
                                         inProbeType         : XPLMProbeType) : XPLMProbeRef;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -152,7 +152,7 @@ TYPE
    PROCEDURE XPLMDestroyProbe(
                                         inProbe             : XPLMProbeRef);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -172,7 +172,7 @@ TYPE
                                         inZ                 : single;    
                                         outInfo             : PXPLMProbeInfo_t) : XPLMProbeResult;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -274,7 +274,7 @@ TYPE
    FUNCTION XPLMLoadObject(
                                         inPath              : Pchar) : XPLMObjectRef;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -302,7 +302,7 @@ TYPE
                                         inCallback          : XPLMObjectLoaded_f;    
                                         inRefcon            : pointer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -339,7 +339,7 @@ TYPE
                                         lighting            : integer;    
                                         earth_relative      : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -357,7 +357,7 @@ TYPE
    PROCEDURE XPLMUnloadObject(
                                         inObject            : XPLMObjectRef);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -409,7 +409,7 @@ TYPE
                                         enumerator          : XPLMLibraryEnumerator_f;    
                                         ref                 : pointer) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}

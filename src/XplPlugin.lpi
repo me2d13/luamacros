@@ -33,7 +33,12 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <Units Count="8">
+    <RequiredPackages Count="1">
+      <Item1>
+        <PackageName Value="etpackage"/>
+      </Item1>
+    </RequiredPackages>
+    <Units Count="9">
       <Unit0>
         <Filename Value="XplPlugin.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -70,6 +75,10 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uXplMessages"/>
       </Unit7>
+      <Unit8>
+        <Filename Value="uTiming.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit8>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -80,7 +89,8 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\inc\XPL_SDK212_XPLM"/>
+      <Libraries Value="..\lib\SDK"/>
+      <OtherUnitFiles Value="..\inc\XPL_SDK213_XPLM"/>
       <UnitOutputDirectory Value="..\out"/>
     </SearchPaths>
     <Parsing>

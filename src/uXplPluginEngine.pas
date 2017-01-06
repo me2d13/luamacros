@@ -4,7 +4,7 @@ unit uXplPluginEngine;
 
 interface
 
-uses XPLMDataAccess, XPLMUtilities, uXplCommon, uXplSender, uXplPluginReceiver, uXplMessages, classes, fgl;
+uses XPLMDataAccess, XPLMUtilities, uXplCommon, uXplSender, uXplPluginReceiver, uXplMessages, classes, fgl, uTiming;
 
 type
 
@@ -14,6 +14,10 @@ TCallbackInfoMap = TFPGMap<Int64,TXplVariableCallbackInfo>;
 
 TXplEngine = class (TObject)
     fDebugging: Boolean;
+    fTickProfilingLog: String;
+    fMessageProfilingLog: String;
+    fTickTimer: TStopWatch;
+    fMessageTimer: TStopWatch;
     fDebugLogFileName: String;
     fTextToBeDrawn: String;
     fScreenWidth: Integer;
@@ -76,9 +80,12 @@ begin
   begin
     fDebugging:=true;
     fDebugLogFileName:=cLogFileTriggerName;
+    DebugLog('LuaMacros Plugin started');
   end
   else
     fDebugging := false;
+  fTickTimer := TStopWatch.Create;
+  fMessageTimer := TStopWatch.Create;
   fTextToBeDrawn:='';
   fTextFloatPosition := 0;
   fSyncSender := TXplSender.Create(cXplToLmcPipeName);
@@ -97,9 +104,12 @@ begin
   begin
     // LMC is already running, but its sender could be connected to nowhere (old XPL instance)
     // send it reconnect request
+    DebugLog('LMC connected, sending message');
     fSyncSender.SendMessage(TXplReconnectToServer.Create);
-  end;
+  end else
+    DebugLog('LMC not connected');
   InitGlValues;
+  DebugLog('LuaMacros init done');
 end;
 
 procedure TXplEngine.DebugLog(Value: String);
@@ -132,6 +142,8 @@ begin
   fReceiver.Free;
   fSyncSender.Free;
   fAsyncSender.Free;
+  fTickTimer.Free;
+  fMessageTimer.Free;
   for I := 0 to fDataRefs.Count - 1 do
   begin
     fDataRefs.Objects[I].Free;
@@ -159,127 +171,22 @@ end;
 
 procedure TXplEngine.XplTick;
 begin
-  CheckVariableCallbacks;
-end;
-
-{$IFDEF OLDWAY}
-procedure TXplEngine.ProcessSlot(pSlot: PXplComSlot);
-var
-  lInt: Integer;
-  lFloat: Single;
-  lBuff: PChar;
-  lMakeChecks: Boolean;
-  lString: string;
-begin
-  if pSlot^.XplRequestFlag = 1 then
+  if (fDebugging) then
   begin
-    // dump
-    DebugLog('Slot dump, size of slot is ' + IntToStr(SizeOf(pSlot^)));
-    //DebugLog(MemoryDump(pSlot, 1570));
-    // check command
-    if (pSlot^.HDMcommand = HDMC_GET_VAR) or
-       (pSlot^.HDMcommand = HDMC_SET_VAR) or
-       (pSlot^.HDMcommand = HDMC_TOGGLE_NEXT) or
-       (pSlot^.HDMcommand = HDMC_TOGGLE_PREVIOUS) or
-       (pSlot^.HDMcommand = HDMC_SWITCH_NEXT) or
-       (pSlot^.HDMcommand = HDMC_SWITCH_PREVIOUS)
-       then
-    begin
-      // is already registered?
-      if pSlot^.DataRef = 0 then
-      begin
-        // register first
-        DebugLog('Finding ref for ' + pSlot^.ValueName);
-        pSlot^.DataRef := Pointer2Pointer8b(XPLMFindDataRef(pSlot^.ValueName));
-        if pSlot^.DataRef <> 0 then
-        begin
-          DebugLog(Format('Got valid pointer %x.', [pSlot^.DataRef]));
-          pSlot^.Writable := (XPLMCanWriteDataRef(Pointer8b2Pointer(pSlot^.DataRef)) <> 0);
-          if (pSlot^.Writable) then
-            DebugLog('Variable is writable.')
-          else
-            DebugLog('Variable is not writable.');
-          pSlot^.DataType := XPLMGetDataRefTypes(Pointer8b2Pointer(pSlot^.DataRef));
-          DebugLog('Data type is ' + IntToStr(Ord(pSlot^.DataType)));
-          pSlot^.Length := GetArrayLength(Pointer8b2Pointer(pSlot^.DataRef), pSlot^.DataType);
-        end
-        else
-          DebugLog('Ref not found.');
-        lMakeChecks := True; // we can make check only when all pBuffer items
-            // were just filled
-      end
-      else
-        lMakeChecks := False;
-      if pSlot^.DataRef <> 0 then
-      begin
-        DebugLog(Format('Using data ref %x.', [pSlot^.DataRef]));
-        if (pSlot^.HDMcommand = HDMC_SET_VAR) then
-        begin
-          String2XplValue(pSlot^.ValueUntyped, @(pSlot^.Value), pSlot^.DataType);
-        end;
-        if lMakeChecks and (not pSlot^.Writable) and (
-            (pSlot^.HDMcommand = HDMC_SET_VAR) or
-            (pSlot^.HDMcommand = HDMC_TOGGLE_NEXT) or
-            (pSlot^.HDMcommand = HDMC_TOGGLE_PREVIOUS) or
-            (pSlot^.HDMcommand = HDMC_SWITCH_NEXT) or
-            (pSlot^.HDMcommand = HDMC_SWITCH_PREVIOUS)
-            ) then
-        begin
-          DebugLog('Can''t set variable which is read only, chenging to get.');
-          pSlot^.HDMcommand := HDMC_GET_VAR;
-        end;
-        if (pSlot^.HDMcommand = HDMC_GET_VAR) or
-           (pSlot^.HDMcommand = HDMC_SET_VAR) then
-          //SimpleReadWrite(pSlot, lMakeChecks);
-        if (pSlot^.HDMcommand = HDMC_TOGGLE_NEXT) or
-           (pSlot^.HDMcommand = HDMC_TOGGLE_PREVIOUS) or
-           (pSlot^.HDMcommand = HDMC_SWITCH_NEXT) or
-           (pSlot^.HDMcommand = HDMC_SWITCH_PREVIOUS) then
-          //ToggleVar(pSlot);
-          end;
-    end;
-    if (pSlot^.HDMcommand = HDMC_EXEC_COMMAND) or
-       (pSlot^.HDMcommand = HDMC_COMMAND_BEGIN) or
-       (pSlot^.HDMcommand = HDMC_COMMAND_END)
-    then
-    begin
-      // is already registered?
-      if pSlot^.CommandRef = 0 then
-      begin
-        // register first
-        DebugLog('Finding ref for command ' + pSlot^.ValueName);
-        pSlot^.CommandRef := Pointer2Pointer8b(XPLMFindCommand(pSlot^.ValueName));
-        if pSlot^.CommandRef <> 0 then
-        begin
-          DebugLog(Format('Got valid pointer %p.', [Pointer8b2Pointer(pSlot^.CommandRef)]));
-          end;
-      end;
-      if pSlot^.CommandRef <> 0 then
-      begin
-        DebugLog(Format('Sending command for %p.', [Pointer8b2Pointer(pSlot^.CommandRef)]));
-        case pSlot^.HDMcommand of
-          HDMC_EXEC_COMMAND: XPLMCommandOnce(Pointer8b2Pointer(pSlot^.CommandRef));
-          HDMC_COMMAND_BEGIN: XPLMCommandBegin(Pointer8b2Pointer(pSlot^.CommandRef));
-          HDMC_COMMAND_END: XPLMCommandEnd(Pointer8b2Pointer(pSlot^.CommandRef));
-        end;
-      end;
-    end;
-    if (pSlot^.HDMcommand = HDMC_SET_POSINTERVAL) then
-      //fPosCountDown := pBuffer^.PosInterval;
-    if (pSlot^.HDMcommand = HDMC_SHOW_TEXT) then
-    begin
-      fTextFloatPosition := pSlot^.Value.floatData;
-      fTextToBeDrawn := pSlot^.StringBuffer;
-      if (pSlot^.Length > 0) then
-        fTextHideTs := IncSecond(Now(), pSlot^.Length)
-      else
-        fTextHideTs := 0;
-      DebugLog(Format('Received DrawText %s at pos %f.', [fTextToBeDrawn, fTextFloatPosition]));
-    end;
-    pSlot^.XplRequestFlag := 0;
+    fTickTimer.Start;
   end;
+  CheckVariableCallbacks;
+  if (fDebugging) then
+  begin
+    fTickProfilingLog:=fTickProfilingLog + #10 + #13 + fTickTimer.StopAndLog;
+    if (Length(fTickProfilingLog) > 2000) then
+    begin
+      DebugLog('Tick log: ' + fTickProfilingLog);
+      fTickProfilingLog:='';
+    end;
+  end;
+
 end;
-{$EndIf}
 
 procedure TXplEngine.String2XplValue(pIn: String; pOut: PXplValue; pDataType: XPLMDataTypeID);
 var
@@ -333,6 +240,11 @@ var
   lStream: TMemoryStream;
   lMessageType: byte;
 begin
+  if (fDebugging) then
+  begin
+    fMessageTimer.Start;
+  end;
+
   lStream := TMemoryStream.Create;
   try
     try
@@ -358,6 +270,17 @@ begin
   finally
     lStream.Free;
   end;
+
+  if (fDebugging) then
+  begin
+    fMessageProfilingLog:=fMessageProfilingLog + #10 + #13 + fMessageTimer.StopAndLog;
+    if (Length(fMessageProfilingLog) > 1000) then
+    begin
+      DebugLog('On mesage log: ' + fMessageProfilingLog);
+      fMessageProfilingLog:='';
+    end;
+  end;
+
 end;
 
 procedure TXplEngine.XplDebugFmt(pFormat: String; pArgs: array of const);

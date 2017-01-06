@@ -106,7 +106,7 @@ CONST
    }
    FUNCTION XPLMGetFirstNavAid: XPLMNavRef;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -126,7 +126,7 @@ CONST
    FUNCTION XPLMGetNextNavAid(
                                         inNavAidRef         : XPLMNavRef) : XPLMNavRef;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -145,7 +145,7 @@ CONST
    FUNCTION XPLMFindFirstNavAidOfType(
                                         inType              : XPLMNavType) : XPLMNavRef;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -164,7 +164,7 @@ CONST
    FUNCTION XPLMFindLastNavAidOfType(
                                         inType              : XPLMNavType) : XPLMNavRef;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -204,7 +204,7 @@ CONST
                                         inFrequency         : Pinteger;    { Can be nil }
                                         inType              : XPLMNavType) : XPLMNavRef;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -240,7 +240,7 @@ CONST
                                         outName             : Pchar;    { Can be nil }
                                         outReg              : Pchar);    { Can be nil }
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -267,7 +267,7 @@ CONST
    }
    FUNCTION XPLMCountFMSEntries: integer;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -279,7 +279,7 @@ CONST
    }
    FUNCTION XPLMGetDisplayedFMSEntry: integer;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -291,7 +291,7 @@ CONST
    }
    FUNCTION XPLMGetDestinationFMSEntry: integer;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -304,7 +304,7 @@ CONST
    PROCEDURE XPLMSetDisplayedFMSEntry(
                                         inIndex             : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -317,7 +317,7 @@ CONST
    PROCEDURE XPLMSetDestinationFMSEntry(
                                         inIndex             : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -342,7 +342,7 @@ CONST
                                         outLat              : Psingle;    { Can be nil }
                                         outLon              : Psingle);    { Can be nil }
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -360,7 +360,7 @@ CONST
                                         inRef               : XPLMNavRef;    
                                         inAltitude          : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -377,7 +377,7 @@ CONST
                                         inLon               : single;    
                                         inAltitude          : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -391,7 +391,7 @@ CONST
    PROCEDURE XPLMClearFMSEntry(
                                         inIndex             : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -413,7 +413,7 @@ CONST
    }
    FUNCTION XPLMGetGPSDestinationType: XPLMNavType;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -425,7 +425,7 @@ CONST
    }
    FUNCTION XPLMGetGPSDestination: XPLMNavRef;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}

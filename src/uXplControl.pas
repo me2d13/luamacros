@@ -141,7 +141,7 @@ var
   lCbInfo: TLmcVariableCallbackInfo;
   lId: Int64;
 begin
-  lId:=Glb.KeyLogService.UnixTimestampMs;
+  lId:=Glb.UnixTimestampMs;
   lXplObj := TXplVariableCallback.Create(pVarName, pIntervalMs, pDelta, lId);
   fXplSender.SendMessage(lXplObj);
   lCbInfo := TLmcVariableCallbackInfo.Create;
@@ -287,7 +287,7 @@ var
   lDataRead: boolean;
 begin
   Result := nil;
-  lId := Glb.KeyLogService.UnixTimestampMs;
+  lId := Glb.UnixTimestampMs;
   lXplObj := TXplGetVariable.Create(pName, lId, lIndex);
   if (lIndex = NO_INDEX) then
     DebugLog(Format('Sending GetXplVar command for name %s with id %d.', [pName, lXplObj.Id]))

@@ -117,7 +117,7 @@ TYPE
    }
    FUNCTION XPLMGetElapsedTime: single;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -130,7 +130,7 @@ TYPE
    }
    FUNCTION XPLMGetCycleNumber: integer;
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -150,7 +150,7 @@ TYPE
                                         inInterval          : single;    
                                         inRefcon            : pointer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -166,7 +166,7 @@ TYPE
                                         inFlightLoop        : XPLMFlightLoop_f;    
                                         inRefcon            : pointer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -190,7 +190,7 @@ TYPE
                                         inRelativeToNow     : integer;    
                                         inRefcon            : pointer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -206,7 +206,7 @@ TYPE
    FUNCTION XPLMCreateFlightLoop(
                                         inParams            : PXPLMCreateFlightLoop_t) : XPLMFlightLoopID;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -221,7 +221,7 @@ TYPE
    PROCEDURE XPLMDestroyFlightLoop(
                                         inFlightLoopID      : XPLMFlightLoopID);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -266,7 +266,7 @@ TYPE
                                         inInterval          : single;    
                                         inRelativeToNow     : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}

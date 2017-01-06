@@ -135,7 +135,7 @@ TYPE
    FUNCTION XPLMFindDataRef(
                                         inDataRefName       : Pchar) : XPLMDataRef;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -149,7 +149,7 @@ TYPE
    FUNCTION XPLMCanWriteDataRef(
                                         inDataRef           : XPLMDataRef) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -171,7 +171,7 @@ TYPE
    FUNCTION XPLMIsDataRefGood(
                                         inDataRef           : XPLMDataRef) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -185,7 +185,7 @@ TYPE
    FUNCTION XPLMGetDataRefTypes(
                                         inDataRef           : XPLMDataRef) : XPLMDataTypeID;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -222,7 +222,7 @@ TYPE
    FUNCTION XPLMGetDatai(
                                         inDataRef           : XPLMDataRef) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -238,7 +238,7 @@ TYPE
                                         inDataRef           : XPLMDataRef;    
                                         inValue             : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -253,7 +253,7 @@ TYPE
    FUNCTION XPLMGetDataf(
                                         inDataRef           : XPLMDataRef) : single;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -269,7 +269,7 @@ TYPE
                                         inDataRef           : XPLMDataRef;    
                                         inValue             : single);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -284,7 +284,7 @@ TYPE
    FUNCTION XPLMGetDatad(
                                         inDataRef           : XPLMDataRef) : real;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -300,7 +300,7 @@ TYPE
                                         inDataRef           : XPLMDataRef;    
                                         inValue             : real);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -328,7 +328,7 @@ TYPE
                                         inOffset            : integer;    
                                         inMax               : integer) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -352,7 +352,7 @@ TYPE
                                         inoffset            : integer;    
                                         inCount             : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -380,7 +380,7 @@ TYPE
                                         inOffset            : integer;    
                                         inMax               : integer) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -404,7 +404,7 @@ TYPE
                                         inoffset            : integer;    
                                         inCount             : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -431,7 +431,7 @@ TYPE
                                         inOffset            : integer;    
                                         inMaxBytes          : integer) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -455,7 +455,7 @@ TYPE
                                         inOffset            : integer;    
                                         inLength            : integer);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -633,7 +633,7 @@ TYPE
                                         inReadRefcon        : pointer;    
                                         inWriteRefcon       : pointer) : XPLMDataRef;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -654,7 +654,7 @@ TYPE
    PROCEDURE XPLMUnregisterDataAccessor(
                                         inDataRef           : XPLMDataRef);    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -736,7 +736,7 @@ TYPE
                                         inNotificationFunc  : XPLMDataChanged_f;    
                                         inNotificationRefcon: pointer) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}
@@ -755,7 +755,7 @@ TYPE
                                         inNotificationFunc  : XPLMDataChanged_f;    
                                         inNotificationRefcon: pointer) : integer;    
 {$IFDEF DELPHI}
-                                       cdecl; external DLL_name;
+                                       cdecl; external 'XPLM_64.DLL';
 {$ELSE}
                                        cdecl; external '';
 {$ENDIF}

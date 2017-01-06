@@ -18,7 +18,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
-      <BuildNr Value="239"/>
+      <BuildNr Value="306"/>
       <StringTable ProductVersion=""/>
     </VersionInfo>
     <BuildModes Count="1">
@@ -30,7 +30,7 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="C:\work\luamacros\src\test.lua"/>
+        <CommandLineParams Value="C:\work\luamacros\src\test.lua -L DX"/>
       </local>
     </RunParams>
     <RequiredPackages Count="6">
@@ -215,7 +215,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\inc\lua;..\inc\XPL_SDK212_XPLM;..\inc\DirectX_Borland_D9-10;..\inc\synapse40;..\inc\LazSerial;..\inc\uniqueinstance-1.0"/>
+      <OtherUnitFiles Value="..\inc\lua;..\inc\XPL_SDK213_XPLM;..\inc\DirectX_Borland_D9-10;..\inc\synapse40;..\inc\LazSerial;..\inc\uniqueinstance-1.0"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -224,9 +224,6 @@
       </SyntaxOptions>
     </Parsing>
     <Linking>
-      <Debugging>
-        <GenerateDebugInfo Value="False"/>
-      </Debugging>
       <Options>
         <Win32>
           <GraphicApplication Value="True"/>
@@ -234,17 +231,4 @@
       </Options>
     </Linking>
   </CompilerOptions>
-  <Debugging>
-    <Exceptions Count="3">
-      <Item1>
-        <Name Value="EAbort"/>
-      </Item1>
-      <Item2>
-        <Name Value="ECodetoolError"/>
-      </Item2>
-      <Item3>
-        <Name Value="EFOpenError"/>
-      </Item3>
-    </Exceptions>
-  </Debugging>
 </CONFIG>

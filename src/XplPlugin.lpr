@@ -88,7 +88,7 @@ function MyDrawCallbackFunc(inPhase             : XPLMDrawingPhase;
       end;
     end;
 
-    result := -1;
+    result := 1;
   end;
 
   {/*

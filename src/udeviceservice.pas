@@ -37,6 +37,7 @@ type
 
       property Devices:TDeviceList read fDevices;
       property KbdDeviceService: TKbdDeviceService read fKbdService;
+      property DxDeviceService: TDxDeviceService read fDxService;
   end;
 
 implementation

@@ -5,9 +5,10 @@ lmc_xpl_text('From LUA macros')
 --lmc2.ahoj = 1
 
 --lmc_log_all();
-lmc_log_module('XPL')
-lmc_xpl_log_file('luamacros1.log')
-lmc_log_module('LUA')
+--lmc_log_module('XPL')
+--lmc_xpl_log_file('luamacros1.log')
+--lmc_log_module('LUA')
+--lmc_log_module('DX')
 --lmc_log_module('CFG')
 --lmc_log_module('SPE')
 --lmc_log_module('HTP')
@@ -23,7 +24,6 @@ end
 
 -- log all modules, very verbose
 --lmc_log_all();
---lmc_log_module('LUA')
 --lmc_log_spool('lmc_spool.log')
 --lmc_spawn('calc.exe')
 
@@ -37,7 +37,8 @@ print('This is LuaMacros. Listing detected devices...');
 -- 1st arg: logical name
 -- 2nd arg: regexp applied on DirectX name
 -- returns: Found directX name
-print(lmc_device_set_name('LB', 'BU0836A'));
+print(lmc_device_set_name('LB', '7E9AD920'));
+print(lmc_device_set_name('LB2', '53175550'));
 print(lmc_device_set_name('KBD1', '826BD90'));
 print(lmc_device_set_name('KBD2', '31BB05D2'));
 --lmc_assign_keyboard('KBD2');
@@ -52,6 +53,11 @@ handler = function()
   --print('cus bus');
   print(lmc_get_window_title())
 end
+
+log_handler = function(button, direction, ts)
+  print('Callback for device: button ' .. button .. ', direction '..direction..', ts '..ts)
+end
+
 
 --test it
 handler()
@@ -77,6 +83,8 @@ lmc_set_handler('LB',function(button, direction)
     --lmc_xpl_command('sim/view/3d_cockpit_cmnd_look')
   end
 end)
+
+lmc_set_handler('LB2', log_handler)
 
 -- add COM port (with default config values) as device
 -- 1st param: logical name
@@ -173,4 +181,7 @@ lmc_http_server(12345, function(url)
   --return '{"HDG" : 123}', 'application/json'
 end)
 
+lmc_set_axis_handler('LB2',0, 2000, 1000, function(val, ts)
+  print('Callback for axis - value ' .. val..', ts '..ts)
+end)
 
