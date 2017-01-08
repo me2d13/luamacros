@@ -4,7 +4,7 @@ unit uXplPluginEngine;
 
 interface
 
-uses XPLMDataAccess, XPLMUtilities, uXplCommon, uXplSender, uXplPluginReceiver, uXplMessages, classes, fgl, uTiming;
+uses XPLMDataAccess, XPLMUtilities, uXplCommon, uXplSender, uXplPluginReceiver, uXplMessages, classes, fgl, uTiming, uXplLogger;
 
 type
 
@@ -13,7 +13,7 @@ TCallbackInfoMap = TFPGMap<Int64,TXplVariableCallbackInfo>;
 { TXplEngine }
 
 TXplEngine = class (TObject)
-    fDebugging: Boolean;
+    fLogger: TXplLogger;
     fTickProfilingLog: String;
     fMessageProfilingLog: String;
     fTickTimer: TStopWatch;
@@ -45,7 +45,8 @@ TXplEngine = class (TObject)
     procedure RunAndFreeCommand(pComm: TXplCallWithName);
     procedure RunAndFree(pVar: TXplVariableCallback); overload;
     procedure RunAndFree(pVar: TXplUnhookVariable); overload;
-    procedure RunAndFree(pVar: TXplSetLogFile); overload;
+    procedure RunAndFree(pVar: TXplLogCommand); overload;
+    procedure RunAndFree(pVar: TXplIncVariable); overload;
     function GetOrRegisterXplVariable(pName: String): TXplVariable;
     function GetOrRegisterXplCommand(pName: String): XPLMCommandRef;
     function GetOrRegisterXplVariableCallback(pId: Int64; pName: String): TXplVariableCallbackInfo;
@@ -71,19 +72,9 @@ uses SysUtils, XPLMGraphics, gl, glu, XPLMDisplay, dateutils;
 
 { TXplEngine }
 
-const
-  cLogFileTriggerName = 'lmc_log_file_trigger.log';
-
 constructor TXplEngine.Create;
 begin
-  if (FileExists(cLogFileTriggerName)) then
-  begin
-    fDebugging:=true;
-    fDebugLogFileName:=cLogFileTriggerName;
-    DebugLog('LuaMacros Plugin started');
-  end
-  else
-    fDebugging := false;
+  fLogger := TXplLogger.Create;
   fTickTimer := TStopWatch.Create;
   fMessageTimer := TStopWatch.Create;
   fTextToBeDrawn:='';
@@ -113,26 +104,13 @@ begin
 end;
 
 procedure TXplEngine.DebugLog(Value: String);
-var
-  lVal: String;
-  logFile: TextFile;
 begin
-  if not fDebugging then
-    exit;
-  lVal := Format('%s [XPLLUMplugin]: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), Value]);
-  // to file
-  AssignFile(logFile, fDebugLogFileName);
-  if FileExists(fDebugLogFileName) then
-      Append(logFile)
-    else
-      Rewrite(logFile);
-  WriteLn(logFile, lVal);
-  CloseFile(logFile);
+  fLogger.Log(Value);
 end;
 
 procedure TXplEngine.DebugLogFmt(pFormat: String; pArgs: array of const);
 begin
-  DebugLog(Format(pFormat, pArgs));
+  fLogger.LogFmt(pFormat, pArgs);
 end;
 
 destructor TXplEngine.Destroy;
@@ -155,6 +133,7 @@ begin
   fDataRefs.Free;
   fCommands.Free;
   fVarCallbacks.Free;
+  fLogger.Free;
   inherited;
 end;
 
@@ -171,12 +150,12 @@ end;
 
 procedure TXplEngine.XplTick;
 begin
-  if (fDebugging) then
+  if (fLogger.LogLevel >= cLlTrace) then
   begin
     fTickTimer.Start;
   end;
   CheckVariableCallbacks;
-  if (fDebugging) then
+  if (fLogger.LogLevel >= cLlTrace) then
   begin
     fTickProfilingLog:=fTickProfilingLog + #10 + #13 + fTickTimer.StopAndLog;
     if (Length(fTickProfilingLog) > 2000) then
@@ -240,7 +219,7 @@ var
   lStream: TMemoryStream;
   lMessageType: byte;
 begin
-  if (fDebugging) then
+  if (fLogger.LogLevel >= cLlTrace) then
   begin
     fMessageTimer.Start;
   end;
@@ -261,7 +240,10 @@ begin
         HDMC_RECONNECT: ReconnectSenders;
         HDMC_VAR_CALLBACK: RunAndFree(TXplVariableCallback.Create(lStream));
         HDMC_UNHOOK_VAR: RunAndFree(TXplUnhookVariable.Create(lStream));
-        HDMC_SET_LOG_FILE: RunAndFree(TXplSetLogFile.Create(lStream));
+        HDMC_LOG_COMMAND: RunAndFree(TXplLogCommand.Create(lStream));
+        HDMC_INC_VARIABLE: RunAndFree(TXplIncVariable.Create(lStream));
+        else
+          DebugLogFmt('Unknown message type %d', [lMessageType]);
       end;
     except
       on E:Exception do
@@ -271,7 +253,7 @@ begin
     lStream.Free;
   end;
 
-  if (fDebugging) then
+  if (fLogger.LogLevel >= cLlTrace) then
   begin
     fMessageProfilingLog:=fMessageProfilingLog + #10 + #13 + fMessageTimer.StopAndLog;
     if (Length(fMessageProfilingLog) > 1000) then
@@ -428,11 +410,86 @@ begin
   pVar.Free;
 end;
 
-procedure TXplEngine.RunAndFree(pVar: TXplSetLogFile);
+procedure TXplEngine.RunAndFree(pVar: TXplLogCommand);
 begin
-  fDebugging:=True;
-  fDebugLogFileName:=pVar.Name;
-  DebugLogFmt('Received log file name %s', [fDebugLogFileName]);
+  if (pVar.Name = cLogCommandLogFileName) then
+  begin
+    fLogger.LogLevel:=cLlDebug;
+    fLogger.DebugLogFileName:=pVar.Value;
+    DebugLogFmt('Received log file name %s', [fLogger.DebugLogFileName]);
+  end
+  else
+    DebugLogFmt('Unknown log command %s = %s', [pVar.Name, pVar.Value]);
+  pVar.Free;
+end;
+
+procedure TXplEngine.RunAndFree(pVar: TXplIncVariable);
+var
+  lXV: TXplVariable;
+  lValue: TXplValue;
+  lIntLimit: Int64;
+  lIntOverflowBase: Int64;
+begin
+  DebugLog(Format('Received request %s.', [pVar.ToString]));
+  lXV := GetOrRegisterXplVariable(pVar.Name);
+  if (lXV <> nil) then
+  begin
+    if (lXV.Writable) then
+    begin
+      lValue := GetVariable(lXV, pVar.Index, True);
+      if (lValue <> nil) then
+      begin
+        if (lValue.ValueType = vtInteger) then
+        begin
+          pVar.Value.MakeInt;
+          lValue.IntValue:=lValue.IntValue + pVar.Value.IntValue;
+          if (pVar.HasLimit) then
+          begin
+            lIntLimit:=trunc(pVar.Limit);
+            lIntOverflowBase:=trunc(pVar.OverflowBase);
+            if (pVar.Value.IntValue > 0) and (lValue.IntValue > lIntLimit) then
+              if pVar.UseOverflow then
+                lValue.IntValue := lIntOverflowBase + (lValue.IntValue - lIntLimit)
+              else
+                lValue.IntValue := lIntLimit
+            else if (pVar.Value.IntValue < 0) and (lValue.IntValue < lIntLimit) then
+              if pVar.UseOverflow then
+                lValue.IntValue := lIntOverflowBase - (lIntLimit - lValue.IntValue)
+              else
+                lValue.IntValue := lIntLimit;
+          end;
+          DebugLogFmt('Variable %s is writable, setting to %f', [pVar.Name, lValue.IntValue]);
+          SetVariable(lXV, lValue, pVar.Index)
+        end
+        else if (lValue.ValueType = vtDouble) then
+        begin
+          pVar.Value.MakeDouble;
+          lValue.DoubleValue:=lValue.DoubleValue + pVar.Value.DoubleValue;
+          if (pVar.HasLimit) then
+            if (pVar.Value.DoubleValue > 0) and (lValue.DoubleValue > pVar.Limit) then
+              if pVar.UseOverflow then
+                lValue.DoubleValue := pVar.OverflowBase + (lValue.DoubleValue - pVar.Limit)
+              else
+                lValue.DoubleValue := pVar.Limit
+            else if (pVar.Value.DoubleValue < 0) and (lValue.DoubleValue < pVar.Limit) then
+              if pVar.UseOverflow then
+                lValue.DoubleValue := pVar.OverflowBase - (pVar.Limit - lValue.DoubleValue)
+              else
+                lValue.DoubleValue := pVar.Limit;
+          DebugLogFmt('Variable %s is writable, setting to %f', [pVar.Name, lValue.DoubleValue]);
+          SetVariable(lXV, lValue, pVar.Index)
+        end
+        else
+          DebugLog('Wrong type of variable. Only int and float tyoes can be increased');
+      end
+      else
+        DebugLog('Can not find out value of variable ' + pVar.Name);
+    end
+    else
+      DebugLog('Variable ' + pVar.Name + ' is not writable.');
+  end
+  else
+    DebugLog('Variable ' + pVar.Name + ' not found.');
   pVar.Free;
 end;
 

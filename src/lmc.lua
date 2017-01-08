@@ -3,7 +3,8 @@ clear()
 --lmc_log_module('XPL')
 --lmc_log_module('LUA')
 --lmc_log_module('CFG')
-lmc_device_set_name('LB', 'BU0836A')
+lmc_device_set_name('LB', '7E9AD920')
+lmc_device_set_name('LB2', '53175550')
 --lmc_device_set_name('KBD1', '826BD90') this is my regular
 lmc_device_set_name('KBD1', '3AE1BAFF')
 lmc_device_set_name('KBD2', '1BDC3055')
@@ -18,6 +19,8 @@ gPitot = false
 gTranspoder = false
 gRotorBrake = true
 gHeadphone = true
+-- roratries
+gTs = {}
 
 gLastRAltInterval = 0
 gRAltCalls = {2, 5, 10, 20, 50, 100, 200, 500}
@@ -111,7 +114,6 @@ function lb_as350(button, direction)
   return true
 end
 
-
 function lb_handler(button, direction)
   if (lb_common(button, direction)) then
     return
@@ -121,6 +123,54 @@ function lb_handler(button, direction)
     end
   end
   print('Callback for LB unused: button ' .. button .. ', direction '..direction)
+end
+
+function handle_rotary_with_cycle_value(button, direction, ts, def)
+  if button == def.button or button == def.button+1 then
+    if (direction == 1) then
+      if gTs[def.button] == nil then gTs[def.button] = 0 end
+      local tsDiff = ts - gTs[def.button]
+      gTs[def.button] = ts
+      local step = 1
+      if (tsDiff > 300) then step = 2
+      elseif (tsDiff > 200) then step = 3
+      elseif (tsDiff > 100) then step = 5
+      else step = 15 end
+      if (button == def.button) then
+        lmc_inc_xpl_variable(def.var_name, step, def.cycle, 0)
+      else
+        lmc_inc_xpl_variable(def.var_name, -step, 0, def.cycle)
+      end
+    end
+    return true
+  end
+  return false
+end
+
+function lb2_common(button, direction, ts)
+  local def = {}
+  def.cycle = 360
+  if (button == 0 or button == 1) then
+    def.button = 0
+    def.var_name = 'sim/cockpit/autopilot/heading_mag'
+    return handle_rotary_with_cycle_value(button, direction, ts, def)
+  elseif (button == 6 or button == 7) then
+    def.button = 6
+    def.var_name = 'sim/cockpit/radios/nav1_obs_degm'
+    return handle_rotary_with_cycle_value(button, direction, ts, def)
+  end
+  return false
+end
+
+function lb2_handler(button, direction, ts)
+  if (lb2_common(button, direction, ts)) then
+    return
+  elseif (gName == 'N994VA') then
+    if (lb2_common(button, direction, ts)) then -- for now
+      return
+    end
+  end
+  print('Callback for LB unused: button ' .. button .. ', direction '..direction..', ts '..ts)
 end
 
 function keyb2_common(button, direction)
@@ -248,6 +298,7 @@ end
 
 lmc_on_xpl_var_change('sim/aircraft/view/acf_tailnum', setPlane)
 lmc_set_handler('LB',lb_handler)
+lmc_set_handler('LB2',lb2_handler)
 lmc_set_handler('KBD2',keyb2)
 lmc_set_handler('KBD1',keyb1)
 lmc_on_xpl_var_change('sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot', checkRAlt, 1000)

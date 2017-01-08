@@ -20,13 +20,17 @@ const
   HDMC_RECONNECT = 13;
   HDMC_VAR_CALLBACK = 14;
   HDMC_UNHOOK_VAR = 15;
-  HDMC_SET_LOG_FILE = 16;
+  HDMC_LOG_COMMAND = 16;
+  HDMC_INC_VARIABLE = 17;
 
   NO_INDEX = -1;
 
   cXplToLmcPipeName = 'XplToLuaMacrosPipe';
   cXplToLmcAsyncPipeName = 'XplToLuaMacrosAsyncPipe';
   cLmcToXplPipeName = 'LuaMacrosToXplPipe';
+
+  cLogCommandLogFileName = 'LOG_FILE_NAME';
+  cLogCommandProfile = 'PROFILE';
 
 
 type

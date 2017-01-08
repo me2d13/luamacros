@@ -12,11 +12,11 @@ type
 
   TStopWatch = class
     private
-      fStart: TEpikTimer;
+      fTimer: TEpikTimer;
       fStartTicks: Int64;
     public
       procedure Start;
-      function StopAndGetUsec: Extended;
+      function StopAndGetUsec: Int64;
       function StopAndLog: String;
       constructor Create;
       destructor Destroy; Override;
@@ -29,27 +29,27 @@ implementation
 
 procedure TStopWatch.Start;
 begin
-  fStartTicks := fStart.GetSystemTicks;
+  fStartTicks := fTimer.GetSystemTicks;
 end;
 
-function TStopWatch.StopAndGetUsec: Extended;
+function TStopWatch.StopAndGetUsec: Int64;
 begin
-  result := fStart.Elapsed;
+  result := fTimer.GetSystemTicks - fStartTicks;
 end;
 
 function TStopWatch.StopAndLog: String;
 begin
-  result := Format('%s - %d', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), fStart.GetSystemTicks - fStartTicks]);
+  result := Format('%s - %d', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), StopAndGetUsec]);
 end;
 
 constructor TStopWatch.Create;
 begin
-  fStart := TEpikTimer.Create(nil);
+  fTimer := TEpikTimer.Create(nil);
 end;
 
 destructor TStopWatch.Destroy;
 begin
-  fStart.Free;
+  fTimer.Free;
   inherited Destroy;
 end;
 

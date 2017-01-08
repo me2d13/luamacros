@@ -9,7 +9,7 @@ uses
     //Graphics,
     XPLMDefs, XPLMDisplay, XPLMProcessing, XPLMUtilities, XPLMDataAccess,
     MemMap, uXplPluginEngine, uXplCommon, uXplSender,
-    uXplAbstractReceiver, uXplPluginReceiver, uxplmessages;
+    uXplAbstractReceiver, uXplPluginReceiver, uxplmessages, uXplLogger;
 
   // The Delphi Compiler must create a file with a .XPL extention. The default
   // extention for a Delphi library is .DLL - thus we use the $E compiler

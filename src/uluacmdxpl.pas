@@ -12,10 +12,12 @@ function XplCommandBegin(luaState : TLuaState) : integer;
 function XplCommandEnd(luaState : TLuaState) : integer;
 function GetXplVariable(luaState : TLuaState) : integer;
 function SetXplVariable(luaState : TLuaState) : integer;
+function IncXplVariable(luaState : TLuaState) : integer;
+function IncXplArrayVariable(luaState : TLuaState) : integer;
 function XplDrawText(luaState : TLuaState) : integer;
 function XplVarChange(luaState : TLuaState) : integer;
 function UnregisterXplVarChange(luaState : TLuaState) : integer;
-function SetXplLogFile(luaState : TLuaState) : integer;
+function XplLogCommand(luaState : TLuaState) : integer;
 
 
 implementation
@@ -107,7 +109,7 @@ begin
   if (lNumOfParams < 2) then
     raise LmcException.Create('Wrong number of parameters. Provide at least name and value.');
   arg := lua_tostring(luaState, 1);
-  if (lua_isnumber(luaState, 2) = 0) then lVal := TXplValue.Create(lua_tonumber(luaState, 2))
+  if (lua_isnumber(luaState, 2) <> 0) then lVal := TXplValue.Create(lua_tonumber(luaState, 2))
   else if (lua_isstring(luaState, 2) <> 0) then lVal := TXplValue.Create(lua_tostring(luaState, 2))
   else
   begin
@@ -122,6 +124,89 @@ begin
     Glb.DebugLog('Setting variable ' + arg + ' to ' + lVal.ToString, cLoggerXpl);
     Glb.XplControl.SetXplVariable(arg, lVal);
   end;
+  Result := 0;
+end;
+
+function IncXplVariable(luaState: TLuaState): integer;
+var arg : PAnsiChar;
+  lVal: TXplValue;
+  lNumOfParams: Integer;
+  lIncVar: TXplIncVariable;
+  lLimit: Double;
+  lOverflowBase: Double;
+begin
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams < 2) then
+    raise LmcException.Create('Wrong number of parameters. Provide at least name and value.');
+  arg := lua_tostring(luaState, 1);
+  if (lua_isnumber(luaState, 2) = 1) then lVal := TXplValue.Create(lua_tonumber(luaState, 2))
+  else
+    raise LmcException.Create('Cannot increment variable by non-numeric value.');
+  if (lNumOfParams > 2) then
+  begin
+    lLimit := lua_tonumber(luaState, 3);
+    if (lNumOfParams > 3) then
+    begin
+      lOverflowBase := lua_tonumber(luaState, 4);
+      Glb.DebugLogFmt('Increasing variable %s by %s with limit %f and overflow from %f',
+        [arg, lVal.ToString, lLimit, lOverflowBase], cLoggerXpl);
+      lIncVar := TXplIncVariable.Create(arg, lVal, lLimit, lOverflowBase);
+    end
+    else
+    begin
+      Glb.DebugLogFmt('Increasing variable %s by %s with limit %f',
+       [arg, lVal.ToString, lLimit], cLoggerXpl);
+      lIncVar := TXplIncVariable.Create(arg, lVal, lLimit);
+    end
+  end else begin
+    Glb.DebugLogFmt('Increasing variable %s by %s', [arg, lVal.ToString], cLoggerXpl);
+    lIncVar := TXplIncVariable.Create(arg, lVal);
+  end;
+  Glb.XplControl.SendMessage(lIncVar);
+  lIncVar.Free;
+  Result := 0;
+end;
+
+function IncXplArrayVariable(luaState: TLuaState): integer;
+var arg : PAnsiChar;
+  lVal: TXplValue;
+  lNumOfParams: Integer;
+  lIncVar: TXplIncVariable;
+  lLimit: Double;
+  lIndex: Integer;
+  lOverflowBase: Double;
+begin
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams < 3) then
+    raise LmcException.Create('Wrong number of parameters. Provide at least name, index and value.');
+  arg := lua_tostring(luaState, 1);
+  lIndex := lua_tointeger(luaState, 2);
+  if (lua_isnumber(luaState, 3) = 0) then lVal := TXplValue.Create(lua_tonumber(luaState, 3))
+  else
+    raise LmcException.Create('Cannot increment variable by non-numeric value.');
+  if (lNumOfParams > 3) then
+  begin
+    lLimit := lua_tonumber(luaState, 4);
+    if (lNumOfParams > 4) then
+    begin
+      lOverflowBase := lua_tonumber(luaState, 5);
+      Glb.DebugLogFmt('Increasing array variable %s[%d] by %s with limit %f and overflow from %f',
+        [arg, lIndex, lVal.ToString, lLimit, lOverflowBase], cLoggerXpl);
+      lIncVar := TXplIncVariable.Create(arg, lVal, lLimit, lOverflowBase);
+    end
+    else
+    begin
+      Glb.DebugLogFmt('Increasing array variable %s[%d] by %s with limit %f',
+       [arg, lIndex, lVal.ToString, lLimit], cLoggerXpl);
+      lIncVar := TXplIncVariable.Create(arg, lVal, lLimit);
+    end
+  end else begin
+    Glb.DebugLogFmt('Increasing array variable %s[%d] by %s', [arg, lIndex, lVal.ToString], cLoggerXpl);
+    lIncVar := TXplIncVariable.Create(arg, lVal);
+  end;
+  lIncVar.Index:=lIndex;
+  Glb.XplControl.SendMessage(lIncVar);
+  lIncVar.Free;
   Result := 0;
 end;
 
@@ -208,20 +293,23 @@ begin
   Result := 0;
 end;
 
-function SetXplLogFile(luaState: TLuaState): integer;
-var arg : PAnsiChar;
+function XplLogCommand(luaState: TLuaState): integer;
+var arg1, arg2 : PAnsiChar;
+  lNumOfParams: Integer;
 begin
-     //reads the first parameter passed to Increment as an integer
-     arg := lua_tostring(luaState, 1);
+  lNumOfParams:=lua_gettop(luaState);
+  //reads the first parameter passed to Increment as an integer
+  arg1 := lua_tostring(luaState, 1);
+  if (lNumOfParams > 1) then
+    arg2 := lua_tostring(luaState, 2)
+  else
+    arg2 := '';
 
-     //print
-     Glb.XplControl.SetLogFile(arg);
+  //print
+  Glb.XplControl.LogCommand(arg1, arg2);
 
-     //clears current Lua stack
-     Lua_Pop(luaState, Lua_GetTop(luaState));
-
-     //Result : number of results to give back to Lua
-     Result := 0;
+  //Result : number of results to give back to Lua
+  Result := 0;
 end;
 
 end.

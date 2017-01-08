@@ -99,7 +99,7 @@ type
     property Index: Int64 read fIndex write fIndex;
   end;
 
-  { TXplVariableValue }
+  { TXplVariableValue - answer to GetValue}
 
   TXplVariableValue = class (TXplSetVariable)
   protected
@@ -115,6 +115,28 @@ type
     function ToString: ansistring;override;
     property Id: Int64 read fId write fId;
     property ChangeCount: Int64 read fChangeCount write fChangeCount;
+  end;
+
+  { TXplIncVariable }
+
+  TXplIncVariable = class (TXplSetVariable)
+  protected
+    fHasLimit: Boolean;
+    fLimit: Double;
+    fUseOverflow: Boolean;
+    fOverflowBase: Double;
+    procedure WriteIdentByte(pStream: TStream);override;
+  public
+    constructor Create(pName: String; pValue: TXplValue);overload;
+    constructor Create(pName: String; pValue: TXplValue; pLimit: Double);overload;
+    constructor Create(pName: String; pValue: TXplValue; pLimit: Double; pOverflowBase: Double);overload;
+    constructor Create(pStream: TStream);overload;
+    procedure SerializeToStream(pStream: TStream);override;
+    function ToString: ansistring;override;
+    property HasLimit: Boolean read fHasLimit write fHasLimit;
+    property UseOverflow: Boolean read fUseOverflow write fUseOverflow;
+    property Limit: Double read fLimit write fLimit;
+    property OverflowBase: Double read fOverflowBase write fOverflowBase;
   end;
 
   { TXplReconnectToServer }
@@ -183,11 +205,18 @@ type
     procedure WriteIdentByte(pStream: TStream);override;
   end;
 
-  { TXplSetLogFile }
+  { TXplLogCommand }
 
-  TXplSetLogFile = class (TXplCallWithName)
+  TXplLogCommand = class (TXplCallWithName)
+  private
+    fValue: String;
   protected
     procedure WriteIdentByte(pStream: TStream);override;
+  public
+    constructor Create(pName: String; pValue: String);overload;
+    constructor Create(pStream: TStream);overload;
+    procedure SerializeToStream(pStream: TStream);override;
+    property Value: String read fValue write fValue;
   end;
 
 
@@ -205,11 +234,94 @@ begin
   Result := StrToFloat(Value);
 end;
 
-{ TXplSetLogFile }
+{ TXplIncVariable }
 
-procedure TXplSetLogFile.WriteIdentByte(pStream: TStream);
+procedure TXplIncVariable.WriteIdentByte(pStream: TStream);
 begin
-  pStream.WriteByte(HDMC_SET_LOG_FILE);
+  pStream.WriteByte(HDMC_INC_VARIABLE);
+end;
+
+constructor TXplIncVariable.Create(pName: String; pValue: TXplValue);
+begin
+  Create(pName, pValue, 0, 0);
+  fUseOverflow:=False;
+  fHasLimit:=False;
+end;
+
+constructor TXplIncVariable.Create(pName: String; pValue: TXplValue;
+  pLimit: Double);
+begin
+  Create(pName, pValue, pLimit, 0);
+  fUseOverflow:=False;
+end;
+
+constructor TXplIncVariable.Create(pName: String; pValue: TXplValue;
+  pLimit: Double; pOverflowBase: Double);
+begin
+  inherited Create(pName, pValue, NO_INDEX);
+  fLimit:=pLimit;
+  fHasLimit:=True;
+  fOverflowBase:=pOverflowBase;
+  fUseOverflow:=True;
+end;
+
+constructor TXplIncVariable.Create(pStream: TStream);
+begin
+  inherited;
+  pStream.Read(fHasLimit, SizeOf(fHasLimit));
+  pStream.Read(fLimit, SizeOf(fLimit));
+  pStream.Read(fUseOverflow, SizeOf(fUseOverflow));
+  pStream.Read(fOverflowBase, SizeOf(fOverflowBase));
+end;
+
+procedure TXplIncVariable.SerializeToStream(pStream: TStream);
+begin
+  inherited SerializeToStream(pStream);
+  pStream.Write(fHasLimit, SizeOf(fHasLimit));
+  pStream.Write(fLimit, SizeOf(fLimit));
+  pStream.Write(fUseOverflow, SizeOf(fUseOverflow));
+  pStream.Write(fOverflowBase, SizeOf(fOverflowBase));
+end;
+
+function TXplIncVariable.ToString: ansistring;
+begin
+  Result := Format('name %s', [fName]);
+  if (fIndex <> NO_INDEX) then
+    Result := Result + Format('[%d]', [fIndex]);
+  Result := Result + ' increased by ';
+  if (fValue = nil) then
+    Result := Result + 'nil'
+  else
+    Result := Result + fValue.ToString;
+  if (fHasLimit) then
+    Result := Result + Format(' limit %f', [fLimit]);
+  if (fUseOverflow) then
+    Result := Result + Format(' on overflow start from %f', [fOverflowBase]);
+end;
+
+{ TXplLogCommand }
+
+procedure TXplLogCommand.WriteIdentByte(pStream: TStream);
+begin
+  pStream.WriteByte(HDMC_LOG_COMMAND);
+end;
+
+constructor TXplLogCommand.Create(pName: String; pValue: String);
+begin
+  inherited Create(pName);
+  fValue:=pValue;
+end;
+
+constructor TXplLogCommand.Create(pStream: TStream);
+begin
+  inherited;
+  fValue:=pStream.ReadAnsiString;
+end;
+
+procedure TXplLogCommand.SerializeToStream(pStream: TStream);
+begin
+  inherited SerializeToStream(pStream);
+  pStream.WriteAnsiString(fValue);
 end;
 
 { TXplUnhookVariable }

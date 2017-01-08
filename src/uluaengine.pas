@@ -663,50 +663,6 @@ end;
 
 { TLuaEngine }
 
-procedure TLuaEngine.RegisterFunctions;
-begin
-  if (fLua = nil) then
-  begin
-    Glb.LogError('Can''t register Lua functions, LUA init failed.', cLoggerLua);
-    exit;
-  end;
-  // general
-  fLua.RegisterFunction('print','',nil,@FormPrint);
-  fLua.RegisterFunction('clear','',nil,@FormClear);
-  fLua.RegisterFunction('lmc_log_module','',nil,@LogModule);
-  fLua.RegisterFunction('lmc_log_spool','',nil,@LogSpool);
-  fLua.RegisterFunction('lmc_log_all','',nil,@LogAll);
-  fLua.RegisterFunction('lmc_send_keys','',nil,@SendKeys);
-  fLua.RegisterFunction('lmc_spawn','',nil,@Spawn);
-  fLua.RegisterFunction('lmc_minimize','',nil,@MinimizeMainWindow);
-  fLua.RegisterFunction('lmc_load','',nil,@LoadScript);
-  fLua.RegisterFunction('lmc_say','',nil,@Say);
-  fLua.RegisterFunction('lmc_get_window_title', '', nil, @GetActiveWindowTitle);
-  // devices
-  fLua.RegisterFunction('lmc_print_devices','',nil,@PrintDevices);
-  fLua.RegisterFunction('lmc_assign_keyboard','',nil,@CheckDeviceNameWithAsk);
-  fLua.RegisterFunction('lmc_device_set_name','',nil,@AssignDeviceNameByRegexp);
-  fLua.RegisterFunction('lmc_set_handler','',nil,@LuaCmdSetCallback);
-  fLua.RegisterFunction('lmc_set_axis_handler','',nil,@LuaCmdSetAxisHandler);
-  // serial
-  fLua.RegisterFunction('lmc_add_com','',nil,@AddCom);
-  fLua.RegisterFunction('lmc_send_to_com','',nil,@SendCom);
-  fLua.RegisterFunction('lmc_set_com_splitter','',nil,@SetComSplitter);
-  // xpl
-  fLua.RegisterFunction('lmc_xpl_command','',nil,@XplCommand);
-  fLua.RegisterFunction('lmc_get_xpl_variable','',nil,@GetXplVariable);
-  fLua.RegisterFunction('lmc_set_xpl_variable','',nil,@SetXplVariable);
-  fLua.RegisterFunction('lmc_xpl_text','',nil,@XplDrawText);
-  fLua.RegisterFunction('lmc_xpl_command_begin','',nil,@XplCommandBegin);
-  fLua.RegisterFunction('lmc_xpl_command_end','',nil,@XplCommandEnd);
-  fLua.RegisterFunction('lmc_on_xpl_var_change','',nil,@XplVarChange);
-  fLua.RegisterFunction('lmc_remove_xpl_var_change','',nil,@UnregisterXplVarChange);
-  fLua.RegisterFunction('lmc_xpl_log_file','',nil,@SetXplLogFile);
-  // http
-  fLua.RegisterFunction('lmc_http_server','',nil,@HttpServerSimple);
-  fLua.RegisterFunction('lmc_http_get','',nil,@HttpGet);
-end;
-
 procedure TLuaEngine.RegisterConfig;
 begin
   lua_createtable(fLua.LuaInstance, 0, 0); // 1.. table
@@ -994,6 +950,53 @@ function TLuaEngine.IsRunning: Boolean;
 begin
   Result := fExecutor.IsRunning;
 end;
+
+procedure TLuaEngine.RegisterFunctions;
+begin
+  if (fLua = nil) then
+  begin
+    Glb.LogError('Can''t register Lua functions, LUA init failed.', cLoggerLua);
+    exit;
+  end;
+  // general
+  fLua.RegisterFunction('print','',nil,@FormPrint);
+  fLua.RegisterFunction('clear','',nil,@FormClear);
+  fLua.RegisterFunction('lmc_log_module','',nil,@LogModule);
+  fLua.RegisterFunction('lmc_log_spool','',nil,@LogSpool);
+  fLua.RegisterFunction('lmc_log_all','',nil,@LogAll);
+  fLua.RegisterFunction('lmc_send_keys','',nil,@SendKeys);
+  fLua.RegisterFunction('lmc_spawn','',nil,@Spawn);
+  fLua.RegisterFunction('lmc_minimize','',nil,@MinimizeMainWindow);
+  fLua.RegisterFunction('lmc_load','',nil,@LoadScript);
+  fLua.RegisterFunction('lmc_say','',nil,@Say);
+  fLua.RegisterFunction('lmc_get_window_title', '', nil, @GetActiveWindowTitle);
+  // devices
+  fLua.RegisterFunction('lmc_print_devices','',nil,@PrintDevices);
+  fLua.RegisterFunction('lmc_assign_keyboard','',nil,@CheckDeviceNameWithAsk);
+  fLua.RegisterFunction('lmc_device_set_name','',nil,@AssignDeviceNameByRegexp);
+  fLua.RegisterFunction('lmc_set_handler','',nil,@LuaCmdSetCallback);
+  fLua.RegisterFunction('lmc_set_axis_handler','',nil,@LuaCmdSetAxisHandler);
+  // serial
+  fLua.RegisterFunction('lmc_add_com','',nil,@AddCom);
+  fLua.RegisterFunction('lmc_send_to_com','',nil,@SendCom);
+  fLua.RegisterFunction('lmc_set_com_splitter','',nil,@SetComSplitter);
+  // xpl
+  fLua.RegisterFunction('lmc_xpl_command','',nil,@XplCommand);
+  fLua.RegisterFunction('lmc_get_xpl_variable','',nil,@GetXplVariable);
+  fLua.RegisterFunction('lmc_set_xpl_variable','',nil,@SetXplVariable);
+  fLua.RegisterFunction('lmc_xpl_text','',nil,@XplDrawText);
+  fLua.RegisterFunction('lmc_xpl_command_begin','',nil,@XplCommandBegin);
+  fLua.RegisterFunction('lmc_xpl_command_end','',nil,@XplCommandEnd);
+  fLua.RegisterFunction('lmc_on_xpl_var_change','',nil,@XplVarChange);
+  fLua.RegisterFunction('lmc_remove_xpl_var_change','',nil,@UnregisterXplVarChange);
+  fLua.RegisterFunction('lmc_xpl_log','',nil,@XplLogCommand);
+  fLua.RegisterFunction('lmc_inc_xpl_variable','',nil,@IncXplVariable);
+  fLua.RegisterFunction('lmc_inc_xpl_array_variable','',nil,@IncXplArrayVariable);
+  // http
+  fLua.RegisterFunction('lmc_http_server','',nil,@HttpServerSimple);
+  fLua.RegisterFunction('lmc_http_get','',nil,@HttpGet);
+end;
+
 
 end.
 
