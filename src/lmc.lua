@@ -7,7 +7,8 @@ lmc_device_set_name('LB', '7E9AD920')
 lmc_device_set_name('LB2', '53175550')
 --lmc_device_set_name('KBD1', '826BD90') this is my regular
 lmc_device_set_name('KBD1', '3AE1BAFF')
-lmc_device_set_name('KBD2', '1BDC3055')
+lmc_device_set_name('KBD2', '31BB05D2')
+--lmc_device_set_name('ST', 'Saitek')
 lmc_print_devices()
 
 lmc.minimizeToTray = true
@@ -55,6 +56,7 @@ commands2[192]='sim/view/still_spot' -- 192 is vkey code of '`'
 commands2[string.byte('1')]='SRS/X-Camera/Select_View_ID_1'
 commands2[string.byte('2')]='SRS/X-Camera/Select_View_ID_2'
 commands2[string.byte('S')]='SRS/X-Camera/Select_View_ID_3'
+commands2[9]='SRS/X-Camera/Select_View_ID_4' -- tab
 commands2[string.byte('G')]='sim/electrical/batteries_toggle'
 commands2[string.byte('H')]='sim/electrical/generators_toggle'
 commands2[string.byte('V')]='sim/lights/landing_lights_toggle'
@@ -73,6 +75,7 @@ commands2_as350={}
 commands2_as350[string.byte('7')]='sim/starters/shut_down' --starter off
 commands2_as350[string.byte('8')]='sim/engines/engage_starters' --starter on
 
+
 commands1={}
 commands1[string.byte('R')]='sim/transponder/transponder_ident'
 
@@ -82,7 +85,8 @@ commands1_as350[string.byte('J')]='AS350/Trim/Pitch_Toggle'
 commands1_as350[string.byte('K')]='AS350/Trim/Roll_Toggle'
 commands1_as350[string.byte('L')]='AS350/Trim/Trim_Release'
 commands1_as350[string.byte('Z')]='AS350/SCU/Inst_l1' -- light1
-commands1_as350[string.byte('X')]='AS350/SCU/Inst_l2' -- light2
+commands1_as350[string.byte('X')]='AS350/SCU/Inst_l2' -- light2  hhhhhh
+
 
 function lb_common(button, direction)
   if (button == 3) then
@@ -162,8 +166,20 @@ function lb2_common(button, direction, ts)
   return false
 end
 
+function lb2_as350(button, direction, ts)
+  if direction == 1 then
+    if button == 20 then lmc_xpl_command('sim/engines/engage_starters') -- on
+    elseif button == 21 then lmc_xpl_command('sim/starters/shut_down') -- off
+    else
+      return false
+    end
+    return true
+  end
+  return false
+end
+
 function lb2_handler(button, direction, ts)
-  if (lb2_common(button, direction, ts)) then
+  if (lb2_as350(button, direction, ts)) then
     return
   elseif (gName == 'N994VA') then
     if (lb2_common(button, direction, ts)) then -- for now
@@ -302,3 +318,8 @@ lmc_set_handler('LB2',lb2_handler)
 lmc_set_handler('KBD2',keyb2)
 lmc_set_handler('KBD1',keyb1)
 lmc_on_xpl_var_change('sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot', checkRAlt, 1000)
+
+lmc_set_axis_handler('LB2',2, 200, 100, function(val, ts)
+  --print('Callback for axis - value ' .. val..', timestamp '..ts)
+  lmc_set_xpl_variable('AS350/Rotor_Brake', val/65535)
+end)

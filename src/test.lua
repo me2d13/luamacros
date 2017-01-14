@@ -41,6 +41,7 @@ print(lmc_device_set_name('LB', '7E9AD920'));
 print(lmc_device_set_name('LB2', '53175550'));
 print(lmc_device_set_name('KBD1', '826BD90'));
 print(lmc_device_set_name('KBD2', '31BB05D2'));
+print(lmc_device_set_name('ST', 'Saitek'));
 --lmc_assign_keyboard('KBD2');
 -- remember 2nd param is regexp, so any unique part from that ugly keyboard system id works
 
@@ -55,7 +56,7 @@ handler = function()
 end
 
 log_handler = function(button, direction, ts)
-  print('Callback for device: button ' .. button .. ', direction '..direction..', ts '..ts)
+  print('MY Callback for device: button ' .. button .. ', direction '..direction..', ts '..ts)
 end
 
 
@@ -67,7 +68,7 @@ handler()
 -- 2nd param: button number
 -- 3rd param: direction, 1=down, 0=up
 -- 4th param: callback function
-lmc_set_handler('LB',2,0,handler)
+--lmc_set_handler('LB',2,0,handler)
 -- now callback is active
 
 -- another type of device callback - assigned to whole device
@@ -84,7 +85,8 @@ lmc_set_handler('LB',function(button, direction)
   end
 end)
 
-lmc_set_handler('LB2', log_handler)
+--lmc_set_handler('LB2', log_handler)
+lmc_set_handler('ST', log_handler)
 
 -- add COM port (with default config values) as device
 -- 1st param: logical name

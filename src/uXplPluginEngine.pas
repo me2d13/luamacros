@@ -79,13 +79,18 @@ begin
   fMessageTimer := TStopWatch.Create;
   fTextToBeDrawn:='';
   fTextFloatPosition := 0;
+  DebugLog('Going to create sync sender...');
   fSyncSender := TXplSender.Create(cXplToLmcPipeName);
   fSyncSender.DebugMethod:=DebugLogFmt;
+  DebugLog('Going to create async sender...');
   fAsyncSender := TXplSender.Create(cXplToLmcAsyncPipeName);
   fAsyncSender.DebugMethod:=DebugLogFmt;
+  DebugLog('Going to create receiver...');
   fReceiver := TXplPluginReceiver.Create(cLmcToXplPipeName);
   fReceiver.OnMessage:=OnLmcMessage;
+  DebugLog('Going to init receiver...');
   fReceiver.Init;
+  DebugLog('Going to init internal structures...');
   fDataRefs:=TStringList.Create;
   fDataRefs.CaseSensitive:=False;
   fCommands:=TStringList.Create;

@@ -82,7 +82,7 @@ begin
       ], cLoggerDx);}
     end else if (lPovIndex >= 0) then begin
       Glb.DebugLogFmt('Device %s POV event, offset %d, data %d', [Name, event.dwOfs, event.dwData], cLoggerDx);
-      Glb.LuaEngine.OnDeviceEvent(self, 1000+lPovIndex, event.dwData);
+      Glb.LuaEngine.OnDeviceEvent(self, 1000+lPovIndex, event.dwData, event.dwTimeStamp);
     end else begin
          Glb.DebugLogFmt('Device %s unknown event, offset %d, data %d', [Name, event.dwOfs, event.dwData], cLoggerDx);
     end;

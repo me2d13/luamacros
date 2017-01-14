@@ -12,6 +12,7 @@ type
 
   TXPLcontrol = class
   private
+    fCallbackCount: Integer;
     fXplSyncListener: TXplListener; // for get var
     fXplAsyncListener: TXplListener; // for var callback
     fXplSender: TXplSender;
@@ -61,6 +62,7 @@ uses SysUtils, Windows, Forms, XPLMDataAccess, Variants,
 constructor TXPLcontrol.Create;
 begin
   //lGlb.DebugLog('Xplane control created.', 'XPL');
+  fCallbackCount := 0;
   fXplSyncListener := TXplListener.Create(cXplToLmcPipeName);
   fXplSyncListener.OnMessage:=OnXplSyncMessage;
   fXplAsyncListener := TXplListener.Create(cXplToLmcAsyncPipeName);
@@ -142,7 +144,8 @@ var
   lCbInfo: TLmcVariableCallbackInfo;
   lId: Int64;
 begin
-  lId:=Glb.UnixTimestampMs;
+  lId:=Glb.UnixTimestampMs * 100 + fCallbackCount;
+  Inc(fCallbackCount);
   lXplObj := TXplVariableCallback.Create(pVarName, pIntervalMs, pDelta, lId);
   fXplSender.SendMessage(lXplObj);
   lCbInfo := TLmcVariableCallbackInfo.Create;

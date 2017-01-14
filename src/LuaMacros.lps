@@ -46,8 +46,8 @@
         <Filename Value="uXplControl.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="6"/>
-        <TopLine Value="187"/>
-        <CursorPos X="3" Y="195"/>
+        <TopLine Value="140"/>
+        <CursorPos X="7" Y="148"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -56,9 +56,10 @@
         <Filename Value="uglobals.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uGlobals"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="282"/>
-        <CursorPos X="69" Y="326"/>
+        <TopLine Value="297"/>
+        <CursorPos X="35" Y="335"/>
         <UsageCount Value="201"/>
         <Bookmarks Count="1">
           <Item0 X="3" Y="217" ID="2"/>
@@ -70,10 +71,9 @@
         <Filename Value="uluacmdxpl.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uLuaCmdXpl"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="264"/>
-        <CursorPos X="16" Y="307"/>
+        <TopLine Value="234"/>
+        <CursorPos X="3" Y="269"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -84,7 +84,7 @@
         <UnitName Value="uLuaEngine"/>
         <EditorIndex Value="4"/>
         <TopLine Value="953"/>
-        <CursorPos X="60" Y="992"/>
+        <CursorPos X="41" Y="990"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="2">
           <Item0 X="18" Y="266" ID="3"/>
@@ -98,6 +98,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uDxDeviceService"/>
         <EditorIndex Value="3"/>
+        <TopLine Value="7"/>
         <CursorPos X="36" Y="19"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -117,8 +118,8 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uDxDevice"/>
         <EditorIndex Value="9"/>
-        <TopLine Value="83"/>
-        <CursorPos X="26" Y="94"/>
+        <TopLine Value="44"/>
+        <CursorPos X="31" Y="83"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -234,7 +235,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="25"/>
         <CursorPos Y="48"/>
-        <UsageCount Value="177"/>
+        <UsageCount Value="178"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit22>
       <Unit23>
@@ -243,7 +244,7 @@
         <UnitName Value="uLuaCmdMainWindow"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="63" Y="16"/>
-        <UsageCount Value="162"/>
+        <UsageCount Value="163"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit23>
       <Unit24>
@@ -252,7 +253,7 @@
         <UnitName Value="uXplListener"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="3" Y="14"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit24>
       <Unit25>
@@ -262,7 +263,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2"/>
         <CursorPos X="51" Y="27"/>
-        <UsageCount Value="156"/>
+        <UsageCount Value="157"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit25>
       <Unit26>
@@ -272,7 +273,7 @@
         <EditorIndex Value="7"/>
         <TopLine Value="281"/>
         <CursorPos X="37" Y="306"/>
-        <UsageCount Value="150"/>
+        <UsageCount Value="151"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit26>
@@ -283,7 +284,7 @@
         <EditorIndex Value="1"/>
         <TopLine Value="61"/>
         <CursorPos X="32" Y="85"/>
-        <UsageCount Value="80"/>
+        <UsageCount Value="81"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit27>
@@ -294,7 +295,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="291"/>
         <CursorPos X="57" Y="301"/>
-        <UsageCount Value="75"/>
+        <UsageCount Value="76"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit28>
       <Unit29>
@@ -304,7 +305,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="51"/>
         <CursorPos X="3" Y="53"/>
-        <UsageCount Value="73"/>
+        <UsageCount Value="74"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit29>
       <Unit30>
@@ -314,7 +315,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="119"/>
         <CursorPos X="35" Y="136"/>
-        <UsageCount Value="58"/>
+        <UsageCount Value="59"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit30>
       <Unit31>
@@ -385,127 +386,123 @@
         <UsageCount Value="10"/>
       </Unit39>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="29" HistoryIndex="28">
       <Position1>
         <Filename Value="uluaengine.pas"/>
-        <Caret Line="198" Column="58" TopLine="174"/>
+        <Caret Line="994" Column="73" TopLine="952"/>
       </Position1>
       <Position2>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="359" Column="76" TopLine="334"/>
+        <Filename Value="uluacmdxpl.pas"/>
+        <Caret Line="16" Column="21"/>
       </Position2>
       <Position3>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="374" Column="61" TopLine="334"/>
+        <Filename Value="uluacmdxpl.pas"/>
+        <Caret Line="203" TopLine="173"/>
       </Position3>
       <Position4>
-        <Filename Value="uxplmessages.pas"/>
-        <Caret Line="133" Column="36" TopLine="90"/>
+        <Filename Value="uluacmdxpl.pas"/>
+        <Caret Line="211" Column="24" TopLine="173"/>
       </Position4>
       <Position5>
-        <Filename Value="uluacmdxpl.pas"/>
-        <Caret Line="148" Column="7" TopLine="108"/>
+        <Filename Value="uxplmessages.pas"/>
+        <Caret Line="368" Column="3" TopLine="365"/>
       </Position5>
       <Position6>
-        <Filename Value="uluacmdxpl.pas"/>
-        <Caret Line="169" Column="3" TopLine="132"/>
+        <Filename Value="uxplmessages.pas"/>
+        <Caret Line="253" Column="21" TopLine="250"/>
       </Position6>
       <Position7>
-        <Filename Value="uluacmdxpl.pas"/>
-        <Caret Line="170" Column="15" TopLine="132"/>
+        <Filename Value="uxplmessages.pas"/>
+        <Caret Line="234" Column="40" TopLine="232"/>
       </Position7>
       <Position8>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="732" Column="11" TopLine="707"/>
+        <Filename Value="uxplmessages.pas"/>
+        <Caret Line="115" Column="14" TopLine="90"/>
       </Position8>
       <Position9>
-        <Filename Value="uluaengine.pas"/>
-        <Caret Line="994" Column="73" TopLine="952"/>
+        <Filename Value="uxplmessages.pas"/>
+        <Caret Line="69" Column="3" TopLine="44"/>
       </Position9>
       <Position10>
         <Filename Value="uluacmdxpl.pas"/>
-        <Caret Line="16" Column="21"/>
+        <Caret Line="211" Column="24" TopLine="173"/>
       </Position10>
       <Position11>
         <Filename Value="uluacmdxpl.pas"/>
-        <Caret Line="203" TopLine="173"/>
+        <Caret Line="144" Column="82" TopLine="120"/>
       </Position11>
       <Position12>
-        <Filename Value="uluacmdxpl.pas"/>
-        <Caret Line="211" Column="24" TopLine="173"/>
-      </Position12>
-      <Position13>
-        <Filename Value="uxplmessages.pas"/>
-        <Caret Line="368" Column="3" TopLine="365"/>
-      </Position13>
-      <Position14>
-        <Filename Value="uxplmessages.pas"/>
-        <Caret Line="253" Column="21" TopLine="250"/>
-      </Position14>
-      <Position15>
-        <Filename Value="uxplmessages.pas"/>
-        <Caret Line="234" Column="40" TopLine="232"/>
-      </Position15>
-      <Position16>
-        <Filename Value="uxplmessages.pas"/>
-        <Caret Line="115" Column="14" TopLine="90"/>
-      </Position16>
-      <Position17>
-        <Filename Value="uxplmessages.pas"/>
-        <Caret Line="69" Column="3" TopLine="44"/>
-      </Position17>
-      <Position18>
-        <Filename Value="uluacmdxpl.pas"/>
-        <Caret Line="211" Column="24" TopLine="173"/>
-      </Position18>
-      <Position19>
-        <Filename Value="uluacmdxpl.pas"/>
-        <Caret Line="144" Column="82" TopLine="120"/>
-      </Position19>
-      <Position20>
         <Filename Value="uluaengine.pas"/>
         <Caret Line="983" Column="62" TopLine="952"/>
-      </Position20>
-      <Position21>
+      </Position12>
+      <Position13>
         <Filename Value="uluacmdxpl.pas"/>
         <Caret Line="144" Column="3" TopLine="130"/>
-      </Position21>
-      <Position22>
+      </Position13>
+      <Position14>
         <Filename Value="uluaengine.pas"/>
         <Caret Line="992" Column="37" TopLine="953"/>
-      </Position22>
-      <Position23>
+      </Position14>
+      <Position15>
         <Filename Value="uluacmdxpl.pas"/>
         <Caret Line="20" Column="9"/>
+      </Position15>
+      <Position16>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="992" Column="60" TopLine="953"/>
+      </Position16>
+      <Position17>
+        <Filename Value="uluacmdxpl.pas"/>
+        <Caret Line="306" Column="18" TopLine="264"/>
+      </Position17>
+      <Position18>
+        <Filename Value="uXplControl.pas"/>
+        <Caret Line="191" Column="3" TopLine="187"/>
+      </Position18>
+      <Position19>
+        <Filename Value="uxplmessages.pas"/>
+        <Caret Line="216" Column="37" TopLine="185"/>
+      </Position19>
+      <Position20>
+        <Filename Value="uxplmessages.pas"/>
+        <Caret Line="323" Column="3" TopLine="321"/>
+      </Position20>
+      <Position21>
+        <Filename Value="uxplmessages.pas"/>
+        <Caret Line="306" Column="38" TopLine="304"/>
+      </Position21>
+      <Position22>
+        <Filename Value="uluacmdxpl.pas"/>
+        <Caret Line="304" Column="18" TopLine="264"/>
+      </Position22>
+      <Position23>
+        <Filename Value="udxdevice.pas"/>
+        <Caret Line="85" Column="26" TopLine="78"/>
       </Position23>
       <Position24>
         <Filename Value="uluaengine.pas"/>
-        <Caret Line="992" Column="60" TopLine="953"/>
+        <Caret Line="892" Column="22" TopLine="864"/>
       </Position24>
       <Position25>
-        <Filename Value="uluacmdxpl.pas"/>
-        <Caret Line="306" Column="18" TopLine="264"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="960" Column="3" TopLine="950"/>
       </Position25>
       <Position26>
-        <Filename Value="uXplControl.pas"/>
-        <Caret Line="191" Column="3" TopLine="187"/>
+        <Filename Value="uluaengine.pas"/>
+        <Caret Line="990" Column="41" TopLine="953"/>
       </Position26>
       <Position27>
-        <Filename Value="uxplmessages.pas"/>
-        <Caret Line="216" Column="37" TopLine="185"/>
+        <Filename Value="uluacmdxpl.pas"/>
+        <Caret Line="269" Column="3" TopLine="234"/>
       </Position27>
       <Position28>
-        <Filename Value="uxplmessages.pas"/>
-        <Caret Line="323" Column="3" TopLine="321"/>
+        <Filename Value="uXplControl.pas"/>
+        <Caret Line="145" Column="3" TopLine="138"/>
       </Position28>
       <Position29>
-        <Filename Value="uxplmessages.pas"/>
-        <Caret Line="306" Column="38" TopLine="304"/>
+        <Filename Value="uXplControl.pas"/>
+        <Caret Line="148" Column="7" TopLine="140"/>
       </Position29>
-      <Position30>
-        <Filename Value="uluacmdxpl.pas"/>
-        <Caret Line="304" Column="18" TopLine="264"/>
-      </Position30>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>
