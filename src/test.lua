@@ -2,6 +2,11 @@
 clear();
 lmc_xpl_text('From LUA macros')
 
+lmc_xpl_command('sim/view/still_spot')
+
+lmc_set_xpl_variable('sim/cockpit2/radios/actuators/adf1_frequency_hz', 424)
+lmc_inc_xpl_variable('sim/cockpit2/radios/actuators/adf1_frequency_hz', 1)
+
 --lmc2.ahoj = 1
 
 --lmc_log_all();

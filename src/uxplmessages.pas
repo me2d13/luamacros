@@ -9,6 +9,32 @@ uses
 
 type
 
+  TXplVarType = (vtNull, vtInteger, vtDouble, vtString);
+
+  PXplValue = ^TXplValueRec;
+  TXplValueRec = packed record
+    case VarType: TXplVarType of
+    vtInteger: (intData : Int64);
+    vtDouble: (doubleData : Double);
+    vtString: (stringData: String[255]);
+  end;
+
+  TXplSetVariableRec = packed record
+    Name: String[255];
+    Value: TXplValueRec;
+    Index: Int64;
+  end;
+
+
+  TXplIncVariableRec = packed record
+    SetVariableData: TXplSetVariableRec;
+    HasLimit: Boolean;
+    Limit: Double;
+    UseOverflow: Boolean;
+    OverflowBase: Double;
+  end;
+
+
   { TXplMessage }
 
   TXplMessage = class
@@ -31,16 +57,15 @@ type
     property Text: String read fText write fText;
   end;
 
-  TXplVarType = (vtNull, vtInteger, vtDouble, vtString);
-
   { TXplValue }
 
   TXplValue = class
   private
-    fType: TXplVarType;
-    fIntValue: Int64;
-    fDoubleValue: Double;
-    fStringValue: String;
+    fValue: TXplValueRec;
+    function GetDoubleValue: Double;
+    function GetIntValue: Int64;
+    function GetStringValue: String;
+    function GetType: TXplVarType;
     procedure SetDoubleValue(AValue: Double);
     procedure SetIntValue(AValue: Int64);
     procedure SetStringValue(AValue: String);
@@ -50,6 +75,7 @@ type
     constructor Create(pDoubleValue: Double);overload;
     constructor Create(pStringValue: String);overload;
     constructor Create(pStream: TStream);overload;
+    constructor Create(pValue: TXplValueRec);overload;
     procedure SerializeToStream(pStream: TStream);virtual;
     procedure MakeDouble;
     procedure MakeInt;
@@ -58,10 +84,11 @@ type
     function Equals(pVar: TXplValue): boolean;
     function EqualsWithDelta(pVar: TXplValue; pDelta:Int64): boolean;
     function SameDouble(pVal1, pVal2, pEpsilon: double): boolean;
-    property IntValue: Int64 read fIntValue write SetIntValue;
-    property DoubleValue: Double read fDoubleValue write SetDoubleValue;
-    property StringValue: String read fStringValue write SetStringValue;
-    property ValueType: TXplVarType read fType;
+    property IntValue: Int64 read GetIntValue write SetIntValue;
+    property DoubleValue: Double read GetDoubleValue write SetDoubleValue;
+    property StringValue: String read GetStringValue write SetStringValue;
+    property ValueType: TXplVarType read GetType;
+    property Value: TXplValueRec read fValue;
   end;
 
   { TXplSetVariable }
@@ -131,6 +158,7 @@ type
     constructor Create(pName: String; pValue: TXplValue; pLimit: Double);overload;
     constructor Create(pName: String; pValue: TXplValue; pLimit: Double; pOverflowBase: Double);overload;
     constructor Create(pStream: TStream);overload;
+    constructor Create(pData: TXplIncVariableRec);overload;
     procedure SerializeToStream(pStream: TStream);override;
     function ToString: ansistring;override;
     property HasLimit: Boolean read fHasLimit write fHasLimit;
@@ -272,6 +300,17 @@ begin
   pStream.Read(fLimit, SizeOf(fLimit));
   pStream.Read(fUseOverflow, SizeOf(fUseOverflow));
   pStream.Read(fOverflowBase, SizeOf(fOverflowBase));
+end;
+
+constructor TXplIncVariable.Create(pData: TXplIncVariableRec);
+begin
+  fName:=pData.SetVariableData.Name;
+  fValue := TXplValue.Create(pData.SetVariableData.Value);
+  fIndex:=pData.SetVariableData.Index;
+  fHasLimit:=pData.HasLimit;
+  fLimit:=pData.Limit;
+  fUseOverflow:=pData.UseOverflow;
+  fOverflowBase:=pData.OverflowBase;
 end;
 
 procedure TXplIncVariable.SerializeToStream(pStream: TStream);
@@ -489,25 +528,45 @@ end;
 
 procedure TXplValue.SetDoubleValue(AValue: Double);
 begin
-  fDoubleValue:=AValue;
-  fType:=vtDouble;
+  fValue.VarType:=vtDouble;
+  fValue.doubleData:=AValue;
+end;
+
+function TXplValue.GetIntValue: Int64;
+begin
+  Result := fValue.intData;
+end;
+
+function TXplValue.GetStringValue: String;
+begin
+  Result := fValue.stringData;
+end;
+
+function TXplValue.GetType: TXplVarType;
+begin
+  Result := fValue.VarType;
+end;
+
+function TXplValue.GetDoubleValue: Double;
+begin
+  Result := fValue.doubleData;
 end;
 
 procedure TXplValue.SetIntValue(AValue: Int64);
 begin
-  fIntValue:=AValue;
-  fType:=vtInteger;
+  fValue.VarType:=vtInteger;
+  fValue.intData:=AValue;
 end;
 
 procedure TXplValue.SetStringValue(AValue: String);
 begin
-  fStringValue:=AValue;
-  fType:=vtString;
+  fValue.VarType:=vtString;
+  fValue.stringData:=AValue;
 end;
 
 constructor TXplValue.Create;
 begin
-  fType:=vtNull;
+  fValue.VarType:=vtNull;
 end;
 
 constructor TXplValue.Create(pIntValue: Integer);
@@ -527,53 +586,58 @@ end;
 
 constructor TXplValue.Create(pStream: TStream);
 begin
-  fType:=TXplVarType(pStream.ReadByte);
-  case fType of
-    vtInteger: pStream.Read(fIntValue, SizeOf(fIntValue));
-    vtDouble: pStream.Read(fDoubleValue, SizeOf(fDoubleValue));
-    vtString: fStringValue := pStream.ReadAnsiString;
+  fValue.VarType:=TXplVarType(pStream.ReadByte);
+  case fValue.VarType of
+    vtInteger: pStream.Read(fValue.intData, SizeOf(fValue.intData));
+    vtDouble: pStream.Read(fValue.doubleData, SizeOf(fValue.doubleData));
+    vtString: fValue.stringData := pStream.ReadAnsiString;
   end;
+end;
+
+constructor TXplValue.Create(pValue: TXplValueRec);
+begin
+  fValue := pValue;
 end;
 
 procedure TXplValue.SerializeToStream(pStream: TStream);
 begin
-  pStream.WriteByte(Ord(fType));
-  case fType of
-    vtInteger: pStream.Write(fIntValue, SizeOf(fIntValue));
-    vtDouble: pStream.Write(fDoubleValue, SizeOf(fDoubleValue));
-    vtString: pStream.WriteAnsiString(fStringValue);
+  pStream.WriteByte(Ord(fValue.VarType));
+  case fValue.VarType of
+    vtInteger: pStream.Write(fValue.intData, SizeOf(fValue.intData));
+    vtDouble: pStream.Write(fValue.doubleData, SizeOf(fValue.doubleData));
+    vtString: pStream.WriteAnsiString(fValue.stringData);
   end;
 end;
 
 procedure TXplValue.MakeDouble;
 begin
-  if (fType = vtDouble) then
+  if (fValue.VarType = vtDouble) then
     exit;
-  case fType of
-    vtInteger: SetDoubleValue(fIntValue);
-    vtString: SetDoubleValue(StrToFloatWithDecimalPoint(fStringValue));
+  case fValue.VarType of
+    vtInteger: SetDoubleValue(fValue.intData);
+    vtString: SetDoubleValue(StrToFloatWithDecimalPoint(fValue.stringData));
     else SetDoubleValue(0);
   end;
 end;
 
 procedure TXplValue.MakeInt;
 begin
-  if (fType = vtInteger) then
+  if (fValue.VarType = vtInteger) then
     exit;
-  case fType of
-    vtDouble: SetIntValue(trunc(fDoubleValue));
-    vtString: SetIntValue(StrToInt(fStringValue));
+  case fValue.VarType of
+    vtDouble: SetIntValue(trunc(fValue.doubleData));
+    vtString: SetIntValue(StrToInt(fValue.stringData));
     else SetIntValue(0);
   end;
 end;
 
 procedure TXplValue.MakeString;
 begin
-  if (fType = vtString) then
+  if (fValue.VarType = vtString) then
     exit;
-  case fType of
-    vtDouble: SetStringValue(FloatToStr(fDoubleValue));
-    vtInteger: SetStringValue(IntToStr(fIntValue));
+  case fValue.VarType of
+    vtDouble: SetStringValue(FloatToStr(fValue.doubleData));
+    vtInteger: SetStringValue(IntToStr(fValue.intData));
     else SetStringValue('');
   end;
 end;
@@ -581,11 +645,11 @@ end;
 function TXplValue.ToString: ansistring;
 begin
   Result := 'N/A';
-  case fType of
+  case fValue.VarType of
     vtNull: Result := 'null';
-    vtString: Result := '[string] "' + fStringValue + '"';
-    vtInteger: Result := '[int] ' + IntToStr(fIntValue);
-    vtDouble: Result := '[double] ' + FloatToStr(fDoubleValue);
+    vtString: Result := '[string] "' + fValue.stringData + '"';
+    vtInteger: Result := '[int] ' + IntToStr(fValue.intData);
+    vtDouble: Result := '[double] ' + FloatToStr(fValue.doubleData);
   end;
 end;
 
@@ -593,24 +657,24 @@ function TXplValue.Equals(pVar: TXplValue): boolean;
 begin
   Result := False;
   if (pVar = nil) then exit;
-  if (fType <> pVar.ValueType) then exit;
+  if (fValue.VarType <> pVar.ValueType) then exit;
   Result :=
-    ((fType = vtInteger) and (fIntValue = pVar.IntValue)) or
-    ((fType = vtDouble) and (SameDouble(fDoubleValue, pVar.DoubleValue, 0))) or
-    ((fType = vtString) and (fStringValue = pVar.StringValue)) or
-    ((fType = vtNull));
+    ((fValue.VarType = vtInteger) and (fValue.intData = pVar.IntValue)) or
+    ((fValue.VarType = vtDouble) and (SameDouble(fValue.doubleData, pVar.DoubleValue, 0))) or
+    ((fValue.VarType = vtString) and (fValue.stringData = pVar.StringValue)) or
+    ((fValue.VarType = vtNull));
 end;
 
 function TXplValue.EqualsWithDelta(pVar: TXplValue; pDelta: Int64): boolean;
 begin
   Result := False;
   if (pVar = nil) then exit;
-  if (fType <> pVar.ValueType) then exit;
+  if (fValue.VarType <> pVar.ValueType) then exit;
   Result :=
-    ((fType = vtInteger) and (Abs(fIntValue - pVar.IntValue) < pDelta)) or
-    ((fType = vtDouble) and (SameDouble(fDoubleValue, pVar.DoubleValue, pDelta))) or
-    ((fType = vtString) and (fStringValue = pVar.StringValue)) or
-    ((fType = vtNull));
+    ((fValue.VarType = vtInteger) and (Abs(fValue.intData - pVar.IntValue) < pDelta)) or
+    ((fValue.VarType = vtDouble) and (SameDouble(fValue.doubleData, pVar.DoubleValue, pDelta))) or
+    ((fValue.VarType = vtString) and (fValue.stringData = pVar.StringValue)) or
+    ((fValue.VarType = vtNull));
 end;
 
 function TXplValue.SameDouble(pVal1, pVal2, pEpsilon: double): boolean;

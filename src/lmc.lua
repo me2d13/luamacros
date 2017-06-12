@@ -6,8 +6,8 @@ clear()
 lmc_device_set_name('LB', '7E9AD920')
 lmc_device_set_name('LB2', '53175550')
 --lmc_device_set_name('KBD1', '826BD90') this is my regular
-lmc_device_set_name('KBD1', '3AE1BAFF')
-lmc_device_set_name('KBD2', '31BB05D2')
+lmc_device_set_name('KBD1', 'VID_046D')
+lmc_device_set_name('KBD2', 'VID_04FC')
 --lmc_device_set_name('ST', 'Saitek')
 lmc_print_devices()
 

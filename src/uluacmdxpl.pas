@@ -129,41 +129,38 @@ end;
 
 function IncXplVariable(luaState: TLuaState): integer;
 var arg : PAnsiChar;
-  lVal: TXplValue;
   lNumOfParams: Integer;
-  lIncVar: TXplIncVariable;
-  lLimit: Double;
-  lOverflowBase: Double;
+  lData: TXplIncVariableRec;
 begin
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams < 2) then
     raise LmcException.Create('Wrong number of parameters. Provide at least name and value.');
   arg := lua_tostring(luaState, 1);
-  if (lua_isnumber(luaState, 2) = 1) then lVal := TXplValue.Create(lua_tonumber(luaState, 2))
+  if (lua_isnumber(luaState, 2) = 1) then lData.SetVariableData.Value.doubleData := lua_tonumber(luaState, 2)
   else
     raise LmcException.Create('Cannot increment variable by non-numeric value.');
+  lData.SetVariableData.Value.VarType:=vtDouble;
   if (lNumOfParams > 2) then
   begin
-    lLimit := lua_tonumber(luaState, 3);
+    lData.HasLimit:=True;
+    lData.Limit := lua_tonumber(luaState, 3);
     if (lNumOfParams > 3) then
     begin
-      lOverflowBase := lua_tonumber(luaState, 4);
-      Glb.DebugLogFmt('Increasing variable %s by %s with limit %f and overflow from %f',
-        [arg, lVal.ToString, lLimit, lOverflowBase], cLoggerXpl);
-      lIncVar := TXplIncVariable.Create(arg, lVal, lLimit, lOverflowBase);
+      lData.OverflowBase  := lua_tonumber(luaState, 4);
+      Glb.DebugLogFmt('Increasing variable %s by %f with limit %f and overflow from %f',
+        [arg, lData.SetVariableData.Value.doubleData, lData.Limit, lData.OverflowBase], cLoggerXpl);
     end
     else
     begin
-      Glb.DebugLogFmt('Increasing variable %s by %s with limit %f',
-       [arg, lVal.ToString, lLimit], cLoggerXpl);
-      lIncVar := TXplIncVariable.Create(arg, lVal, lLimit);
+      Glb.DebugLogFmt('Increasing variable %s by %f with limit %f',
+       [arg, lData.SetVariableData.Value.doubleData, lData.Limit], cLoggerXpl);
     end
   end else begin
-    Glb.DebugLogFmt('Increasing variable %s by %s', [arg, lVal.ToString], cLoggerXpl);
-    lIncVar := TXplIncVariable.Create(arg, lVal);
+    Glb.DebugLogFmt('Increasing variable %s by %f', [arg, lData.SetVariableData.Value.doubleData], cLoggerXpl);
+    lData.HasLimit:=False;
   end;
-  Glb.XplControl.SendMessage(lIncVar);
-  lIncVar.Free;
+  lData.SetVariableData.Name:=arg;
+  Glb.XplControl.IncVariable(lData);
   Result := 0;
 end;
 

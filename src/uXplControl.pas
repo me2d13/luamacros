@@ -2,7 +2,7 @@ unit uXplControl;
 
 interface
 
-uses uXplCommon, Classes, uXplListener, uXplSender, uXplMessages, fgl;
+uses uXplCommon, Classes, uXplListener, uXplSender, uXplMessages, fgl, MemMap;
 
 type
 
@@ -13,15 +13,18 @@ type
   TXPLcontrol = class
   private
     fCallbackCount: Integer;
-    fXplSyncListener: TXplListener; // for get var
-    fXplAsyncListener: TXplListener; // for var callback
-    fXplSender: TXplSender;
     fXplVariableValue: TXplVariableValue;
     fCallbacks: TCallbackInfoMap;
+    fLmc2XplMem: TMemMap;
+    fXpl2LmcMem: TMemMap;
+    fXplMem: PXpl2LmcSharedMem;
+    fLmcMem: PLmc2XplSharedMem;
+    fRequestSequence: Int64;
     procedure DebugLog(Value: String);
     procedure DebugLogFmt(pFormat:String; pArgs: array of const);
     procedure OnXplSyncMessage(Sender: TObject);
     procedure OnXplAsyncMessage(Sender: TObject);
+    function getCommandSlotAndInitHeader: PLmcCommandRec;
   public
     { Public declarations }
     constructor Create;
@@ -30,7 +33,8 @@ type
     function GetXplVariable(pName: String): TXplValue; overload;
     function GetXplVariable(pName: String; lIndex: Integer): TXplValue; overload;
     procedure SetXplVariable(pName: String; pValue: TXplValue); overload;
-    procedure SetXplVariable(pName: String; pValue: TXplValue; lIndex: Integer); overload;
+    procedure SetXplVariable(pName: String; pValue: TXplValue; pIndex: Integer); overload;
+    procedure IncVariable(pData: TXplIncVariableRec);
     procedure ExecuteCommand(pCmdName: String);
     procedure ExecuteCommandBegin(pCmdName: String);
     procedure ExecuteCommandEnd(pCmdName: String);
@@ -63,14 +67,13 @@ constructor TXPLcontrol.Create;
 begin
   //lGlb.DebugLog('Xplane control created.', 'XPL');
   fCallbackCount := 0;
-  fXplSyncListener := TXplListener.Create(cXplToLmcPipeName);
-  fXplSyncListener.OnMessage:=OnXplSyncMessage;
-  fXplAsyncListener := TXplListener.Create(cXplToLmcAsyncPipeName);
-  fXplAsyncListener.OnMessage:=OnXplAsyncMessage;
-  fXplSender := TXplSender.Create(cLmcToXplPipeName);
-  fXplSender.DebugMethod:=DebugLogFmt;
   fXplVariableValue := nil;
+  fRequestSequence := 1;
   fCallbacks := TCallbackInfoMap.Create;
+  fXpl2LmcMem := TMemMap.Create(cXpl2LmcMemName, SizeOf(TXpl2LmcSharedMem), True);
+  fXplMem:=fXpl2LmcMem.Memory;
+  fLmc2XplMem := TMemMap.Create(cLmc2XplMemName, SizeOf(TLmc2XplSharedMem), True);
+  fLmcMem:=fLmc2XplMem.Memory;
 end;
 
 procedure TXPLcontrol.DebugLog(Value: String);
@@ -88,9 +91,6 @@ end;
 destructor TXPLcontrol.Destroy;
 var I: Integer;
 begin
-  fXplSyncListener.Free;
-  fXplAsyncListener.Free;
-  fXplSender.Free;
   for I := fCallbacks.Count - 1 downto 0 do
     fCallbacks.Data[I].Free;
   fCallbacks.Free;
@@ -98,16 +98,17 @@ begin
 end;
 
 procedure TXPLcontrol.Init;
+var
+  lCom: PLmcCommandRec;
 begin
-  fXplSyncListener.Init;
-  fXplAsyncListener.Init;
-  if (fXplSender.ServerRunning) then
+  lCom := getCommandSlotAndInitHeader;
+  if (lCom <> nil) then
   begin
-    // Xplane is already running, could be connected to wrong previous LMC instance
-    // Send reconnect command to be sure
-    fXplSender.SendMessage(TXplReconnectToServer.Create);
+    lCom^.CommandType:=LMC_COMMAND_LMC_STARTED;
+    lCom^.Header.Id:=High(Int64);
+    lCom^.Header.Status:=STATUS_READY;
+    DebugLog('Sending LMC started command to reset XPL plugin structures');
   end;
-  //lGlb.DebugLog(Format('Slot size: %d, mem size: %d', [SizeOf(TXplComSlot), SizeOf(TXplComRecord)]), 'XPL');
 end;
 
 function TXPLcontrol.GetXplVariable(pName: String): TXplValue;
@@ -117,14 +118,19 @@ end;
 
 procedure TXPLcontrol.DrawText(pText: String; pPos: Single; pSec: Integer);
 var
-  lXplText: TXplDrawText;
+  lCom: PLmcCommandRec;
 begin
-  lXplText := TXplDrawText.Create(pText);
-  lXplText.TimeInSec:=pSec;
-  lXplText.Position:=pPos;
-  DebugLog(Format('Sending DrawText command for text %s at pos %f.', [pText, pPos]));
-  fXplSender.SendMessage(lXplText);
-  lXplText.Free;
+  lCom := getCommandSlotAndInitHeader;
+  if (lCom <> nil) then
+  begin
+    lCom^.CommandType:=LMC_COMMAND_DRAW_TEXT;
+    lCom^.TextData.Position:=pPos;
+    lCom^.TextData.TimeInSec:=pSec;
+    lCom^.TextData.Value:=pText;
+    lCom^.Header.Status:=STATUS_READY;
+    DebugLog(Format('Sending DrawText command for text %s at pos %f.', [pText, pPos]));
+    //DebugLogFmt('Size of TLmc2XplSharedMem is %d', [SizeOf(TLmc2XplSharedMem)]);
+  end;
 end;
 
 procedure TXPLcontrol.XplVarProcessed;
@@ -147,7 +153,7 @@ begin
   lId:=Glb.UnixTimestampMs * 100 + fCallbackCount;
   Inc(fCallbackCount);
   lXplObj := TXplVariableCallback.Create(pVarName, pIntervalMs, pDelta, lId);
-  fXplSender.SendMessage(lXplObj);
+  //fXplSender.SendMessage(lXplObj);
   lCbInfo := TLmcVariableCallbackInfo.Create;
   lCbInfo.Id:=lId;
   lCbInfo.Interval:=pIntervalMs;
@@ -167,7 +173,7 @@ var
 begin
   // remove from XPL plugin
   lXplObj := TXplUnhookVariable.Create(pVarName);
-  fXplSender.SendMessage(lXplObj);
+  //fXplSender.SendMessage(lXplObj);
   // remove from my records
   i := 0;
   while i < fCallbacks.Count do
@@ -195,13 +201,13 @@ var
 begin
   lXplObj := TXplLogCommand.Create(pPar1, pPar2);
   Glb.DebugLog(Format('XPL plugin log command %s value %s', [pPar1, pPar2]), cLoggerXpl);
-  fXplSender.SendMessage(lXplObj);
+  //fXplSender.SendMessage(lXplObj);
   lXplObj.Free;
 end;
 
 procedure TXPLcontrol.SendMessage(pMessage: TXplMessage);
 begin
-  fXplSender.SendMessage(pMessage);
+  //fXplSender.SendMessage(pMessage);
 end;
 
 procedure TXPLcontrol.OnXplSyncMessage(Sender: TObject);
@@ -213,13 +219,13 @@ begin
   lStream := TMemoryStream.Create;
   try
     try
-      fXplSyncListener.Server.GetMessageData(lStream);
+      //fXplSyncListener.Server.GetMessageData(lStream);
       Glb.DebugLog('Received message with length ' + IntToStr(lStream.Size), cLoggerXpl);
       lStream.Position:=0;
       lMessageType := lStream.ReadByte;
       if (lMessageType = HDMC_RECONNECT) then
       begin
-        fXplSender.Reconnect;
+        //fXplSender.Reconnect;
       end else if (lMessageType = HDMC_VAR_RESPONSE) then
       begin
         if (fXplVariableValue <> nil) then
@@ -253,13 +259,13 @@ begin
   lStream := TMemoryStream.Create;
   try
     try
-      fXplAsyncListener.Server.GetMessageData(lStream);
+      //fXplAsyncListener.Server.GetMessageData(lStream);
       Glb.DebugLog('Received async message with length ' + IntToStr(lStream.Size), cLoggerXpl);
       lStream.Position:=0;
       lMessageType := lStream.ReadByte;
       if (lMessageType = HDMC_RECONNECT) then
       begin
-        fXplSender.Reconnect;
+        //fXplSender.Reconnect;
       end else if (lMessageType = HDMC_VAR_RESPONSE) then
       begin
         lVarValue := TXplVariableValue.Create(lStream);
@@ -289,6 +295,42 @@ begin
   end;
 end;
 
+function TXPLcontrol.getCommandSlotAndInitHeader: PLmcCommandRec;
+var
+  lIndex: Integer;
+  lCommand: PLmcCommandRec;
+begin
+  lCommand:=nil;
+  for lIndex := Low(fLmcMem^.Commands) to High(fLmcMem^.Commands) do
+  begin
+    if fLmcMem^.Commands[lIndex].Header.Status = STATUS_FREE then
+    begin
+      lCommand:=@fLmcMem^.Commands[lIndex];
+      break;
+    end;
+    if (fLmcMem^.Commands[lIndex].Header.Status = STATUS_READY) and
+      (fXplMem.LastProcessedId > fLmcMem^.Commands[lIndex].Header.Id) then
+    begin
+      lCommand:=@fLmcMem^.Commands[lIndex];
+      lCommand.Header.Status:=STATUS_FREE;
+      break;
+    end;
+  end;
+  if (lCommand = nil) then
+  begin
+    DebugLog(Format('No free slots (out of %d) for XPL command. Xplane probably not running.', [High(fLmcMem^.Commands) - Low(fLmcMem^.Commands)]));
+    Result := nil;
+  end else begin
+    Result := lCommand;
+    Result^.Header.Status:=STATUS_WRITING;
+    Result^.Header.Id:=fRequestSequence;
+    Result^.Header.TimeStamp:=Glb.UnixTimestampMs;
+    DebugLog(Format('Initiated command slot %d with request id %d at %d.', [lIndex, fRequestSequence, Result^.Header.TimeStamp]));
+    Inc(fRequestSequence);
+    DebugLog(Format('XPL memory: last id %d, updated %d.', [fXplMem^.LastProcessedId, fXplMem^.UpdateTimeStamp]));
+  end;
+end;
+
 function TXPLcontrol.GetXplVariable(pName: String; lIndex: Integer): TXplValue;
 var
   lXplObj: TXplGetVariable;
@@ -302,9 +344,9 @@ begin
     DebugLog(Format('Sending GetXplVar command for name %s with id %d.', [pName, lXplObj.Id]))
   else
     DebugLog(Format('Sending GetXplVar command for name %s[%d] with id %d.', [pName, lIndex, lXplObj.Id]));
-  fXplSender.SendMessage(lXplObj);
+  //fXplSender.SendMessage(lXplObj);
   // wait for XPL answer
-  lDataRead := fXplSyncListener.Server.PeekMessage(1000, true); // in ms
+  //lDataRead := fXplSyncListener.Server.PeekMessage(1000, true); // in ms
   // function above should return true when something was read
   // however it seems to return falsi even when onMessage method was called :-(
   // so check also if xpl variable is set with correct id
@@ -331,40 +373,79 @@ begin
 end;
 
 procedure TXPLcontrol.SetXplVariable(pName: String; pValue: TXplValue;
-  lIndex: Integer);
+  pIndex: Integer);
 var
-  lSetVar: TXplSetVariable;
+  lCom: PLmcCommandRec;
 begin
-  lSetVar := TXplSetVariable.Create(pName, pValue, lIndex);
-  fXplSender.SendMessage(lSetVar);
-  lSetVar.Free;
+  lCom := getCommandSlotAndInitHeader;
+  if (lCom <> nil) then
+  begin
+    lCom^.CommandType:=LMC_COMMAND_SET_VARIABLE;
+    lCom^.SetVariableData.Name:=pName;
+    lCom^.SetVariableData.Value := pValue.Value;
+    lCom^.SetVariableData.Index:=pIndex;
+    lCom^.Header.Status:=STATUS_READY;
+    DebugLog(Format('Sending SetVar command for variable %s index %d.', [pName, pIndex]));
+  end;
+end;
+
+procedure TXPLcontrol.IncVariable(pData: TXplIncVariableRec);
+var
+  lCom: PLmcCommandRec;
+begin
+  lCom := getCommandSlotAndInitHeader;
+  if (lCom <> nil) then
+  begin
+    lCom^.CommandType:=LMC_COMMAND_INC_VARIABLE;
+    lCom^.IncVariableData := pData;
+    lCom^.Header.Status:=STATUS_READY;
+    DebugLog(Format('Sending inc variable %s.', [pData.SetVariableData.Name]));
+  end;
 end;
 
 procedure TXPLcontrol.ExecuteCommand(pCmdName: String);
 var
-  lXplObj: TXplCallWithName;
+  lCom: PLmcCommandRec;
 begin
-  lXplObj := TXplExecuteCommand.Create(pCmdName);
-  fXplSender.SendMessage(lXplObj);
-  lXplObj.Free;
+  lCom := getCommandSlotAndInitHeader;
+  if (lCom <> nil) then
+  begin
+    lCom^.CommandType:=LMC_COMMAND_XPL_COMMAND;
+    lCom^.CommandData.Name:=pCmdName;
+    lCom^.CommandData.Mode:=XPL_COMMAND_EXECUTE;
+    lCom^.Header.Status:=STATUS_READY;
+    DebugLog(Format('Sending execute command %s.', [pCmdName]));
+  end;
 end;
 
 procedure TXPLcontrol.ExecuteCommandBegin(pCmdName: String);
 var
-  lXplObj: TXplCallWithName;
+  lCom: PLmcCommandRec;
 begin
-  lXplObj := TXplExecuteCommandBegin.Create(pCmdName);
-  fXplSender.SendMessage(lXplObj);
-  lXplObj.Free;
+  lCom := getCommandSlotAndInitHeader;
+  if (lCom <> nil) then
+  begin
+    lCom^.CommandType:=LMC_COMMAND_XPL_COMMAND;
+    lCom^.CommandData.Name:=pCmdName;
+    lCom^.CommandData.Mode:=XPL_COMMAND_START;
+    lCom^.Header.Status:=STATUS_READY;
+    DebugLog(Format('Sending begin execute command %s.', [pCmdName]));
+  end;
 end;
 
 procedure TXPLcontrol.ExecuteCommandEnd(pCmdName: String);
 var
-  lXplObj: TXplCallWithName;
+  lCom: PLmcCommandRec;
 begin
-  lXplObj := TXplExecuteCommandEnd.Create(pCmdName);
-  fXplSender.SendMessage(lXplObj);
-  lXplObj.Free;
+  lCom := getCommandSlotAndInitHeader;
+  if (lCom <> nil) then
+  begin
+    lCom^.CommandType:=LMC_COMMAND_XPL_COMMAND;
+    lCom^.CommandData.Name:=pCmdName;
+    lCom^.CommandData.Mode:=XPL_COMMAND_END;
+    lCom^.Header.Status:=STATUS_READY;
+    DebugLog(Format('Sending end execute command %s.', [pCmdName]));
+  end;
 end;
 
 

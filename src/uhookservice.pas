@@ -44,7 +44,7 @@ procedure THookService.InitSharedMemory(pMainFormHandle: THandle);
 begin
   fSMPtr := nil;
   try
-    fSharedMemory := TMemMap.Create(MMFName, SizeOf(TMMFData));
+    fSharedMemory := TMemMap.Create(MMFName, SizeOf(TMMFData), True);
     fSMPtr := fSharedMemory.Memory;
   except
     on EMemMapException do

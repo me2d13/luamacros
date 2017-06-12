@@ -32,17 +32,76 @@ const
   cLogCommandLogFileName = 'LOG_FILE_NAME';
   cLogCommandProfile = 'PROFILE';
 
+  cLmc2XplMemName = 'LuaMacrosToXplPlugin';
+  cXpl2LmcMemName = 'XplPluginToLuaMacros';
+
+  cMaxAcceptableRequestDelayMs = 5000;
+
+  LOCK_NONE = 0;
+  LOCK_VALUE_UPDATE = 1; // allow read
+  LOCK_LIST_CHANGING = 2; // full lock
+
+  STATUS_FREE = 0;
+  STATUS_WRITING = 1;
+  STATUS_READY = 2;
+
+  XPL_COMMAND_EXECUTE = 1;
+  XPL_COMMAND_START = 2;
+  XPL_COMMAND_END = 3;
+
+  LMC_COMMAND_LMC_STARTED = 1;
+  LMC_COMMAND_DRAW_TEXT = 2;
+  LMC_COMMAND_XPL_COMMAND = 3;
+  LMC_COMMAND_SET_VARIABLE = 4;
+  LMC_COMMAND_INC_VARIABLE = 5;
+
 
 type
   Pointer8b = Int64;
 
-  PXplValue = ^TXplValueRec;
-  TXplValueRec = packed record
-    case Integer of
-    0: (intData : Integer);
-    1: (floatData : Single);
-    2: (doubleData : Double);
+  PComSlotRec = ^TComSlotRec;
+  TComSlotRec = packed record
+    Id: Int64;
+    TimeStamp: Int64;
+    Status: byte;
   end;
+
+
+  TXplCommandRec = packed record
+    Name: String[50];
+    Mode: byte;
+  end;
+
+  TXplDrawTextRec = packed record
+    Value: String[255];
+    Position: Single;
+    TimeInSec: Integer;
+  end;
+
+  PLmcCommandRec = ^TLmcCommandRec;
+  TLmcCommandRec = packed record
+    Header: TComSlotRec;
+    case CommandType: byte of
+    LMC_COMMAND_DRAW_TEXT: (TextData: TXplDrawTextRec);
+    LMC_COMMAND_XPL_COMMAND: (CommandData: TXplCommandRec);
+    LMC_COMMAND_SET_VARIABLE: (SetVariableData: TXplSetVariableRec);
+    LMC_COMMAND_INC_VARIABLE: (IncVariableData: TXplIncVariableRec);
+  end;
+
+  PLmc2XplSharedMem = ^TLmc2XplSharedMem;
+  TLmc2XplSharedMem = packed record
+    Lock : byte;
+    UpdateTimeStamp: Int64;
+    Commands: array[0..100] of TLmcCommandRec;
+  end;
+
+  PXpl2LmcSharedMem = ^TXpl2LmcSharedMem;
+  TXpl2LmcSharedMem = packed record
+    Lock : byte;
+    UpdateTimeStamp: Int64;
+    LastProcessedId: Int64;
+  end;
+
 
   TXplVariable = class(TObject)
   public

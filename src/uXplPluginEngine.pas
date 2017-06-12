@@ -4,7 +4,7 @@ unit uXplPluginEngine;
 
 interface
 
-uses XPLMDataAccess, XPLMUtilities, uXplCommon, uXplSender, uXplPluginReceiver, uXplMessages, classes, fgl, uTiming, uXplLogger;
+uses XPLMDataAccess, XPLMUtilities, uXplCommon, uXplSender, uXplPluginReceiver, uXplMessages, classes, fgl, uTiming, uXplLogger, MemMap;
 
 type
 
@@ -17,7 +17,6 @@ TXplEngine = class (TObject)
     fTickProfilingLog: String;
     fMessageProfilingLog: String;
     fTickTimer: TStopWatch;
-    fMessageTimer: TStopWatch;
     fDebugLogFileName: String;
     fTextToBeDrawn: String;
     fScreenWidth: Integer;
@@ -26,12 +25,16 @@ TXplEngine = class (TObject)
     fBasicFontWidth: Integer;
     fTextFloatPosition: Single;
     fTextHideTs: TDateTime;
-    fSyncSender: TXplSender;
-    fAsyncSender: TXplSender;
-    fReceiver: TXplPluginReceiver;
     fDataRefs: TStringList;
     fCommands: TStringList;
     fVarCallbacks: TCallbackInfoMap;
+    fLmc2XplMem: TMemMap;
+    fXpl2LmcMem: TMemMap;
+    fXplMem: PXpl2LmcSharedMem;
+    fLmcMem: PLmc2XplSharedMem;
+    fLastProcessedId: Int64;
+    fMaxComIdInTick: Int64;
+    fTickNo: Int64;
     procedure DebugLog(Value: String);
     procedure DebugLogFmt(pFormat:String; pArgs: array of const);
     function GetArrayLength(pDataRef: XPLMDataRef ;pDataType: XPLMDataTypeID): Integer;
@@ -39,10 +42,11 @@ TXplEngine = class (TObject)
     procedure InitGlValues;
     procedure OnLmcMessage(pSender: TObject);
     procedure XplDebugFmt(pFormat:String; pArgs: array of const);
-    procedure RunAndFree(pText: TXplDrawText); overload;
-    procedure RunAndFree(pVar: TXplSetVariable); overload;
+    procedure Run(pText: TXplDrawTextRec); overload;
+    procedure Run(pData: TXplSetVariableRec); overload;
+    procedure Run(pData: TXplIncVariableRec); overload;
     procedure RunAndFree(pVar: TXplGetVariable); overload;
-    procedure RunAndFreeCommand(pComm: TXplCallWithName);
+    procedure Run(pComm: TXplCommandRec);
     procedure RunAndFree(pVar: TXplVariableCallback); overload;
     procedure RunAndFree(pVar: TXplUnhookVariable); overload;
     procedure RunAndFree(pVar: TXplLogCommand); overload;
@@ -56,6 +60,9 @@ TXplEngine = class (TObject)
     procedure ReconnectSenders;
     procedure CheckVariableCallbacks;
     function UnixTimestampMs: Int64;
+    function ValidLmcRequest(header: TComSlotRec): Boolean;
+    procedure CheckCommandQueue;
+    procedure LmcStarted;
   public
     { Public declarations }
     constructor Create;
@@ -74,38 +81,25 @@ uses SysUtils, XPLMGraphics, gl, glu, XPLMDisplay, dateutils;
 
 constructor TXplEngine.Create;
 begin
+  fTickNo := 0;
   fLogger := TXplLogger.Create;
   fTickTimer := TStopWatch.Create;
-  fMessageTimer := TStopWatch.Create;
+  fXpl2LmcMem := TMemMap.Create(cXpl2LmcMemName, SizeOf(TXpl2LmcSharedMem), True);
+  fXplMem:=fXpl2LmcMem.Memory;
+  fLmc2XplMem := TMemMap.Create(cLmc2XplMemName, SizeOf(TLmc2XplSharedMem), True);
+  fLmcMem:=fLmc2XplMem.Memory;
+  fLastProcessedId:=0;
   fTextToBeDrawn:='';
   fTextFloatPosition := 0;
-  DebugLog('Going to create sync sender...');
-  fSyncSender := TXplSender.Create(cXplToLmcPipeName);
-  fSyncSender.DebugMethod:=DebugLogFmt;
-  DebugLog('Going to create async sender...');
-  fAsyncSender := TXplSender.Create(cXplToLmcAsyncPipeName);
-  fAsyncSender.DebugMethod:=DebugLogFmt;
-  DebugLog('Going to create receiver...');
-  fReceiver := TXplPluginReceiver.Create(cLmcToXplPipeName);
-  fReceiver.OnMessage:=OnLmcMessage;
-  DebugLog('Going to init receiver...');
-  fReceiver.Init;
   DebugLog('Going to init internal structures...');
   fDataRefs:=TStringList.Create;
   fDataRefs.CaseSensitive:=False;
   fCommands:=TStringList.Create;
   fCommands.CaseSensitive:=False;
   fVarCallbacks:=TCallbackInfoMap.Create;
-  if (fSyncSender.ServerRunning) then
-  begin
-    // LMC is already running, but its sender could be connected to nowhere (old XPL instance)
-    // send it reconnect request
-    DebugLog('LMC connected, sending message');
-    fSyncSender.SendMessage(TXplReconnectToServer.Create);
-  end else
-    DebugLog('LMC not connected');
   InitGlValues;
   DebugLog('LuaMacros init done');
+  //DebugLogFmt('Size of TLmc2XplSharedMem is %d', [SizeOf(TLmc2XplSharedMem)]);
 end;
 
 procedure TXplEngine.DebugLog(Value: String);
@@ -122,11 +116,9 @@ destructor TXplEngine.Destroy;
 var
   I: Integer;
 begin
-  fReceiver.Free;
-  fSyncSender.Free;
-  fAsyncSender.Free;
   fTickTimer.Free;
-  fMessageTimer.Free;
+  fLmc2XplMem.Free;
+  fXpl2LmcMem.Free;
   for I := 0 to fDataRefs.Count - 1 do
   begin
     fDataRefs.Objects[I].Free;
@@ -154,12 +146,26 @@ begin
 end;
 
 procedure TXplEngine.XplTick;
+var
+  lOrigLastId: Int64;
 begin
+  Inc(fTickNo);
   if (fLogger.LogLevel >= cLlTrace) then
   begin
     fTickTimer.Start;
   end;
-  CheckVariableCallbacks;
+  lOrigLastId := fLastProcessedId;
+  fMaxComIdInTick:=0;
+  CheckCommandQueue;
+  if (fLastProcessedId < fMaxComIdInTick) then
+  begin
+    fLastProcessedId:=fMaxComIdInTick;
+  end;
+  if fLastProcessedId <> lOrigLastId then
+    DebugLogFmt('After xpl tick %d we have fLastProcessedId = %d, fMaxComIdInTick = %d', [fTickNo, fLastProcessedId, fMaxComIdInTick]);
+  fXplMem^.LastProcessedId:=fLastProcessedId;
+  fXplMem^.Lock:=LOCK_NONE;
+  fXplMem^.UpdateTimeStamp:=UnixTimestampMs;
   if (fLogger.LogLevel >= cLlTrace) then
   begin
     fTickProfilingLog:=fTickProfilingLog + #10 + #13 + fTickTimer.StopAndLog;
@@ -169,7 +175,39 @@ begin
       fTickProfilingLog:='';
     end;
   end;
+end;
 
+procedure TXplEngine.CheckCommandQueue;
+var
+  lIndex: Integer;
+begin
+  for lIndex := Low(fLmcMem^.Commands) to High(fLmcMem^.Commands) do
+  begin
+    if ValidLmcRequest(fLmcMem^.Commands[lIndex].Header) then
+    begin
+      DebugLogFmt('Tick %d: Detected valid command index %d, id %d type %d', [fTickNo, lIndex, fLmcMem^.Commands[lIndex].Header.Id, fLmcMem^.Commands[lIndex].CommandType]);
+      case fLmcMem^.Commands[lIndex].CommandType of
+      LMC_COMMAND_LMC_STARTED:
+          LmcStarted;
+      LMC_COMMAND_DRAW_TEXT:
+        Run(fLmcMem^.Commands[lIndex].TextData);
+      LMC_COMMAND_XPL_COMMAND:
+        Run(fLmcMem^.Commands[lIndex].CommandData);
+      LMC_COMMAND_SET_VARIABLE:
+        Run(fLmcMem^.Commands[lIndex].SetVariableData);
+      LMC_COMMAND_INC_VARIABLE:
+        Run(fLmcMem^.Commands[lIndex].IncVariableData);
+      end;
+      DebugLogFmt('Tick %d: After slot process we have fLastProcessedId = %d, fMaxComIdInTick = %d', [fTickNo, fLastProcessedId, fMaxComIdInTick]);
+    end;
+  end;
+end;
+
+procedure TXplEngine.LmcStarted;
+begin
+  DebugLog('Processing Lmc started command');
+  fLastProcessedId:=0;
+  fMaxComIdInTick:=0;
 end;
 
 procedure TXplEngine.String2XplValue(pIn: String; pOut: PXplValue; pDataType: XPLMDataTypeID);
@@ -187,7 +225,7 @@ begin
     case pDataType of
     xplmType_Float,
     xplmType_FloatArray:
-      pOut^.floatData := StrToFloat(pIn, FS);
+      pOut^.doubleData := StrToFloat(pIn, FS);
     xplmType_Double:
       pOut^.doubleData := StrToFloat(pIn, FS);
     xplmType_Int,
@@ -206,7 +244,6 @@ begin
       finally
         FreeMem(lBuff);
       end;
-      pOut^.floatData := 0;
       pOut^.doubleData := 0;
       pOut^.intData := 0;
     end;
@@ -224,24 +261,13 @@ var
   lStream: TMemoryStream;
   lMessageType: byte;
 begin
-  if (fLogger.LogLevel >= cLlTrace) then
-  begin
-    fMessageTimer.Start;
-  end;
-
   lStream := TMemoryStream.Create;
   try
     try
-      fReceiver.Server.GetMessageData(lStream);
       lStream.Position:=0;
       lMessageType := lStream.ReadByte;
       case lMessageType of
-        HDMC_SHOW_TEXT: RunAndFree(TXplDrawText.Create(lStream));
-        HDMC_SET_VAR: RunAndFree(TXplSetVariable.Create(lStream));
         HDMC_GET_VAR: RunAndFree(TXplGetVariable.Create(lStream));
-        HDMC_EXEC_COMMAND: RunAndFreeCommand(TXplExecuteCommand.Create(lStream));
-        HDMC_COMMAND_BEGIN: RunAndFreeCommand(TXplExecuteCommandBegin.Create(lStream));
-        HDMC_COMMAND_END: RunAndFreeCommand(TXplExecuteCommandEnd.Create(lStream));
         HDMC_RECONNECT: ReconnectSenders;
         HDMC_VAR_CALLBACK: RunAndFree(TXplVariableCallback.Create(lStream));
         HDMC_UNHOOK_VAR: RunAndFree(TXplUnhookVariable.Create(lStream));
@@ -257,17 +283,6 @@ begin
   finally
     lStream.Free;
   end;
-
-  if (fLogger.LogLevel >= cLlTrace) then
-  begin
-    fMessageProfilingLog:=fMessageProfilingLog + #10 + #13 + fMessageTimer.StopAndLog;
-    if (Length(fMessageProfilingLog) > 1000) then
-    begin
-      DebugLog('On mesage log: ' + fMessageProfilingLog);
-      fMessageProfilingLog:='';
-    end;
-  end;
-
 end;
 
 procedure TXplEngine.XplDebugFmt(pFormat: String; pArgs: array of const);
@@ -285,40 +300,49 @@ begin
   end;
 end;
 
-procedure TXplEngine.RunAndFree(pText: TXplDrawText);
+procedure TXplEngine.Run(pText: TXplDrawTextRec);
 begin
   fTextFloatPosition := pText.Position;
-  fTextToBeDrawn := pText.Text;
+  fTextToBeDrawn := pText.Value;
   if (pText.TimeInSec > 0) then
     fTextHideTs := IncSecond(Now(), pText.TimeInSec)
   else
     fTextHideTs := 0;
   DebugLog(Format('Received DrawText %s at pos %f.', [fTextToBeDrawn, fTextFloatPosition]));
-  pText.Free;
 end;
 
-procedure TXplEngine.RunAndFree(pVar: TXplSetVariable);
+procedure TXplEngine.Run(pData: TXplSetVariableRec);
 var
   lXV: TXplVariable;
+  lXplValue: TXplValue;
 begin
-  if (pVar.Index = NO_INDEX) then
-    DebugLog('Received request to set variable ' + pVar.Name + ' to ' + pVar.Value.ToString)
+  lXplValue := TXplValue.Create(pData.Value);
+  if (pData.Index = NO_INDEX) then
+    DebugLog('Received request to set variable ' + pData.Name + ' to ' + lXplValue.ToString)
   else
-    DebugLogFmt('Received request to set variable %s[%d] to %s', [pVar.Name, pVar.Index, pVar.Value.ToString]);
-  lXV := GetOrRegisterXplVariable(pVar.Name);
+    DebugLogFmt('Received request to set variable %s[%d] to %s', [pData.Name, pData.Index, lXplValue.ToString]);
+  lXV := GetOrRegisterXplVariable(pData.Name);
   if (lXV <> nil) then
   begin
     if (lXV.Writable) then
     begin
-      DebugLog('Variable ' + pVar.Name + ' is writable, setting...');
-      SetVariable(lXV, pVar.Value, pVar.Index)
+      DebugLog('Variable ' + pData.Name + ' is writable, setting...');
+      SetVariable(lXV, lXplValue, pData.Index)
     end
     else
-      DebugLog('Variable ' + pVar.Name + ' is not writable.');
+      DebugLog('Variable ' + pData.Name + ' is not writable.');
   end
   else
-    DebugLog('Cannot set variable ' + pVar.Name + ' - not found.');
-  pVar.Free;
+    DebugLog('Cannot set variable ' + pData.Name + ' - not found.');
+  lXplValue.Free;
+end;
+
+procedure TXplEngine.Run(pData: TXplIncVariableRec);
+var
+  lObject: TXplIncVariable;
+begin
+  lObject := TXplIncVariable.Create(pData);
+  RunAndFree(lObject);
 end;
 
 procedure TXplEngine.RunAndFree(pVar: TXplGetVariable);
@@ -340,7 +364,7 @@ begin
     lValue := GetVariable(lXV, pVar.Index, True);
     if (lValue <> nil) then
     begin
-      fSyncSender.SendMessage(TXplVariableValue.Create(pVar.Name, lValue, pVar.Id));
+      //fSyncSender.SendMessage(TXplVariableValue.Create(pVar.Name, lValue, pVar.Id));
       DebugLog('Written to stream');
     end
     else
@@ -351,19 +375,19 @@ begin
   pVar.Free;
 end;
 
-procedure TXplEngine.RunAndFreeCommand(pComm: TXplCallWithName);
+procedure TXplEngine.Run(pComm: TXplCommandRec);
 var
   lCom: XPLMCommandRef;
 begin
   lCom:=GetOrRegisterXplCommand(pComm.Name);
   if (lCom <> nil) then
   begin
-    if (pComm is TXplExecuteCommandBegin) then
+    if (pComm.Mode = XPL_COMMAND_START) then
     begin
       XPLMCommandBegin(lCom);
       DebugLog(Format('Executed command begin %s.', [pComm.Name]));
     end else
-    if (pComm is TXplExecuteCommandEnd) then
+    if (pComm.Mode = XPL_COMMAND_END) then
     begin
       XPLMCommandEnd(lCom);
       DebugLog(Format('Executed command end %s.', [pComm.Name]));
@@ -373,7 +397,6 @@ begin
       DebugLog(Format('Executed command %s.', [pComm.Name]));
     end;
   end;
-  pComm.Free;
 end;
 
 procedure TXplEngine.RunAndFree(pVar: TXplVariableCallback);
@@ -447,9 +470,12 @@ begin
         if (lValue.ValueType = vtInteger) then
         begin
           pVar.Value.MakeInt;
+          DebugLogFmt('Curent int value is %d, delta is %d', [lValue.IntValue, pVar.Value.IntValue]);
           lValue.IntValue:=lValue.IntValue + pVar.Value.IntValue;
+          DebugLogFmt('After inc Curent int value is %d, delta is %d', [lValue.IntValue, pVar.Value.IntValue]);
           if (pVar.HasLimit) then
           begin
+            DebugLog('Has limit');
             lIntLimit:=trunc(pVar.Limit);
             lIntOverflowBase:=trunc(pVar.OverflowBase);
             if (pVar.Value.IntValue > 0) and (lValue.IntValue > lIntLimit) then
@@ -463,7 +489,7 @@ begin
               else
                 lValue.IntValue := lIntLimit;
           end;
-          DebugLogFmt('Variable %s is writable, setting to %f', [pVar.Name, lValue.IntValue]);
+          DebugLogFmt('Variable %s is writable, setting to %d', [pVar.Name, lValue.IntValue]);
           SetVariable(lXV, lValue, pVar.Index)
         end
         else if (lValue.ValueType = vtDouble) then
@@ -710,8 +736,8 @@ end;
 
 procedure TXplEngine.ReconnectSenders;
 begin
-  fSyncSender.Reconnect;
-  fAsyncSender.Reconnect;
+  //fSyncSender.Reconnect;
+  //fAsyncSender.Reconnect;
 end;
 
 procedure TXplEngine.CheckVariableCallbacks;
@@ -755,7 +781,7 @@ begin
       lSend := (lNow - lXVC.LastCallback) >= lXVC.Interval;
       if (lSend) then
       begin
-        fAsyncSender.SendMessage(TXplVariableValue.Create(lXVC.XplVariable.Name, lValue, lXVC.Id, lXVC.ChangeCount));
+        //fAsyncSender.SendMessage(TXplVariableValue.Create(lXVC.XplVariable.Name, lValue, lXVC.Id, lXVC.ChangeCount));
         DebugLog(Format('Change of variable %s written to stream with value %s and change count %d',
           [lXVC.XplVariable.Name, lValue.ToString, lXVC.ChangeCount]));
         lXVC.ChangeCount:=0;
@@ -769,7 +795,19 @@ end;
 
 function TXplEngine.UnixTimestampMs: Int64;
 begin
-  Result := Round(Now * 24*60*60*1000);
+  //Result := Round(Now * 24*60*60*1000);
+  Result := Round((Now - 25569) * 86400*1000);
+end;
+
+function TXplEngine.ValidLmcRequest(header: TComSlotRec): Boolean;
+begin
+  Result := (header.Status = STATUS_READY)
+    and (UnixTimestampMs - header.TimeStamp < cMaxAcceptableRequestDelayMs)
+    and (header.Id > fLastProcessedId);
+  if Result and (fMaxComIdInTick < header.Id) then
+  begin
+    fMaxComIdInTick := header.Id;
+  end;
 end;
 
 procedure TXplEngine.DrawText;

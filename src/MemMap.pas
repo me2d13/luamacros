@@ -1,6 +1,6 @@
 {                                                                             }
-{ TMemMap v1.00                                                               }
-{ Amigreen Software 1999, Janus N. Tøndering (j@nus.person.dk)                }
+{ TMemMap v2.00                                                               }
+{ Amigreen Software 1999, Janus N. Tndering (j@nus.person.dk)                }
 {                                                                             }
 { This unit is freeware. There's limited support on this unit and if it some- }
 { how does any damage to your system (which isn't likely) - DON'T BLAIM ME!   }
@@ -8,121 +8,173 @@
 {                                                                             }
 { Version history:                                                            }
 { - 1.00        Initial release.                                              }
+{ - 2.00        Rewrite @ 2017-04-13 (YYYY-MM-DD)                             }
+{                       by Andreas Toth andreas.toth@xtra.co.nz               }
 
 unit MemMap;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes;
+  Windows,
+  SysUtils,
+  Classes;
 
 type
   EMemMapException = class(Exception);
+
   TMemMap = class(TObject)
   private
-    { Private declarations }
-    fMapHandle: Integer;
-    fMem: Pointer;
-    fDontFree: Boolean;
-    function GetRealPointer: Pointer;
-  protected
-    { Protected declarations }
+    FName: UnicodeString;
+    FSize: Cardinal;
+    FFreeOnDestroy: Boolean;
+
+    FMemory: Pointer;
+    FHandle: THandle;
+
+    procedure Clean(const APrefix: string = 'Clean');
   public
-    { Public declarations }
-    constructor Create(const Name: string; const Size: Integer);
+    constructor Create(const AName: UnicodeString; const ASize: Cardinal; const AFreeOnDestroy: Boolean);
     destructor Destroy; override;
-    function GetMemSize: Integer;
-    procedure ReadBuffer(var Buffer);
-    procedure WriteBuffer(const Buffer; const Size: Integer);
-    property Memory: Pointer read fMem default nil;
-  published
-    { Published declarations }
-    property DontFree: Boolean read fDontFree write fDontFree default True;
+
+    function Name: UnicodeString;
+    function Size: PtrInt;
+    property FreeOnDestroy: Boolean read FFreeOnDestroy write FFreeOnDestroy;
+
+    procedure ReadBuffer(var ABuffer; const ASize: Cardinal);
+    procedure WriteBuffer(const ABuffer; const ASize: Cardinal);
+
+    property Memory: Pointer read FMemory default nil;
   end;
 
 implementation
 
-constructor TMemMap.Create(const Name: string; const Size: Integer);
-//var lNew: Boolean;
+constructor TMemMap.Create(const AName: UnicodeString; const ASize: Cardinal; const AFreeOnDestroy: Boolean);
 begin
   inherited Create;
-  fMem := nil; DontFree := True;
 
-  {$IFDEF WIN64}
-  fMapHandle := CreateFileMapping($FFFFFFFFFFFFFFFF, nil, PAGE_READWRITE, 0, Size + 4, PChar(Name));
-  {$ELSE}
-  fMapHandle := CreateFileMapping($FFFFFFFF, nil, PAGE_READWRITE, 0, Size + 4, PChar(Name));
-  {$ENDIF}
+  FName := '';
+  FSize := 0;
+  FFreeOnDestroy := True;
+  FMemory := nil;
+  FHandle := 0;
 
-  if fMapHandle = 0 then
-  begin
-    raise EMemMapException.Create('Error creating memory mapping');
-    fMapHandle := 0;
-    Destroy;
-  end
-  else
-  begin
-    //lNew := (GetLastError <> ERROR_ALREADY_EXISTS);
-    fMem := MapViewOfFileEx(fMapHandle, FILE_MAP_WRITE, 0, 0, 0, nil);
-    if fMem = nil then
+  try
+    if ASize = 0 then
     begin
-      raise EMemMapException.Create('Error creating memory mapping');
-      Destroy;
-    end
-    else
-    begin
-      PInteger(fMem)^ := Size;
-      fMem := Pointer(Integer(fMem) + 4);
-      //if lNew then
-      //  FillChar(fMem, Size, 0);
+      raise EMemMapException.Create('Create: Invalid size');
     end;
+
+    FHandle := CreateFileMapping(INVALID_HANDLE_VALUE, nil, PAGE_READWRITE, 0, ASize, PChar(AName));
+
+    if FHandle = 0 then
+    begin
+      raise EMemMapException.Create('Create: Error mapping memory');
+    end;
+
+    FMemory := MapViewOfFileEx(FHandle, FILE_MAP_WRITE, 0, 0, 0, nil);
+
+    if not Assigned(FMemory) then
+    begin
+      raise EMemMapException.Create('Create: Error allocating memory');
+    end;
+  except
+    try
+      Clean;
+    except
+      // Do not raise new exception
+    end;
+
+    raise;
   end;
+
+  FName := AName;
+  FSize := ASize;
+  FFreeOnDestroy := AFreeOnDestroy;
 end;
 
 destructor TMemMap.Destroy;
 begin
-  if (fMem <> nil) then
-    if not UnmapViewOfFile(GetRealPointer) then
-      raise EMemMapException.Create('Error deallocating mapped memory');
-  if (fMapHandle <> 0) and (DontFree = False) then
-    if not CloseHandle(fMapHandle) then
-      raise EMemMapException.Create('Error freeing memory mapping handle');
-
-  inherited Destroy;
+  try
+    Clean('Destroy');
+  finally
+    inherited Destroy;
+  end;
 end;
 
-function TMemMap.GetMemSize: Integer;
+procedure TMemMap.Clean(const APrefix: string);
 begin
-   if (fMem <> nil) then
-     Result := PInteger(GetRealPointer)^
-   else
-   begin
-     //Result := 0;
-     raise EMemMapException.Create('Error getting mapping size');
-   end;
+  try
+    if Assigned(FMemory) then
+    begin
+      if not UnmapViewOfFile(FMemory) then
+      begin
+        raise EMemMapException.Create(APrefix + ': Error unmapping memory');
+      end;
+
+      FMemory := nil;
+    end;
+  finally
+    if (FHandle <> 0) and FFreeOnDestroy then
+    begin
+      if not CloseHandle(FHandle) then
+      begin
+        raise EMemMapException.Create(APrefix + ': Error deallocating memory');
+      end;
+
+      FHandle := 0;
+    end;
+  end;
 end;
 
-procedure TMemMap.ReadBuffer(var Buffer);
+function TMemMap.Name: UnicodeString;
 begin
-  if (fMem <> nil) then
-    Move(fMem^, Buffer, GetMemSize);
+  if not Assigned(FMemory) then
+  begin
+    raise EMemMapException.Create('Name: Memory not allocated');
+  end;
+
+  Result := FName;
 end;
 
-procedure TMemMap.WriteBuffer(const Buffer; const Size: Integer);
+function TMemMap.Size: PtrInt;
 begin
-  if (fMem <> nil) then
-    if (Size <= GetMemSize) then
-      Move(Buffer, fMem^, Size)
-    else
-      raise EMemMapException.Create('Buffer ''Size'' is too big!');
+  if not Assigned(FMemory) then
+  begin
+    raise EMemMapException.Create('Size: Memory not allocated');
+  end;
+
+  Result := FSize;
 end;
 
-function TMemMap.GetRealPointer: pointer;
+procedure TMemMap.ReadBuffer(var ABuffer; const ASize: Cardinal);
 begin
-  if fMem <> nil then
-    Result := Pointer(Integer(fMem) - 4)
-  else
-    Result := nil;
+  if not Assigned(FMemory) then
+  begin
+    raise EMemMapException.Create('ReadBuffer: Memory not allocated');
+  end;
+
+  if ASize > FSize then
+  begin
+    raise EMemMapException.Create('ReadBuffer: Too much data requested');
+  end;
+
+  Move(FMemory^, ABuffer, ASize);
+end;
+
+procedure TMemMap.WriteBuffer(const ABuffer; const ASize: Cardinal);
+begin
+  if not Assigned(FMemory) then
+  begin
+    raise EMemMapException.Create('WriteBuffer: Memory not allocated');
+  end;
+
+  if ASize > FSize then
+  begin
+    raise EMemMapException.Create('WriteBuffer: Too much data provided');
+  end;
+
+  Move(ABuffer, FMemory^, ASize);
 end;
 
 end.
