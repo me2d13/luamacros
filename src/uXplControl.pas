@@ -25,13 +25,14 @@ type
     procedure OnXplSyncMessage(Sender: TObject);
     procedure OnXplAsyncMessage(Sender: TObject);
     function getCommandSlotAndInitHeader: PLmcCommandRec;
+    function GetVariableValueFromXplSharedMemory(pName: String; pIndex: Integer): TXplValue;
   public
     { Public declarations }
     constructor Create;
     destructor Destroy; Override;
     procedure Init;
     function GetXplVariable(pName: String): TXplValue; overload;
-    function GetXplVariable(pName: String; lIndex: Integer): TXplValue; overload;
+    function GetXplVariable(pName: String; pIndex: Integer): TXplValue; overload;
     procedure SetXplVariable(pName: String; pValue: TXplValue); overload;
     procedure SetXplVariable(pName: String; pValue: TXplValue; pIndex: Integer); overload;
     procedure IncVariable(pData: TXplIncVariableRec);
@@ -101,11 +102,13 @@ procedure TXPLcontrol.Init;
 var
   lCom: PLmcCommandRec;
 begin
+  fRequestSequence := fXplMem.LastProcessedId + 1;   // ususally 0+1, but if XPL
+  // is running and LMC was restarted, the sequence continues (otherwise XPL would
+  // ignore requests 1,2,3... as processed
   lCom := getCommandSlotAndInitHeader;
   if (lCom <> nil) then
   begin
     lCom^.CommandType:=LMC_COMMAND_LMC_STARTED;
-    lCom^.Header.Id:=High(Int64);
     lCom^.Header.Status:=STATUS_READY;
     DebugLog('Sending LMC started command to reset XPL plugin structures');
   end;
@@ -331,40 +334,44 @@ begin
   end;
 end;
 
-function TXPLcontrol.GetXplVariable(pName: String; lIndex: Integer): TXplValue;
-var
-  lXplObj: TXplGetVariable;
-  lId: Int64;
-  lDataRead: boolean;
+function TXPLcontrol.GetVariableValueFromXplSharedMemory(pName: String;
+  pIndex: Integer): TXplValue;
 begin
-  Result := nil;
-  lId := Glb.UnixTimestampMs;
-  lXplObj := TXplGetVariable.Create(pName, lId, lIndex);
-  if (lIndex = NO_INDEX) then
-    DebugLog(Format('Sending GetXplVar command for name %s with id %d.', [pName, lXplObj.Id]))
-  else
-    DebugLog(Format('Sending GetXplVar command for name %s[%d] with id %d.', [pName, lIndex, lXplObj.Id]));
-  //fXplSender.SendMessage(lXplObj);
-  // wait for XPL answer
-  //lDataRead := fXplSyncListener.Server.PeekMessage(1000, true); // in ms
-  // function above should return true when something was read
-  // however it seems to return falsi even when onMessage method was called :-(
-  // so check also if xpl variable is set with correct id
-  // in fact ignore this result, just check fXplVariableValue
-  if (fXplVariableValue <> nil) and (fXplVariableValue.Id = lId) then
+
+end;
+
+function TXPLcontrol.GetXplVariable(pName: String; pIndex: Integer): TXplValue;
+var
+  lCom: PLmcCommandRec;
+  lTickCount: ULONGLONG;
+begin
+  Result := GetVariableValueFromXplSharedMemory(pName, pIndex);
+  if (Result <> nil) then
+    exit;
+  lCom := getCommandSlotAndInitHeader;
+  if (lCom <> nil) then
   begin
-    Result := fXplVariableValue.Value;
-    // later LUA will call XplVarProcessed
-  end
-  else
-  begin
-    Glb.LogError('No value returned from XPL for get variable ' + pName, cLoggerXpl);
-    if (fXplVariableValue = nil) then
-      Glb.DebugLog('fXplVariableValue is nil', cLoggerXpl)
+    lCom^.CommandType:=LMC_COMMAND_GET_VARIABLE;
+    lCom^.GetVariableData.Name:=pName;
+    lCom^.GetVariableData.Index:=pIndex;
+    lCom^.Header.Status:=STATUS_READY;
+    if (pIndex = NO_INDEX) then
+      DebugLog(Format('Sending GetXplVar command for name %s.', [pName]))
     else
-      Glb.DebugLog('fXplVariableValue has id ' + IntToStr(fXplVariableValue.Id), cLoggerXpl)
+      DebugLog(Format('Sending GetXplVar command for name %s[%d].', [pName, pIndex]));
   end;
-  lXplObj.Free;
+  lTickCount := GetTickCount64;
+  while (lTickCount + cAcceptableXplAnswerDelayInMs > GetTickCount64) do
+  begin
+    Result := GetVariableValueFromXplSharedMemory(pName, pIndex);
+    if (Result <> nil) then
+      exit;
+    Sleep(20);
+  end;
+  if (pIndex = NO_INDEX) then
+    DebugLog(Format('No answer from XPL for GetXplVar command for name %s.', [pName]))
+  else
+    DebugLog(Format('No answer from XPL for GetXplVar command for name %s[%d].', [pName, pIndex]));
 end;
 
 procedure TXPLcontrol.SetXplVariable(pName: String; pValue: TXplValue);

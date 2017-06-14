@@ -35,7 +35,9 @@ const
   cLmc2XplMemName = 'LuaMacrosToXplPlugin';
   cXpl2LmcMemName = 'XplPluginToLuaMacros';
 
-  cMaxAcceptableRequestDelayMs = 5000;
+  cMaxAcceptableRequestDelayMs = 5000; // to purge request queue and ignore such request by XPL
+
+  cAcceptableXplAnswerDelayInMs = 500; // to accept variable value
 
   LOCK_NONE = 0;
   LOCK_VALUE_UPDATE = 1; // allow read
@@ -54,6 +56,7 @@ const
   LMC_COMMAND_XPL_COMMAND = 3;
   LMC_COMMAND_SET_VARIABLE = 4;
   LMC_COMMAND_INC_VARIABLE = 5;
+  LMC_COMMAND_GET_VARIABLE = 6;
 
 
 type
@@ -84,8 +87,9 @@ type
     case CommandType: byte of
     LMC_COMMAND_DRAW_TEXT: (TextData: TXplDrawTextRec);
     LMC_COMMAND_XPL_COMMAND: (CommandData: TXplCommandRec);
-    LMC_COMMAND_SET_VARIABLE: (SetVariableData: TXplSetVariableRec);
+    LMC_COMMAND_SET_VARIABLE: (SetVariableData: TXplVariableWithValueRec);
     LMC_COMMAND_INC_VARIABLE: (IncVariableData: TXplIncVariableRec);
+    LMC_COMMAND_GET_VARIABLE: (GetVariableData: TXplGetVariableRequestRec);
   end;
 
   PLmc2XplSharedMem = ^TLmc2XplSharedMem;
@@ -100,6 +104,7 @@ type
     Lock : byte;
     UpdateTimeStamp: Int64;
     LastProcessedId: Int64;
+    Values: array[0..100] of TXplVariableWithValueRec;
   end;
 
 

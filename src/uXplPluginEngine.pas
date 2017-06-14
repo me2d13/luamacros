@@ -27,6 +27,7 @@ TXplEngine = class (TObject)
     fTextHideTs: TDateTime;
     fDataRefs: TStringList;
     fCommands: TStringList;
+    fWatchedVariables: TStringList;
     fVarCallbacks: TCallbackInfoMap;
     fLmc2XplMem: TMemMap;
     fXpl2LmcMem: TMemMap;
@@ -43,8 +44,9 @@ TXplEngine = class (TObject)
     procedure OnLmcMessage(pSender: TObject);
     procedure XplDebugFmt(pFormat:String; pArgs: array of const);
     procedure Run(pText: TXplDrawTextRec); overload;
-    procedure Run(pData: TXplSetVariableRec); overload;
+    procedure Run(pData: TXplVariableWithValueRec); overload;
     procedure Run(pData: TXplIncVariableRec); overload;
+    procedure Run(pData: TXplGetVariableRequestRec); overload;
     procedure RunAndFree(pVar: TXplGetVariable); overload;
     procedure Run(pComm: TXplCommandRec);
     procedure RunAndFree(pVar: TXplVariableCallback); overload;
@@ -63,6 +65,7 @@ TXplEngine = class (TObject)
     function ValidLmcRequest(header: TComSlotRec): Boolean;
     procedure CheckCommandQueue;
     procedure LmcStarted;
+    procedure UpdateWatchedValue(pIndex: Integer);
   public
     { Public declarations }
     constructor Create;
@@ -96,6 +99,8 @@ begin
   fDataRefs.CaseSensitive:=False;
   fCommands:=TStringList.Create;
   fCommands.CaseSensitive:=False;
+  fWatchedVariables:=TStringList.Create;
+  fWatchedVariables.CaseSensitive:=False;
   fVarCallbacks:=TCallbackInfoMap.Create;
   InitGlValues;
   DebugLog('LuaMacros init done');
@@ -130,6 +135,7 @@ begin
   fDataRefs.Free;
   fCommands.Free;
   fVarCallbacks.Free;
+  fWatchedVariables.Free;
   fLogger.Free;
   inherited;
 end;
@@ -197,6 +203,8 @@ begin
         Run(fLmcMem^.Commands[lIndex].SetVariableData);
       LMC_COMMAND_INC_VARIABLE:
         Run(fLmcMem^.Commands[lIndex].IncVariableData);
+      LMC_COMMAND_GET_VARIABLE:
+        Run(fLmcMem^.Commands[lIndex].GetVariableData);
       end;
       DebugLogFmt('Tick %d: After slot process we have fLastProcessedId = %d, fMaxComIdInTick = %d', [fTickNo, fLastProcessedId, fMaxComIdInTick]);
     end;
@@ -208,6 +216,28 @@ begin
   DebugLog('Processing Lmc started command');
   fLastProcessedId:=0;
   fMaxComIdInTick:=0;
+end;
+
+procedure TXplEngine.UpdateWatchedValue(pIndex: Integer);
+var
+  lValue: TXplValue;
+  lXplVariable: TXplVariable;
+begin
+  if (pIndex >= High(TXpl2LmcSharedMem.Values) then
+  begin
+    DebugLogFmt('Cannot send more values to LuaMacros. Maximum %d reached.', [High(TXpl2LmcSharedMem.Values)]);
+  end else begin
+    lXplVariable := TXplVariable(fWatchedVariables.Objects[pIndex]);
+    lValue := GetVariable(lXplVariable, fXplMem.Values[pIndex].Index, True);
+    if (lValue <> nil) then
+    begin
+      fXplMem.Values[pIndex].Value:=lValue.Value;
+      //TODO: value must be some struct with header, add lock and timestamp
+    end
+    else
+      DebugLog('Can not find out value of variable ' + pVar.Name);
+
+  end;
 end;
 
 procedure TXplEngine.String2XplValue(pIn: String; pOut: PXplValue; pDataType: XPLMDataTypeID);
@@ -311,7 +341,7 @@ begin
   DebugLog(Format('Received DrawText %s at pos %f.', [fTextToBeDrawn, fTextFloatPosition]));
 end;
 
-procedure TXplEngine.Run(pData: TXplSetVariableRec);
+procedure TXplEngine.Run(pData: TXplVariableWithValueRec);
 var
   lXV: TXplVariable;
   lXplValue: TXplValue;
@@ -343,6 +373,26 @@ var
 begin
   lObject := TXplIncVariable.Create(pData);
   RunAndFree(lObject);
+end;
+
+procedure TXplEngine.Run(pData: TXplGetVariableRequestRec);
+var
+  lIndex: Integer;
+  lVariable: TXplVariable;
+begin
+  lIndex := fWatchedVariables.IndexOf(pData.Name);
+  if (lIndex < 0) then
+  begin
+    // not found, add to list
+    lVariable := GetOrRegisterXplVariable(pData.Name);;
+    if (lVariable <> nil) then
+    begin
+      fXplMem.Lock:=LOCK_LIST_CHANGING;
+      fWatchedVariables.AddObject(pData.Name, lVariable);
+      UpdateWatchedValue(fWatchedVariables.Count-1);
+      fXplMem.Lock:=LOCK_NONE;
+    end;
+  end
 end;
 
 procedure TXplEngine.RunAndFree(pVar: TXplGetVariable);

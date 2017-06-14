@@ -19,15 +19,20 @@ type
     vtString: (stringData: String[255]);
   end;
 
-  TXplSetVariableRec = packed record
+  TXplVariableWithValueRec = packed record
     Name: String[255];
     Value: TXplValueRec;
     Index: Int64;
   end;
 
+  TXplGetVariableRequestRec = packed record
+    Name: String[255];
+    Index: Int64;
+  end;
+
 
   TXplIncVariableRec = packed record
-    SetVariableData: TXplSetVariableRec;
+    SetVariableData: TXplVariableWithValueRec;
     HasLimit: Boolean;
     Limit: Double;
     UseOverflow: Boolean;
