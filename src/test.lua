@@ -2,6 +2,18 @@
 clear();
 lmc_xpl_text('From LUA macros')
 
+print(lmc_get_xpl_variable('sim/aircraft/view/acf_tailnum'))
+print(lmc_get_xpl_variable('sim/cockpit2/radios/actuators/adf1_frequency_hz'))
+
+varName='sim/cockpit2/radios/actuators/adf1_frequency_hz'
+lmc_on_xpl_var_change(varName,
+  function(value, count)
+    print(varName .. ' changed to ' .. value .. ' with ' .. count .. ' changes')
+    print(string.format('Value is %d', value))
+  end, 1000, 5)
+print('XPL Callback set')
+
+
 lmc_xpl_command('sim/view/still_spot')
 
 lmc_set_xpl_variable('sim/cockpit2/radios/actuators/adf1_frequency_hz', 424)

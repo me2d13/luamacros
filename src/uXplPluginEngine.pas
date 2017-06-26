@@ -55,7 +55,7 @@ TXplEngine = class (TObject)
     function ValidLmcRequest(header: TComSlotRec): Boolean;
     procedure CheckCommandQueue;
     procedure LmcStarted;
-    procedure UpdateWatchedValue(pIndex: Integer);
+    procedure UpdateWatchedValue(pIndex: Integer; pProduceLog: Boolean);
     function WatchedKey(lRec: PXplGetVariableRequestRec): String;
     procedure RefreshWatchedVariables;
   public
@@ -111,19 +111,17 @@ destructor TXplEngine.Destroy;
 var
   I: Integer;
 begin
+  DebugLog('Starting plugin shutdown');
   fLmc2XplMem.Free;
   fXpl2LmcMem.Free;
   for I := 0 to fDataRefs.Count - 1 do
   begin
     fDataRefs.Objects[I].Free;
   end;
-  for I := 0 to fWatchedVariables.Count - 1 do
-  begin
-    fWatchedVariables.Objects[I].Free;
-  end;
   fDataRefs.Free;
   fCommands.Free;
-  fWatchedVariables.Free;
+  fWatchedVariables.Free; // objects already freed as fDataRefs
+  DebugLog('Plugin shutdown complete');
   fLogger.Free;
   inherited;
 end;
@@ -194,7 +192,7 @@ begin
   fMaxComIdInTick:=0;
 end;
 
-procedure TXplEngine.UpdateWatchedValue(pIndex: Integer);
+procedure TXplEngine.UpdateWatchedValue(pIndex: Integer; pProduceLog: Boolean);
 var
   lValue: TXplValue;
   lXplVariable: TXplVariable;
@@ -205,7 +203,7 @@ begin
     DebugLogFmt('Cannot send more values to LuaMacros. Maximum %d reached.', [High(TXpl2LmcSharedMem.Values)]);
   end else begin
     lXplVariable := TXplVariable(fWatchedVariables.Objects[pIndex]);
-    lValue := GetVariable(lXplVariable, fXplMem.Values[pIndex].Value.Index, True);
+    lValue := GetVariable(lXplVariable, fXplMem.Values[pIndex].Value.Index, pProduceLog);
     if (lValue <> nil) then
     begin
       lNow:=UnixTimestampMs;
@@ -229,7 +227,7 @@ var
   I: Integer;
 begin
   for I := 0 to fWatchedVariables.Count -1 do
-    UpdateWatchedValue(I);
+    UpdateWatchedValue(I, False);
 end;
 
 procedure TXplEngine.String2XplValue(pIn: String; pOut: PXplValue; pDataType: XPLMDataTypeID);
@@ -356,7 +354,7 @@ begin
       fXplMem.Values[lIndex].Header.Status:=LMC_STATUS_WRITING;
       fXplMem.Values[lIndex].Value.Name:=pData.Name;
       fXplMem.Values[lIndex].Value.Index:=pData.Index;
-      UpdateWatchedValue(lIndex);
+      UpdateWatchedValue(lIndex, True);
       fXplMem.Lock:=LOCK_NONE;
     end;
   end

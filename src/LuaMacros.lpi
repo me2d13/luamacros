@@ -18,7 +18,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
-      <BuildNr Value="336"/>
+      <BuildNr Value="338"/>
       <StringTable ProductVersion=""/>
     </VersionInfo>
     <BuildModes Count="1">
@@ -33,22 +33,25 @@
         <CommandLineParams Value="C:\work\luamacros\src\test.lua -L DX"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="5">
+    <RequiredPackages Count="6">
       <Item1>
-        <PackageName Value="lnetbase"/>
+        <PackageName Value="extrahighlighters_RT"/>
       </Item1>
       <Item2>
-        <PackageName Value="uniqueinstance_package"/>
+        <PackageName Value="lnetbase"/>
       </Item2>
       <Item3>
-        <PackageName Value="LazSerialPort"/>
+        <PackageName Value="uniqueinstance_package"/>
       </Item3>
       <Item4>
-        <PackageName Value="SynEdit"/>
+        <PackageName Value="LazSerialPort"/>
       </Item4>
       <Item5>
-        <PackageName Value="LCL"/>
+        <PackageName Value="SynEdit"/>
       </Item5>
+      <Item6>
+        <PackageName Value="LCL"/>
+      </Item6>
     </RequiredPackages>
     <Units Count="31">
       <Unit0>
@@ -70,12 +73,10 @@
       <Unit3>
         <Filename Value="uXplCommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="uXplCommon"/>
       </Unit3>
       <Unit4>
         <Filename Value="uXplControl.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="uXplControl"/>
       </Unit4>
       <Unit5>
         <Filename Value="uglobals.pas"/>
@@ -232,8 +233,5 @@
         </Win32>
       </Options>
     </Linking>
-    <Other>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
 </CONFIG>

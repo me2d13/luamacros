@@ -308,7 +308,8 @@ end;
 
 procedure TGlobals.TickMe;
 begin
-  fDeviceService.TickMe;;
+  fDeviceService.TickMe;
+  fXplCLcontrol.Tick;
 end;
 
 procedure TGlobals.FlushBuffer;

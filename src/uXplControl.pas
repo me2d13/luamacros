@@ -28,6 +28,7 @@ type
     constructor Create;
     destructor Destroy; Override;
     procedure Init;
+    procedure Tick;
     function GetXplVariable(pName: String): TXplValue; overload;
     function GetXplVariable(pName: String; pIndex: Integer): TXplValue; overload;
     procedure SetXplVariable(pName: String; pValue: TXplValue); overload;
@@ -103,6 +104,11 @@ begin
     lCom^.Header.Status:=LMC_STATUS_READY;
     DebugLog('Sending LMC started command to reset XPL plugin structures');
   end;
+end;
+
+procedure TXPLcontrol.Tick;
+begin
+  CheckVaribleCallbacks;
 end;
 
 function TXPLcontrol.GetXplVariable(pName: String): TXplValue;
