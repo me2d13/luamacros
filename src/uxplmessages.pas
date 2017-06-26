@@ -25,6 +25,7 @@ type
     Index: Int64;
   end;
 
+  PXplGetVariableRequestRec = ^TXplGetVariableRequestRec;
   TXplGetVariableRequestRec = packed record
     Name: String[255];
     Index: Int64;
@@ -86,8 +87,8 @@ type
     procedure MakeInt;
     procedure MakeString;
     function ToString: ansistring;override;
-    function Equals(pVar: TXplValue): boolean;
-    function EqualsWithDelta(pVar: TXplValue; pDelta:Int64): boolean;
+    function Equals(pVar: PXplValue): boolean;
+    function EqualsWithDelta(pVar: PXplValue; pDelta:Int64): boolean;
     function SameDouble(pVal1, pVal2, pEpsilon: double): boolean;
     property IntValue: Int64 read GetIntValue write SetIntValue;
     property DoubleValue: Double read GetDoubleValue write SetDoubleValue;
@@ -658,27 +659,27 @@ begin
   end;
 end;
 
-function TXplValue.Equals(pVar: TXplValue): boolean;
+function TXplValue.Equals(pVar: PXplValue): boolean;
 begin
   Result := False;
   if (pVar = nil) then exit;
-  if (fValue.VarType <> pVar.ValueType) then exit;
+  if (fValue.VarType <> pVar^.VarType) then exit;
   Result :=
-    ((fValue.VarType = vtInteger) and (fValue.intData = pVar.IntValue)) or
-    ((fValue.VarType = vtDouble) and (SameDouble(fValue.doubleData, pVar.DoubleValue, 0))) or
-    ((fValue.VarType = vtString) and (fValue.stringData = pVar.StringValue)) or
+    ((fValue.VarType = vtInteger) and (fValue.intData = pVar^.intData)) or
+    ((fValue.VarType = vtDouble) and (SameDouble(fValue.doubleData, pVar^.doubleData, 0))) or
+    ((fValue.VarType = vtString) and (fValue.stringData = pVar^.stringData)) or
     ((fValue.VarType = vtNull));
 end;
 
-function TXplValue.EqualsWithDelta(pVar: TXplValue; pDelta: Int64): boolean;
+function TXplValue.EqualsWithDelta(pVar: PXplValue; pDelta: Int64): boolean;
 begin
   Result := False;
   if (pVar = nil) then exit;
-  if (fValue.VarType <> pVar.ValueType) then exit;
+  if (fValue.VarType <> pVar^.VarType) then exit;
   Result :=
-    ((fValue.VarType = vtInteger) and (Abs(fValue.intData - pVar.IntValue) < pDelta)) or
-    ((fValue.VarType = vtDouble) and (SameDouble(fValue.doubleData, pVar.DoubleValue, pDelta))) or
-    ((fValue.VarType = vtString) and (fValue.stringData = pVar.StringValue)) or
+    ((fValue.VarType = vtInteger) and (Abs(fValue.intData - pVar^.intData) < pDelta)) or
+    ((fValue.VarType = vtDouble) and (SameDouble(fValue.doubleData, pVar^.doubleData, pDelta))) or
+    ((fValue.VarType = vtString) and (fValue.stringData = pVar^.stringData)) or
     ((fValue.VarType = vtNull));
 end;
 

@@ -121,11 +121,11 @@ type
 
   TRiRefXplValueInteger = class (TRiRef)
     protected
-      fPar1: TXplVariableValue;
+      fPar1: PXplValue;
       fPar2: Integer;
-      procedure PushXplValue(pLuaState: TLuaState; pValue: TXplVariableValue);
+      procedure PushXplValue(pLuaState: TLuaState; pValue: PXplValue);
     public
-      constructor Create(pRef: Integer; p1: TXplVariableValue; p2: Integer);
+      constructor Create(pRef: Integer; p1: PXplValue; p2: Integer);
       procedure Execute(pLua: TLua); override;
       function Describe: String; override;
   end;
@@ -195,7 +195,7 @@ type
       function GetExecutionQueueSize: Integer;
       function IsRunning: Boolean;
       procedure StackDump(pLuaState: TLuaState);
-      procedure CallFunctionByRef(pRef: Integer; pValue: TXplVariableValue; pChangeCount: Integer);overload;
+      procedure CallFunctionByRef(pRef: Integer; pValue: PXplValue; pChangeCount: Integer);overload;
       procedure CallFunctionByRef(pRef: Integer; pData: String);overload;
       procedure CallFunctionByRef(pRef: Integer; pData: Integer);overload;
       procedure CallFunctionByRef(pRef: Integer; pKey: Int64; pDirection: Int64);overload;
@@ -356,22 +356,28 @@ end;
 
 { TRiRefXplValueInteger }
 
-procedure TRiRefXplValueInteger.PushXplValue(pLuaState: TLuaState; pValue: TXplVariableValue);
+procedure TRiRefXplValueInteger.PushXplValue(pLuaState: TLuaState; pValue: PXplValue);
+var
+  lStrValue: String;
 begin
-  if (pValue = nil) or (pValue.Value = nil) or (pValue.Value.ValueType = vtNull) then
+  if (pValue = nil) or (pValue^.VarType = vtNull) then
   begin
     lua_pushinteger(pLuaState, 0);
     Glb.LogError('No XPL variable value for LUA callback', cLoggerLua);
   end else begin
-    case pValue.Value.ValueType of
-      vtInteger: lua_pushinteger(pLuaState, pValue.Value.IntValue);
-      vtDouble: lua_pushnumber(pLuaState, pValue.Value.DoubleValue);
-      vtString: lua_pushstring(pLuaState, PChar(pValue.Value.StringValue));
+    case pValue.VarType of
+      vtInteger: lua_pushinteger(pLuaState, pValue^.intData);
+      vtDouble: lua_pushnumber(pLuaState, pValue^.doubleData);
+      vtString:
+        begin
+          lStrValue:=pValue^.stringData;
+          lua_pushstring(pLuaState, PChar(lStrValue));
+        end;
     end;
   end;
 end;
 
-constructor TRiRefXplValueInteger.Create(pRef: Integer; p1: TXplVariableValue;
+constructor TRiRefXplValueInteger.Create(pRef: Integer; p1: PXplValue;
   p2: Integer);
 begin
   inherited Create(pRef);
@@ -391,7 +397,7 @@ end;
 
 function TRiRefXplValueInteger.Describe: String;
 begin
-  Result:=Format('callback id %d, xpl value %s, int param %d', [fRef, fPar1.ToString, fPar2]);
+  Result:=Format('callback id %d, xpl value ..., int param %d', [fRef, fPar2]);
 end;
 
 { TLuaExecutor }
@@ -729,7 +735,7 @@ begin
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer;
-  pValue: TXplVariableValue; pChangeCount: Integer);
+  pValue: PXplValue; pChangeCount: Integer);
 begin
   fExecutor.Run(TRiRefXplValueInteger.Create(pRef, pValue, pChangeCount));
 end;

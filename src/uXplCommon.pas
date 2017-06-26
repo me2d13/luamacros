@@ -43,9 +43,9 @@ const
   LOCK_VALUE_UPDATE = 1; // allow read
   LOCK_LIST_CHANGING = 2; // full lock
 
-  STATUS_FREE = 0;
-  STATUS_WRITING = 1;
-  STATUS_READY = 2;
+  LMC_STATUS_FREE = 0;
+  LMC_STATUS_WRITING = 1;
+  LMC_STATUS_READY = 2;
 
   XPL_COMMAND_EXECUTE = 1;
   XPL_COMMAND_START = 2;
@@ -92,6 +92,11 @@ type
     LMC_COMMAND_GET_VARIABLE: (GetVariableData: TXplGetVariableRequestRec);
   end;
 
+  TXplFeedbackRec = packed record
+    Header: TComSlotRec;
+    Value: TXplVariableWithValueRec
+  end;
+
   PLmc2XplSharedMem = ^TLmc2XplSharedMem;
   TLmc2XplSharedMem = packed record
     Lock : byte;
@@ -104,7 +109,7 @@ type
     Lock : byte;
     UpdateTimeStamp: Int64;
     LastProcessedId: Int64;
-    Values: array[0..100] of TXplVariableWithValueRec;
+    Values: array[0..100] of TXplFeedbackRec;
   end;
 
 
@@ -136,11 +141,13 @@ type
 
   TLmcVariableCallbackInfo = class(TObject)
   public
-    Id: Int64;
     Name: String;
     Interval: Int64;
     Delta: Int64;
     LuaHandlerRef: Integer;
+    LastValue: TXplValueRec;
+    LastTriggerTs: Int64;
+    ChangeCount: Integer;
   end;
 
 

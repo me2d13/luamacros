@@ -95,7 +95,7 @@ begin
        lua_pushstring(luaState, PChar(lMessage))
      end;
    Result := 1;
-   Glb.XplControl.XplVarProcessed;
+   lRes.Free;
   end;
 end;
 
@@ -166,44 +166,36 @@ end;
 
 function IncXplArrayVariable(luaState: TLuaState): integer;
 var arg : PAnsiChar;
-  lVal: TXplValue;
   lNumOfParams: Integer;
-  lIncVar: TXplIncVariable;
-  lLimit: Double;
-  lIndex: Integer;
-  lOverflowBase: Double;
+  lData: TXplIncVariableRec;
 begin
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams < 3) then
     raise LmcException.Create('Wrong number of parameters. Provide at least name, index and value.');
   arg := lua_tostring(luaState, 1);
-  lIndex := lua_tointeger(luaState, 2);
-  if (lua_isnumber(luaState, 3) = 0) then lVal := TXplValue.Create(lua_tonumber(luaState, 3))
+  lData.SetVariableData.Index := lua_tointeger(luaState, 2);
+  if (lua_isnumber(luaState, 3) = 0) then lData.SetVariableData.Value.doubleData := lua_tonumber(luaState, 3)
   else
     raise LmcException.Create('Cannot increment variable by non-numeric value.');
   if (lNumOfParams > 3) then
   begin
-    lLimit := lua_tonumber(luaState, 4);
+    lData.Limit := lua_tonumber(luaState, 4);
     if (lNumOfParams > 4) then
     begin
-      lOverflowBase := lua_tonumber(luaState, 5);
-      Glb.DebugLogFmt('Increasing array variable %s[%d] by %s with limit %f and overflow from %f',
-        [arg, lIndex, lVal.ToString, lLimit, lOverflowBase], cLoggerXpl);
-      lIncVar := TXplIncVariable.Create(arg, lVal, lLimit, lOverflowBase);
+      lData.OverflowBase := lua_tonumber(luaState, 5);
+      Glb.DebugLogFmt('Increasing array variable %s[%d] by %f with limit %f and overflow from %f',
+        [arg, lData.SetVariableData.Index, lData.SetVariableData.Value.doubleData, lData.Limit, lData.OverflowBase], cLoggerXpl);
     end
     else
     begin
-      Glb.DebugLogFmt('Increasing array variable %s[%d] by %s with limit %f',
-       [arg, lIndex, lVal.ToString, lLimit], cLoggerXpl);
-      lIncVar := TXplIncVariable.Create(arg, lVal, lLimit);
+      Glb.DebugLogFmt('Increasing array variable %s[%d] by %f with limit %f',
+       [arg, lData.SetVariableData.Index, lData.SetVariableData.Value.doubleData, lData.Limit], cLoggerXpl);
     end
   end else begin
-    Glb.DebugLogFmt('Increasing array variable %s[%d] by %s', [arg, lIndex, lVal.ToString], cLoggerXpl);
-    lIncVar := TXplIncVariable.Create(arg, lVal);
+    Glb.DebugLogFmt('Increasing array variable %s[%d] by %f', [arg, lData.SetVariableData.Index, lData.SetVariableData.Value.doubleData], cLoggerXpl);
   end;
-  lIncVar.Index:=lIndex;
-  Glb.XplControl.SendMessage(lIncVar);
-  lIncVar.Free;
+  lData.SetVariableData.Name:=arg;
+  Glb.XplControl.IncVariable(lData);
   Result := 0;
 end;
 

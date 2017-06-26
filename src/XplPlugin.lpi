@@ -33,12 +33,7 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="1">
-      <Item1>
-        <PackageName Value="etpackage"/>
-      </Item1>
-    </RequiredPackages>
-    <Units Count="10">
+    <Units Count="9">
       <Unit0>
         <Filename Value="XplPlugin.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -46,14 +41,17 @@
       <Unit1>
         <Filename Value="uXplPluginEngine.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="uXplPluginEngine"/>
       </Unit1>
       <Unit2>
         <Filename Value="uXplCommon.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="uXplCommon"/>
       </Unit2>
       <Unit3>
         <Filename Value="MemMap.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="MemMap"/>
       </Unit3>
       <Unit4>
         <Filename Value="uxplsender.pas"/>
@@ -76,13 +74,9 @@
         <UnitName Value="uXplMessages"/>
       </Unit7>
       <Unit8>
-        <Filename Value="uTiming.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit8>
-      <Unit9>
         <Filename Value="uXplLogger.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit9>
+      </Unit8>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -116,6 +110,7 @@
     </Linking>
     <Other>
       <CustomOptions Value="-dXPLM210 -dXPLM200"/>
+      <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
   <Debugging>
