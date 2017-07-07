@@ -976,6 +976,7 @@ begin
   fLua.RegisterFunction('lmc_load','',nil,@LoadScript);
   fLua.RegisterFunction('lmc_say','',nil,@Say);
   fLua.RegisterFunction('lmc_get_window_title', '', nil, @GetActiveWindowTitle);
+  fLua.RegisterFunction('lmc_sleep','',nil,@DoSleep);
   // devices
   fLua.RegisterFunction('lmc_print_devices','',nil,@PrintDevices);
   fLua.RegisterFunction('lmc_assign_keyboard','',nil,@CheckDeviceNameWithAsk);

@@ -18,6 +18,7 @@ function MinimizeMainWindow(luaState : TLuaState) : integer;
 function LoadScript(luaState : TLuaState) : integer;
 function Say(luaState : TLuaState) : integer;
 function GetActiveWindowTitle(luaState : TLuaState) : integer;
+function DoSleep(luaState : TLuaState) : integer;
 
 implementation
 
@@ -167,6 +168,20 @@ begin
     lTitle:= '';
   lua_pushstring(luaState, PChar(lTitle));
   Result := 1;
+end;
+
+function DoSleep(luaState: TLuaState): integer;
+var
+  lArg: Integer;
+  lNumOfParams: Integer;
+begin
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams <> 1) then
+    raise LmcException.Create('Wrong number of arguments. Provide number of ms.');
+  lArg := lua_tointeger(luaState, 1);
+  Glb.DebugLogFmt('Sleeping for %d msec.', [lArg], cLoggerLua);
+  Sleep(lArg);
+  Result := 0;
 end;
 
 
