@@ -91,7 +91,7 @@ begin
                 newKbd := TKbdDevice.Create;
                 newKbd.SystemId := StrPas(pDeviceName);
                 newKbd.Handle:=pDevice^.hDevice;
-                Glb.DebugLogFmt('Found keyboard %s handle %d.', [newKbd.SystemId, pDevice^.hDevice], cKbdLoggerName);
+                Glb.DebugLogFmt('Found keyboard %s handle %d.', [newKbd.SystemId, pDevice^.hDevice], cLoggerKbd);
                 fDevices.Add(newKbd);
                 Glb.DeviceService.Devices.Add(newKbd);
               end
@@ -121,7 +121,7 @@ begin
   ids.hwndTarget := pForHandle;
   if (not RegisterRawInputDevices(@ids, 1, sizeOf(ids))) then
   begin
-    Glb.LogError('Failed to register keyboard input messages.', cKbdLoggerName);
+    Glb.LogError('Failed to register keyboard input messages.', cLoggerKbd);
   end;
 end;
 
@@ -145,7 +145,7 @@ begin
           WM_KEYDOWN, WM_SYSKEYDOWN: lDirection:=cDirectionDown;
           WM_KEYUP, WM_SYSKEYUP: lDirection:=cDirectionUp;
         end;
-        Glb.DebugLog('RAW message: ' + DescribeRawMessage(buff), cKbdLoggerName);
+        Glb.DebugLog('RAW message: ' + DescribeRawMessage(buff), cLoggerKbd);
         lKeyStrokePtr := Glb.KeyLogService.AddRaw(buff);
         // search device
         for lDev in fDevices do
@@ -155,7 +155,7 @@ begin
             if (lDev.Name <> '') then
             begin
               lKeyStrokePtr^.Device:=lDev;
-              Glb.LuaEngine.OnDeviceEvent(lDev, buff^.keyboard.VKey, lDirection);
+              Glb.LuaEngine.OnDeviceEvent(lDev, buff^.keyboard.VKey, lDirection, buff^.keyboard.Flags);
             end;
             // for scanning consider only key down messages
             // key ups usually come when Ctrl+Enter is released to execute script
@@ -245,9 +245,9 @@ begin
     WM_KEYDOWN, WM_SYSKEYDOWN: lDirection:='UP';
     WM_KEYUP, WM_SYSKEYUP: lDirection:='DOWN';
   end;
-  Result := Format('message %s, key code %d [%s], extended %d, direction %s, keyboard handle %d',
+  Result := Format('message %s, key code %d, extended %d, flags %d, makecode %d, direction %s, keyboard handle %d',
     [GetMessageId(rawdata^.keyboard.Message), rawdata^.keyboard.VKey,
-     GetCharFromVirtualKey(rawdata^.keyboard.VKey), rawdata^.keyboard.ExtraInformation,
+     rawdata^.keyboard.ExtraInformation, rawdata^.keyboard.Flags, rawdata^.keyboard.MakeCode,
      lDirection, rawdata^.header.hDevice]);
 end;
 

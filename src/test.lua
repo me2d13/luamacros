@@ -1,26 +1,21 @@
 -- GUI thing: clear log window
 clear();
-lmc_xpl_text('From LUA macros')
+print('Text1')
+lmc_sleep(1500)
+print('Text2')
 
-print(lmc_get_xpl_variable('sim/aircraft/view/acf_tailnum'))
-print(lmc_get_xpl_variable('sim/cockpit2/radios/actuators/adf1_frequency_hz'))
+lmc_sleep(1500)
+lmc_send_input(16, 0, 0) -- press shift
+lmc_send_input(65, 0, 0) -- press A
+lmc_send_input(65, 0, 2) -- release A
+lmc_send_input(66, 0, 0) -- press B
+lmc_send_input(66, 0, 2) -- release B
+lmc_send_input(16, 0, 2) -- release shift
+lmc_send_input(67, 0, 0) -- press C
+lmc_send_input(67, 0, 2) -- release C
+-- produced ABc
 
-varName='sim/cockpit2/radios/actuators/adf1_frequency_hz'
-lmc_on_xpl_var_change(varName,
-  function(value, count)
-    print(varName .. ' changed to ' .. value .. ' with ' .. count .. ' changes')
-    print(string.format('Value is %d', value))
-  end, 1000, 5)
-print('XPL Callback set')
-
-
-lmc_xpl_command('sim/view/still_spot')
-
-lmc_set_xpl_variable('sim/cockpit2/radios/actuators/adf1_frequency_hz', 424)
-lmc_inc_xpl_variable('sim/cockpit2/radios/actuators/adf1_frequency_hz', 1)
-
---lmc2.ahoj = 1
-
+--lmc_xpl_text('From LUA macros')
 --lmc_log_all();
 --lmc_log_module('XPL')
 --lmc_xpl_log_file('luamacros1.log')
@@ -48,44 +43,37 @@ end
 print('This is LuaMacros. Listing detected devices...');
 
 -- print device table
---lmc_print_devices();
+lmc_print_devices();
 
 -- assign logical name to game device by regexp
 -- 1st arg: logical name
 -- 2nd arg: regexp applied on DirectX name
 -- returns: Found directX name
-print(lmc_device_set_name('LB', '7E9AD920'));
-print(lmc_device_set_name('LB2', '53175550'));
-print(lmc_device_set_name('KBD1', '826BD90'));
-print(lmc_device_set_name('KBD2', '31BB05D2'));
-print(lmc_device_set_name('ST', 'Saitek'));
---lmc_assign_keyboard('KBD2');
+print(lmc_device_set_name('LB', '7E9AD920'))
+print(lmc_device_set_name('LB2', '53175550'))
+print(lmc_device_set_name('KBD1', '3970CC3F'))
+print(lmc_device_set_name('KBD2', '31BB05D2'))
+print(lmc_device_set_name('ST', 'Saitek'))
 -- remember 2nd param is regexp, so any unique part from that ugly keyboard system id works
+--lmc_assign_keyboard('KBD2');
 
 
 -- now logical name is assigned to game device
---lmc_print_devices();
+lmc_print_devices()
 
 --define callback function
-handler = function()
-  --print('cus bus');
-  print(lmc_get_window_title())
-end
-
 log_handler = function(button, direction, ts)
-  print('MY Callback for device: button ' .. button .. ', direction '..direction..', ts '..ts)
+  print('Callback for device: button ' .. button .. ', direction '..direction..', ts '..ts)
 end
 
-
---test it
-handler()
+lmc_set_handler('KBD1', log_handler)
 
 -- assign callback to game device, button no 2, press event
 -- 1st param: logical name
 -- 2nd param: button number
 -- 3rd param: direction, 1=down, 0=up
 -- 4th param: callback function
---lmc_set_handler('LB',2,0,handler)
+--lmc_set_handler('LB',2,0,log_handler)
 -- now callback is active
 
 -- another type of device callback - assigned to whole device

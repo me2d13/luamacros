@@ -886,14 +886,14 @@ begin
       if (not lTrigger.WholeDevice) and (pButton = lTrigger.KeyNumber) and
       (pDirection = lTrigger.Direction) then
       begin
-        Glb.DebugLog(Format('Calling handler %d for device %s, key %d, direction %d',
-            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), cLoggerLua);
+        Glb.DebugLog(Format('Calling handler %d for device %s, key %d, direction %d, ts %d',
+            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection, pTimeStamp]), cLoggerLua);
         CallFunctionByRef(lTrigger.LuaRef);
       end;
       if (lTrigger.WholeDevice) then
       begin
-        Glb.DebugLog(Format('Calling handler %d for device %s with params key %d, direction %d',
-            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection]), cLoggerLua);
+        Glb.DebugLog(Format('Calling handler %d for device %s with params key %d, direction %d, ts %d',
+            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection, pTimeStamp]), cLoggerLua);
         if (pTimeStamp > 0) then
           CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection, pTimeStamp)
         else
@@ -971,6 +971,7 @@ begin
   fLua.RegisterFunction('lmc_log_spool','',nil,@LogSpool);
   fLua.RegisterFunction('lmc_log_all','',nil,@LogAll);
   fLua.RegisterFunction('lmc_send_keys','',nil,@SendKeys);
+  fLua.RegisterFunction('lmc_send_input','',nil,@SendInput);
   fLua.RegisterFunction('lmc_spawn','',nil,@Spawn);
   fLua.RegisterFunction('lmc_minimize','',nil,@MinimizeMainWindow);
   fLua.RegisterFunction('lmc_load','',nil,@LoadScript);

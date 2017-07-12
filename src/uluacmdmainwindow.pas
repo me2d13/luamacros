@@ -13,6 +13,7 @@ function LogModule(luaState : TLuaState) : integer;
 function LogAll(luaState : TLuaState) : integer;
 function LogSpool(luaState : TLuaState) : integer;
 function SendKeys(luaState : TLuaState) : integer;
+function SendInput(luaState : TLuaState) : integer;
 function Spawn(luaState : TLuaState) : integer;
 function MinimizeMainWindow(luaState : TLuaState) : integer;
 function LoadScript(luaState : TLuaState) : integer;
@@ -74,6 +75,24 @@ begin
   lSndKey.Sequence := arg;
   lSndKey.Resume;
   Lua_Pop(luaState, Lua_GetTop(luaState));
+  Result := 0;
+end;
+
+function SendInput(luaState: TLuaState): integer;
+var
+  lArg1: Integer;
+  lArg2: Integer;
+  lArg3: Integer;
+  lNumOfParams: Integer;
+begin
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams <> 3) then
+    raise LmcException.Create('Wrong number of arguments. Provide 3 numbers.');
+  lArg1 := lua_tointeger(luaState, 1);
+  lArg2 := lua_tointeger(luaState, 2);
+  lArg3 := lua_tointeger(luaState, 3);
+  Glb.DebugLogFmt('Sending input vk:%d, scan:%d, flags:%d', [lArg1, lArg2, lArg3], cLoggerKbd);
+  SendKeyboardInput(lArg1, lArg2, lArg3);
   Result := 0;
 end;
 

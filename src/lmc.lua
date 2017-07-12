@@ -1,5 +1,5 @@
 clear()
---lmc_log_all();
+lmc_log_all();
 --lmc_log_module('XPL')
 --lmc_log_module('LUA')
 --lmc_log_module('CFG')

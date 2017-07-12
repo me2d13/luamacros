@@ -141,7 +141,7 @@ begin
   gSharedPtr := nil;
   //DebugLog('Attached to PID ' + IntToStr(gPid));
   try
-    gMemMap := TMemMap.Create(MMFName, SizeOf(TMMFData));
+    gMemMap := TMemMap.Create(MMFName, SizeOf(TMMFData), True);
     gSharedPtr := gMemMap.Memory;
   except
     on EMemMapException do

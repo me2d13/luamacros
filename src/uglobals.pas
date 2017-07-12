@@ -93,6 +93,8 @@ const
   cLoggerSpe = 'SPE';
   cLoggerHook = 'HOOK';
   cLoggerDx = 'DX';
+  cLoggerKbd = 'KBD';
+
 
 
 function Sto_GetFmtFileVersion(const FileName: String = ''; const Fmt: String = '%d.%d.%d.%d'): String;

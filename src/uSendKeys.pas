@@ -40,9 +40,11 @@ type
     property DelayKeys: Integer read fDelayKeys write fDelayKeys;
   end;
 
+procedure SendKeyboardInput(pVk, pScan, pFlags: Integer);
+
 implementation
 
-uses uGlobals;
+uses uGlobals, JwaWinUser;
 
 type
   TSendKey = record
@@ -158,6 +160,18 @@ const
   VKKEYSCANSHIFTON = $01;
   VKKEYSCANCTRLON = $02;
   VKKEYSCANALTON = $04;
+
+procedure SendKeyboardInput(pVk, pScan, pFlags: Integer);
+var
+  Input: TInput;
+begin
+  FillChar(Input, SizeOf(Input), 0);
+  Input.type_ := INPUT_KEYBOARD;
+  Input.ki.dwFlags := pFlags;
+  Input.ki.wVk := pVk;
+  Input.ki.wScan:=pScan;
+  SendInput(1, @Input, SizeOf(Input));
+end;
 
 constructor TKeySequence.Create;
 begin

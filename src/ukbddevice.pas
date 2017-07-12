@@ -28,9 +28,6 @@ type
     Direction: Integer;
   end;
 
-const
-  cKbdLoggerName = 'KBD';
-
 
 implementation
 

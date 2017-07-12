@@ -23,6 +23,7 @@ type
     function getCommandSlotAndInitHeader: PLmcCommandRec;
     function GetVariableValueFromXplSharedMemory(pName: String; pIndex: Integer): TXplValue;
     procedure CheckVaribleCallbacks;
+    function IsXplConnected: Boolean;
   public
     { Public declarations }
     constructor Create;
@@ -108,7 +109,8 @@ end;
 
 procedure TXPLcontrol.Tick;
 begin
-  CheckVaribleCallbacks;
+  if IsXplConnected then
+    CheckVaribleCallbacks;
 end;
 
 function TXPLcontrol.GetXplVariable(pName: String): TXplValue;
@@ -290,6 +292,11 @@ begin
     else
       lValue.Free;
   end;
+end;
+
+function TXPLcontrol.IsXplConnected: Boolean;
+begin
+  Result := (Glb.UnixTimestampMs - fXplMem.UpdateTimeStamp) < cMaxAcceptableRequestDelayMs;
 end;
 
 function TXPLcontrol.GetXplVariable(pName: String; pIndex: Integer): TXplValue;
