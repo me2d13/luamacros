@@ -4,16 +4,11 @@ print('Text1')
 lmc_sleep(1500)
 print('Text2')
 
-lmc_sleep(1500)
+--lmc_sleep(1500)
 lmc_send_input(16, 0, 0) -- press shift
-lmc_send_input(65, 0, 0) -- press A
-lmc_send_input(65, 0, 2) -- release A
-lmc_send_input(66, 0, 0) -- press B
-lmc_send_input(66, 0, 2) -- release B
 lmc_send_input(16, 0, 2) -- release shift
-lmc_send_input(67, 0, 0) -- press C
-lmc_send_input(67, 0, 2) -- release C
--- produced ABc
+--lmc_send_input(67, 0, 0) -- press C
+--lmc_send_input(67, 0, 2) -- release C
 
 --lmc_xpl_text('From LUA macros')
 --lmc_log_all();
@@ -57,6 +52,7 @@ print(lmc_device_set_name('ST', 'Saitek'))
 -- remember 2nd param is regexp, so any unique part from that ugly keyboard system id works
 --lmc_assign_keyboard('KBD2');
 
+print(lmc_get_button('LB2', 9))
 
 -- now logical name is assigned to game device
 lmc_print_devices()

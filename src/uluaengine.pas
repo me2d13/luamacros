@@ -984,6 +984,7 @@ begin
   fLua.RegisterFunction('lmc_device_set_name','',nil,@AssignDeviceNameByRegexp);
   fLua.RegisterFunction('lmc_set_handler','',nil,@LuaCmdSetCallback);
   fLua.RegisterFunction('lmc_set_axis_handler','',nil,@LuaCmdSetAxisHandler);
+  fLua.RegisterFunction('lmc_get_button','',nil,@LuaCmdGetButtonState);
   // serial
   fLua.RegisterFunction('lmc_add_com','',nil,@AddCom);
   fLua.RegisterFunction('lmc_send_to_com','',nil,@SendCom);

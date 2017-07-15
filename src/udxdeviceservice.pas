@@ -45,10 +45,12 @@ type
       procedure HandleAxisEvent(pDevice: TDxDevice; event: DIDEVICEOBJECTDATA; pAxisIndex: Integer);
       procedure TickMe;
       procedure SetAxisHandler(pDeviceName: String; pAxisNumber: Integer; pInterval: Integer; pTolerance: Integer; pHandlerRef: Integer);
+      function GetButtonState(pDeviceName: String; pButtonNumber: Integer) : Integer;
       property OnNewDevice: TNewDxDeviceCallback read fOnNewDevice write fOnNewDevice;
   end;
 
   function LuaCmdSetAxisHandler(luaState : TLuaState) : integer;
+  function LuaCmdGetButtonState(luaState : TLuaState) : integer;
 
 implementation
 
@@ -121,6 +123,21 @@ begin
   end else
     raise LmcException.Create('5 parameters expected: device, axis_number, interval[0], tolerance[1], handler');
   Result := 0;
+end;
+
+function LuaCmdGetButtonState(luaState: TLuaState): integer;
+var arg : PAnsiChar;
+  lNumOfParams: Integer;
+  lIndex: Integer;
+begin
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams <> 2) then
+    raise LmcException.Create('Wrong number of parameters. Provide at device name and button number.');
+  arg := lua_tostring(luaState, 1);
+  lIndex := lua_tointeger(luaState, 2);
+  Glb.DebugLog(Format('Finding out button %d state of device %s', [lIndex, arg]), cLoggerLua);
+  lua_pushinteger(luaState, Glb.DeviceService.DxDeviceService.GetButtonState(arg, lIndex));
+  Result := 1;
 end;
 
 
@@ -305,6 +322,25 @@ begin
     fAxisHandlers.Add(lHandler);
     Glb.DebugLog(Format('Added handler %d for axes %d of device %s, interval %d, tolerance %d',
         [pHandlerRef, pAxisNumber, lDevice.Name, pInterval, pTolerance]), cLoggerDx);
+  end;
+end;
+
+function TDxDeviceService.GetButtonState(pDeviceName: String;
+  pButtonNumber: Integer): Integer;
+var
+  lDevice: TDevice;
+  lDxDevice: TDxDevice;
+begin
+  lDevice := Glb.DeviceService.GetByName(pDeviceName);
+  if (lDevice = nil) then
+    Glb.LogError('Device with name ' + pDeviceName + ' not found', cLoggerDx)
+  else if (not (lDevice is TDxDevice)) then
+    Glb.LogError('Device ' + pDeviceName + ' is not game device. Axis are supposed to be handled for game devices only.', cLoggerDx)
+  else begin
+    lDxDevice := lDevice as TDxDevice;
+    Result := lDxDevice.GetButtonValue(pButtonNumber);
+    Glb.DebugLog(Format('Button %d of device %s has state %d',
+        [pButtonNumber, pDeviceName, Result]), cLoggerDx);
   end;
 end;
 

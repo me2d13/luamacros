@@ -30,6 +30,7 @@ type
       function TypeCaption: String; override;
       procedure ReadEventBuffer;
       constructor Create;
+      function GetButtonValue(pIndex: Integer): Integer;
       property ButtonsCount : Integer read fButtonsCount write fButtonsCount;
       property AxisCount : Integer read fAxisCount write fAxisCount;
       property POVsCount : Integer read fPOVsCount write fPOVsCount;
@@ -161,6 +162,25 @@ var
   I : Integer;
 begin
   fBufferSize:=cBufferSize;
+end;
+
+function TDxDevice.GetButtonValue(pIndex: Integer): Integer;
+var
+  lJoyState: DIJOYSTATE2;
+  hr: HRESULT;
+begin
+  hr := fDIDevice.GetDeviceState(SizeOf(DIJOYSTATE2), @lJoyState);
+  if FAILED(hr) then
+  begin
+    Glb.DebugLog('Can''t read current button state for device ' + Name, cLoggerDx);
+  end else begin
+      if (pIndex <= 0) or (pIndex > fButtonsCount) then begin
+        Glb.DebugLogFmt('Device %s has %d buttons. Provide value between 1 and %d', [Name, fButtonsCount, fButtonsCount], cLoggerDx);
+        Result := 0;
+      end
+      else
+        Result := lJoyState.rgbButtons[pIndex-1];
+  end;
 end;
 
 end.
