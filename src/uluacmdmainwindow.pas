@@ -74,7 +74,7 @@ begin
   arg := lua_tostring(luaState, 1);
   lSndKey := TKeySequence.Create;
   lSndKey.Sequence := arg;
-  lSndKey.Resume;
+  lSndKey.Start;
   Lua_Pop(luaState, Lua_GetTop(luaState));
   Result := 0;
 end;
@@ -131,6 +131,7 @@ end;
 function MinimizeMainWindow(luaState: TLuaState): integer;
 begin
   SendMessage(Glb.MainFormHandle, WM_MAIN_WINDOW_COMMAND, MWC_MINIMIZE, 0);
+  Result := 0;
 end;
 
 function LoadScript(luaState: TLuaState): integer;
