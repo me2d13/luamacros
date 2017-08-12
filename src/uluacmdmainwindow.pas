@@ -19,6 +19,7 @@ function MinimizeMainWindow(luaState : TLuaState) : integer;
 function LoadScript(luaState : TLuaState) : integer;
 function Say(luaState : TLuaState) : integer;
 function GetActiveWindowTitle(luaState : TLuaState) : integer;
+function GetParentWindowTitle(luaState : TLuaState) : integer;
 function DoSleep(luaState : TLuaState) : integer;
 
 implementation
@@ -186,6 +187,31 @@ begin
   else
     lTitle:= '';
   lua_pushstring(luaState, PChar(lTitle));
+  Result := 1;
+end;
+
+function GetParentWindowTitle(luaState: TLuaState): integer;
+var
+  lNumOfParams: Integer;
+  lHandle: THandle;
+  lLen: LongInt;
+  lTitle: string;
+begin
+  lNumOfParams := lua_gettop (luaState);
+  if (lNumOfParams > 0) then
+     raise LmcException.Create ('Wrong number of parameters. No argument expected.');
+  lHandle := getForegroundWindow;
+  if lHandle <> 0 then
+  begin
+       lHandle := GetAncestor (lHandle, GA_ROOTOWNER);
+       lLen := GetWindowTextLength(lHandle);
+       SetLength (lTitle, lLen);
+       GetWindowText (lHandle, PChar (lTitle), lLen);
+       lTitle := TrimRight (lTitle);
+  end
+  else
+      lTitle := '';
+  lua_pushstring(luaState, PChar (lTitle));
   Result := 1;
 end;
 
