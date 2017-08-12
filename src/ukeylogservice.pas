@@ -5,7 +5,7 @@ unit uKeyLogService;
 interface
 
 uses
-  uRawInput, Classes, SysUtils, uKbdDevice;
+  Windows, uRawInput, Classes, SysUtils, uKbdDevice;
 
 const
   cLogArrayLength = 100;
@@ -38,7 +38,7 @@ type
 implementation
 
 uses
-  Windows, dateutils, uDevice, uGlobals, uHookService;
+  dateutils, uDevice, uGlobals, uHookService;
 
 { TKeyLogService }
 
