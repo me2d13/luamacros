@@ -16,7 +16,7 @@ type
     private
       fDevices: TKbdDeviceList;
       function GetMessageId(Message: Word): String;
-      function DescribeRawMessage(rawdata: URAWINPUT.PRAWINPUT): String;
+      function DescribeRawMessage(rawdata: PRAWINPUT): String;
     public
       constructor Create;
       destructor Destroy; virtual;
@@ -63,28 +63,28 @@ begin
   pDeviceInfo := nil;
   pDevicesHID := nil;
   deviceCount := 0;
-  if (GetRawInputDeviceList(nil, @deviceCount, sizeof(RAWINPUTDEVICELIST)) = 0) then
+  if (GetRawInputDeviceList(nil, deviceCount, sizeof(RAWINPUTDEVICELIST)) = 0) then
   begin
     try
       GetMem(pDevicesHID, deviceCount * sizeOf(RAWINPUTDEVICELIST));
       GetMem(pDeviceInfo, sizeOf(RID_DEVICE_INFO));
       pDevice := pDevicesHID;
-      GetRawInputDeviceList(pDevicesHID, @deviceCount, sizeof(RAWINPUTDEVICELIST));
+      GetRawInputDeviceList(pDevicesHID, deviceCount, sizeof(RAWINPUTDEVICELIST));
       begin
         // process the list
         strLen := 0;
         for I := 0 to deviceCount - 1 do
         begin
           if (GetRawInputDeviceInfo(pDevice^.hDevice, RIDI_DEVICENAME,
-              nil, @StrLen) = 0) then
+              nil, StrLen) = 0) then
           begin
             GetMem(pDeviceName, StrLen + 1);
             try
               GetRawInputDeviceInfo(pDevice^.hDevice, RIDI_DEVICENAME,
-                  pDeviceName, @StrLen);
+                  pDeviceName, StrLen);
               TmpSize := sizeof(RID_DEVICE_INFO);
               pDeviceInfo^.cbSize := TmpSize;
-              GetRawInputDeviceInfo(pDevice^.hDevice, RIDI_DEVICEINFO, pDeviceInfo, @TmpSize);
+              GetRawInputDeviceInfo(pDevice^.hDevice, RIDI_DEVICEINFO, pDeviceInfo, TmpSize);
               if (pDeviceInfo^.dwType = RIM_TYPEKEYBOARD) and (strpos(strUpper(pDeviceName), 'ROOT') = nil) then
               begin
                 // create kbd object
@@ -128,16 +128,16 @@ end;
 procedure TKbdDeviceService.OnRawMessage(var Message: TMessage);
 var
   pcbSize: UINT;
-  buff: URAWINPUT.PRAWINPUT;
+  buff: PRAWINPUT;
   lDev: TKbdDevice;
   lDirection: Integer;
   lKeyStrokePtr: TKeyStrokePtr;
 begin
-  GetRawInputData(Message.LParam, RID_INPUT, nil, @pcbSize, sizeOf(RAWINPUTHEADER));
+  GetRawInputData(Message.LParam, RID_INPUT, nil, pcbSize, sizeOf(RAWINPUTHEADER));
   GetMem(buff, pcbSize);
   try
     if (GetRawInputData(Message.LParam, RID_INPUT, buff,
-        @pcbSize, sizeOf(RAWINPUTHEADER)) = pcbSize) then
+        pcbSize, sizeOf(RAWINPUTHEADER)) = pcbSize) then
     begin
       if (buff^.header.dwType = RIM_TYPEKEYBOARD)then
       begin
@@ -145,7 +145,7 @@ begin
           WM_KEYDOWN, WM_SYSKEYDOWN: lDirection:=cDirectionDown;
           WM_KEYUP, WM_SYSKEYUP: lDirection:=cDirectionUp;
         end;
-        // Glb.DebugLog('RAW message: ' + DescribeRawMessage(buff), cLoggerKbd);
+        Glb.DebugLog('RAW message: ' + DescribeRawMessage(buff), cLoggerKbd);
         lKeyStrokePtr := Glb.KeyLogService.AddRaw(buff);
         // search device
         for lDev in fDevices do
@@ -237,7 +237,7 @@ begin
   end;
 end;
 
-function TKbdDeviceService.DescribeRawMessage(rawdata: URAWINPUT.PRAWINPUT): String;
+function TKbdDeviceService.DescribeRawMessage(rawdata: PRAWINPUT): String;
 var
   lDirection: String;
 begin
