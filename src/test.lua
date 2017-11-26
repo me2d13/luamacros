@@ -3,6 +3,7 @@ clear();
 print('Text1')
 lmc_sleep(1500)
 print('Text2')
+lmc.autoReload = true
 
 --lmc_sleep(1500)
 lmc_send_input(16, 0, 0) -- press shift

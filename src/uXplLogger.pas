@@ -60,10 +60,12 @@ procedure TXplLogger.Log(Value: String);
 var
   lVal: String;
   logFile: TextFile;
+  lThread: TThreadID;
 begin
   if fLogLevel = cLlNone then
     exit;
-  lVal := Format('%s [XPLLUMplugin]: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), Value]);
+  lThread:=GetCurrentThreadId;
+  lVal := Format('%s [XPLLUMplugin %d]: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now), lThread, Value]);
   // to file
   AssignFile(logFile, fDebugLogFileName);
   if FileExists(fDebugLogFileName) then

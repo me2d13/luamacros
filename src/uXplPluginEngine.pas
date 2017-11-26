@@ -408,6 +408,7 @@ begin
       DebugLog(Format('Executed command end %s.', [pComm.Name]));
     end else
     begin
+      DebugLog(Format('Executing command %s.', [pComm.Name]));
       XPLMCommandOnce(lCom);
       DebugLog(Format('Executed command %s.', [pComm.Name]));
     end;

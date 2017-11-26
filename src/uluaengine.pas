@@ -980,6 +980,7 @@ begin
   fLua.RegisterFunction('lmc_sleep','',nil,@DoSleep);
   // devices
   fLua.RegisterFunction('lmc_print_devices','',nil,@PrintDevices);
+  fLua.RegisterFunction('lmc_get_devices','',nil,@GetDevices);
   fLua.RegisterFunction('lmc_assign_keyboard','',nil,@CheckDeviceNameWithAsk);
   fLua.RegisterFunction('lmc_device_set_name','',nil,@AssignDeviceNameByRegexp);
   fLua.RegisterFunction('lmc_set_handler','',nil,@LuaCmdSetCallback);

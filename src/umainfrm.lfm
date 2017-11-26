@@ -1,7 +1,7 @@
 object LmcMainForm: TLmcMainForm
-  Left = 193
+  Left = 378
   Height = 701
-  Top = 127
+  Top = 126
   Width = 918
   Caption = 'Lua Macros'
   ClientHeight = 701
@@ -10,7 +10,7 @@ object LmcMainForm: TLmcMainForm
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnWindowStateChange = FormWindowStateChange
-  LCLVersion = '1.4.2.0'
+  LCLVersion = '1.6.0.4'
   object PairSplitter1: TPairSplitter
     Cursor = crVSplit
     Left = 0
@@ -558,7 +558,10 @@ object LmcMainForm: TLmcMainForm
         Width = 200
       end    
       item
-        Width = 150
+        Width = 300
+      end    
+      item
+        Width = 50
       end>
     SimplePanel = False
   end

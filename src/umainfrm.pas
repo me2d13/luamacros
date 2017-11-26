@@ -2,6 +2,11 @@ unit uMainFrm;
 
 {$mode objfpc}{$H+}
 
+{
+Command line parameter - script with DX logger on:
+  C:\work\luamacros\src\test.lua -L DX
+}
+
 interface
 
 uses
@@ -73,6 +78,8 @@ type
     fEditorDirty: boolean;
     fFileName: String;
     fAutoExecute: Boolean;
+    fHookKeyboard: Boolean;
+    fLastWriteTime: FILETIME;
     procedure SetEditorDirty(AValue: boolean);
     procedure SetFileName(AValue: String);
     procedure BuildFormCaption;
@@ -82,6 +89,8 @@ type
     function SaveTrueCanContinue: boolean;
     function SaveAsTrueCanContinue: boolean;
     procedure OrderRawInputMessagesToBeReceived;
+    procedure StoreFileModificationTime;
+    procedure AppGetsFocus(Sender: TObject);
   public
     { public declarations }
     procedure print(what: String);
@@ -232,6 +241,7 @@ end;
 procedure TLmcMainForm.WmLuaRunChange(var Message: TMessage);
 var
   lCaption: String;
+  lArFlag: String;
 begin
   if (Glb.LuaEngine.IsRunning) then
   begin
@@ -242,8 +252,13 @@ begin
     lCaption:='Not running';
     ManageTrayIcon;
   end;
+  if (Glb.ConfigService.GetBoolean(cParamAutoReload)) then
+    lArFlag:='Auto reload'
+  else
+    lArFlag:='';
   // refresh lua running indicators
   StatusBar1.Panels.Items[0].Text:=lCaption;
+  StatusBar1.Panels.Items[2].Text:=lArFlag;
 end;
 
 function TLmcMainForm.WmMainWindowCommand(wParam: WParam; lParam: LParam
@@ -300,6 +315,11 @@ begin
     if (UpperCase(Application.Params[i]) = '-R') then
     begin
       fAutoExecute := True; // start after complete init is done
+    end else if (UpperCase(Application.Params[i]) = '-K') then
+    begin
+      // do not hook keyboards globaly which can cause weird keyboard behavior (mainly for dead keys)
+      // used when lms should run in the background and you don't need (use) keyboard macros
+      fHookKeyboard := False;
     end else if (UpperCase(Application.Params[i]) = '-L') and (i < Application.ParamCount) then
     begin
       Inc(i);
@@ -319,8 +339,9 @@ begin
   if not FileExists(pFileName) then
     exit;
   SynEdit1.Lines.LoadFromFile(pFileName);
-  fEditorDirty:=false;
+  EditorDirty:=false;
   FileName:=pFileName;
+  StoreFileModificationTime;
 end;
 
 function TLmcMainForm.CheckDirtyTrueCanContinue: boolean;
@@ -349,6 +370,7 @@ begin
   else
   begin
     SynEdit1.Lines.SaveToFile(FileName);
+    StoreFileModificationTime;
     EditorDirty:=false;
   end;
 end;
@@ -361,6 +383,7 @@ begin
   begin
     FileName:=SaveDialog1.FileName;
     SynEdit1.Lines.SaveToFile(FileName);
+    StoreFileModificationTime;
     EditorDirty:=false;
     Result := True;
   end
@@ -371,6 +394,37 @@ end;
 procedure TLmcMainForm.OrderRawInputMessagesToBeReceived;
 begin
   Glb.DeviceService.KbdDeviceService.OrderRawInputMessagesToBeReceived(Handle);
+end;
+
+procedure TLmcMainForm.StoreFileModificationTime;
+var
+  fad: TWin32FileAttributeData;
+begin
+  if not GetFileAttributesEx(PChar(FileName), GetFileExInfoStandard, @fad) then
+    RaiseLastOSError;
+  fLastWriteTime := fad.ftLastWriteTime;
+end;
+
+procedure TLmcMainForm.AppGetsFocus(Sender: TObject);
+var
+  fad: TWin32FileAttributeData;
+begin
+  if (FileName <> cUntitled) then
+  begin
+    if not GetFileAttributesEx(PChar(FileName), GetFileExInfoStandard, @fad) then
+      RaiseLastOSError;
+    if (fLastWriteTime.dwHighDateTime <> fad.ftLastWriteTime.dwHighDateTime) or
+      (fLastWriteTime.dwLowDateTime <> fad.ftLastWriteTime.dwLowDateTime) then
+    begin
+      if (Glb.ConfigService.GetBoolean(cParamAutoReload)) then
+      begin
+        LoadFile(FileName);
+      end else begin
+        EditorDirty:=true;
+        StoreFileModificationTime;
+      end;
+    end;
+  end;
 end;
 
 procedure TLmcMainForm.print(what: String);
@@ -387,7 +441,10 @@ procedure TLmcMainForm.Init;
 begin
   // here Glb is alreadu created & initialized
   OrderRawInputMessagesToBeReceived;
-  Glb.HookService.Init(Handle);
+  if (fHookKeyboard) then
+  begin
+    Glb.HookService.Init(Handle);
+  end;
   if (fAutoExecute) then
   begin
     RunScriptAction.Execute;
@@ -399,6 +456,7 @@ procedure TLmcMainForm.FormCreate(Sender: TObject);
 begin
   gMainFormThreadId := GetCurrentThreadID;
   fAutoExecute := False;
+  fHookKeyboard := True;
   Glb.LogFunction:=@print;
   Glb.MainFormHandle:=handle;
   if (Application.ParamCount > 0) then
@@ -412,6 +470,7 @@ begin
   Glb.Version:=Sto_GetFmtFileVersion();
   StatusBar1.Panels.Items[1].Text:= 'Version: ' + Glb.Version;
   Timer1.Interval:=Glb.ConfigService.GetInteger(cParamDxTimerIntervalMs);
+  Application.OnActivate:=@AppGetsFocus;
 end;
 
 procedure TLmcMainForm.FormDestroy(Sender: TObject);

@@ -8,6 +8,7 @@ uses
   Classes, SysUtils, Lua;
 
 function PrintDevices(luaState : TLuaState) : integer;
+function GetDevices(luaState : TLuaState) : integer;
 function CheckDeviceNameWithAsk(luaState : TLuaState) : integer;
 function AssignDeviceNameByRegexp(luaState : TLuaState) : integer;
 function LuaCmdSetCallback(luaState : TLuaState) : integer;
@@ -26,6 +27,44 @@ begin
      Glb.DeviceService.ListDevices;
      //Result : number of results to give back to Lua
      Result := 0;
+end;
+
+function GetDevices(luaState: TLuaState): integer;
+var
+  lItem: TDevice;
+  lI: Integer;
+  lName: String;
+begin
+  lua_createtable(luaState, 0, Glb.DeviceService.Devices.Count);
+  for lI := 0 to Glb.DeviceService.Devices.Count - 1 do
+  begin
+    lItem := Glb.DeviceService.Devices[lI];
+    if (lItem.Name = '') then
+      lName := cUnassigned
+    else
+      lName := lItem.Name;
+    //Result.Add(Format('%s:%s:%s', [lName, lItem.SystemId, lItem.TypeCaption]));
+    // lName, lItem.SystemId, lItem.Handle, lItem.TypeCaption
+    lua_createtable(luaState, 0, 4);
+    lua_pushstring(luaState, 'Name');
+    lua_pushstring(luaState, PChar(lName));
+    lua_rawset(luaState, -3);
+
+    lua_pushstring(luaState, 'SystemId');
+    lua_pushstring(luaState, PChar(lItem.SystemId));
+    lua_rawset(luaState, -3);
+
+    lua_pushstring(luaState, 'Handle');
+    lua_pushnumber(luaState, lItem.Handle);
+    lua_rawset(luaState, -3);
+
+    lua_pushstring(luaState, 'Type');
+    lua_pushstring(luaState, PChar(lItem.TypeCaption));
+    lua_rawset(luaState, -3);
+
+    lua_rawseti(luaState, -2, lI);
+  end;
+  Result := 1;
 end;
 
 function CheckDeviceNameWithAsk(luaState : TLuaState) : integer;

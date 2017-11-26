@@ -3,8 +3,8 @@ lmc_log_all();
 --lmc_log_module('XPL')
 --lmc_log_module('LUA')
 --lmc_log_module('CFG')
-lmc_device_set_name('LB', '7E9AD920')
-lmc_device_set_name('LB2', '53175550')
+lmc_device_set_name('LB', '800F444553540000')
+lmc_device_set_name('LB2', '8001444553540000')
 --lmc_device_set_name('KBD1', '826BD90') this is my regular
 lmc_device_set_name('KBD1', 'VID_046D')
 lmc_device_set_name('KBD2', 'VID_04FC')
