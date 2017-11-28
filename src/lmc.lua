@@ -1,13 +1,15 @@
 clear()
-lmc_log_all();
+lmc.autoReload = true
+lmc.statistics = true
+lmc_log_all()
 --lmc_log_module('XPL')
 --lmc_log_module('LUA')
 --lmc_log_module('CFG')
 lmc_device_set_name('LB', '800F444553540000')
 lmc_device_set_name('LB2', '8001444553540000')
 --lmc_device_set_name('KBD1', '826BD90') this is my regular
-lmc_device_set_name('KBD1', 'VID_046D')
-lmc_device_set_name('KBD2', 'VID_04FC')
+lmc_device_set_name('KBD1', 'VID_046D') -- upper
+lmc_device_set_name('KBD2', 'VID_04FC') -- lower
 --lmc_device_set_name('ST', 'Saitek')
 lmc_print_devices()
 
@@ -317,7 +319,7 @@ lmc_set_handler('LB',lb_handler)
 lmc_set_handler('LB2',lb2_handler)
 lmc_set_handler('KBD2',keyb2)
 lmc_set_handler('KBD1',keyb1)
-lmc_on_xpl_var_change('sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot', checkRAlt, 1000)
+lmc_on_xpl_var_change('sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot', checkRAlt, 1000, 1)
 
 lmc_set_axis_handler('LB2',2, 200, 100, function(val, ts)
   --print('Callback for axis - value ' .. val..', timestamp '..ts)

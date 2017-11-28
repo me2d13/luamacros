@@ -118,7 +118,7 @@ implementation
 {$R *.lfm}
 
 uses
-  uGlobals, uHookCommon, uConfigService, comobj;
+  uGlobals, uHookCommon, uConfigService, comobj, uStatsForm;
 
 const
   cUntitled = 'Untitled';
@@ -242,6 +242,7 @@ procedure TLmcMainForm.WmLuaRunChange(var Message: TMessage);
 var
   lCaption: String;
   lArFlag: String;
+  lStatsFlag: Boolean;
 begin
   if (Glb.LuaEngine.IsRunning) then
   begin
@@ -259,6 +260,11 @@ begin
   // refresh lua running indicators
   StatusBar1.Panels.Items[0].Text:=lCaption;
   StatusBar1.Panels.Items[2].Text:=lArFlag;
+  lStatsFlag := Glb.ConfigService.GetBoolean(cParamStats);
+  if (lStatsFlag) and (not StatisticsForm.Visible) then
+    StatisticsForm.Show;
+  if (not lStatsFlag) and (StatisticsForm.Visible) then
+    StatisticsForm.Hide;
 end;
 
 function TLmcMainForm.WmMainWindowCommand(wParam: WParam; lParam: LParam

@@ -253,6 +253,8 @@ type
     property Value: String read fValue write fValue;
   end;
 
+  function XplValueRecToString(pValue: TXplValueRec): ansistring;
+
 
 implementation
 
@@ -266,6 +268,17 @@ begin
   //GetLocaleFormatSettings(GetThreadLocale, myFormatSettings);
   DecimalSeparator := '.';
   Result := StrToFloat(Value);
+end;
+
+function XplValueRecToString(pValue: TXplValueRec): ansistring;
+begin
+  Result := 'N/A';
+  case pValue.VarType of
+    vtNull: Result := 'null';
+    vtString: Result := '[string] "' + pValue.stringData + '"';
+    vtInteger: Result := '[int] ' + IntToStr(pValue.intData);
+    vtDouble: Result := '[double] ' + FloatToStr(pValue.doubleData);
+  end;
 end;
 
 { TXplIncVariable }
@@ -650,13 +663,7 @@ end;
 
 function TXplValue.ToString: ansistring;
 begin
-  Result := 'N/A';
-  case fValue.VarType of
-    vtNull: Result := 'null';
-    vtString: Result := '[string] "' + fValue.stringData + '"';
-    vtInteger: Result := '[int] ' + IntToStr(fValue.intData);
-    vtDouble: Result := '[double] ' + FloatToStr(fValue.doubleData);
-  end;
+  Result := XplValueRecToString(fValue);
 end;
 
 function TXplValue.Equals(pVar: PXplValue): boolean;

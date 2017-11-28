@@ -19,7 +19,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="44"/>
+      <BuildNr Value="43"/>
       <StringTable ProductVersion=""/>
     </VersionInfo>
     <BuildModes Count="1">
@@ -218,7 +218,6 @@
         <Filename Value="uStatsForm.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="StatisticsForm"/>
-        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit31>
       <Unit32>

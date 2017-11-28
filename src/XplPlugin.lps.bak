@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="44">
+    <Units Count="43">
       <Unit0>
         <Filename Value="XplPlugin.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -96,7 +96,7 @@
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="41"/>
-        <CursorPos Y="67"/>
+        <CursorPos X="31" Y="67"/>
         <UsageCount Value="44"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -326,20 +326,15 @@
       </Unit41>
       <Unit42>
         <Filename Value="..\inc\XPL_SDK213_XPLM\XPLMUtilities.pas"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="839"/>
         <CursorPos X="14" Y="860"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit42>
-      <Unit43>
-        <Filename Value="C:\Apps\lazarus16\fpc\3.0.0\source\rtl\win\sysosh.inc"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="3" Y="22"/>
-        <UsageCount Value="10"/>
-      </Unit43>
     </Units>
-    <JumpHistory Count="14" HistoryIndex="13">
+    <JumpHistory Count="13" HistoryIndex="12">
       <Position1>
         <Filename Value="XplPlugin.lpr"/>
         <Caret Line="42" Column="26" TopLine="13"/>
@@ -392,10 +387,6 @@
         <Filename Value="uXplPluginEngine.pas"/>
         <Caret Line="102" Column="3" TopLine="100"/>
       </Position13>
-      <Position14>
-        <Filename Value="uXplLogger.pas"/>
-        <Caret Line="67" Column="31" TopLine="41"/>
-      </Position14>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

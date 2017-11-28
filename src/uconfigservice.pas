@@ -17,6 +17,7 @@ const
   cParamVersion = 'VERSION';
   cParamDxTimerIntervalMs = 'DXTIMERINTERVALMS';
   cParamAutoReload = 'AUTORELOAD';
+  cParamStats = 'STATISTICS';
 
 type
 
@@ -36,11 +37,12 @@ type
 
   TConfigService = class
     private
-      fParams: array[0..3] of TInternalParamDescriptor;
+      fParams: array[0..4] of TInternalParamDescriptor;
       fMinimizeToTray: boolean;
       fAutoReload: boolean;
       fVersion: String;
       fDxTimerIntervalMs: Integer;
+      fShowStats: boolean;
     public
       constructor Create;
       procedure InitParams;
@@ -160,6 +162,11 @@ begin
   fParams[3].ParamType:=vtBoolean;
   fParams[3].ReadOnly:=False;
   fParams[3].Value:=@fAutoReload;
+
+  fParams[4].Name:=cParamStats;
+  fParams[4].ParamType:=vtBoolean;
+  fParams[4].ReadOnly:=False;
+  fParams[4].Value:=@fShowStats;
 end;
 
 function TConfigService.GetDescriptor(pName: String): TParamDescriptor;

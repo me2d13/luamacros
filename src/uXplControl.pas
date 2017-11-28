@@ -266,9 +266,18 @@ begin
     if (not lChanged) then
     begin
       if (lCallbackInfo.Delta = 0) then
+      begin
         lChanged := not lValue.Equals(@lCallbackInfo.LastValue) // different value
+      end
       else
-        lChanged := not lValue.EqualsWithDelta(@lCallbackInfo.LastValue, lCallbackInfo.Delta) // different value
+      begin
+        lChanged := not lValue.EqualsWithDelta(@lCallbackInfo.LastValue, lCallbackInfo.Delta); // different value
+        {$ifdef LMC_XPL_VERY_VERBOSE_DEBUG}
+        if (lChanged) then
+          Glb.DebugLogFmt('Different values with delta %d, old %s, new %s',
+            [lCallbackInfo.Delta, XplValueRecToString(lCallbackInfo.LastValue), lValue.ToString], cLoggerXpl);
+        {$endif}
+      end;
     end;
     if (lChanged) or (lCallbackInfo.ChangeCount > 0) then
     begin
@@ -282,8 +291,8 @@ begin
       lSend := (lNow - lCallbackInfo.LastTriggerTs) >= lCallbackInfo.Interval;
       if (lSend) then
       begin
-        Glb.DebugLog(Format('Calling Lua function %d on var %s change and change count %d.',
-              [lCallbackInfo.LuaHandlerRef, lCallbackInfo.Name, lCallbackInfo.ChangeCount]), cLoggerXpl);
+        Glb.DebugLog(Format('Calling Lua function %d on var %s change to %s and change count %d.',
+              [lCallbackInfo.LuaHandlerRef, lCallbackInfo.Name, lValue.ToString, lCallbackInfo.ChangeCount]), cLoggerXpl);
         Glb.LuaEngine.CallFunctionByRef(lCallbackInfo.LuaHandlerRef, @lValue.Value, lCallbackInfo.ChangeCount);
         lCallbackInfo.ChangeCount:=0;
         lCallbackInfo.LastTriggerTs:=lNow;

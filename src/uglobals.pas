@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, uXplControl, uLuaEngine, uDeviceService, uDevice, uHookService,
-  uKeyLogService, windows, uScanService, uConfigService, uHttpServer, uSpeechService;
+  uKeyLogService, windows, uScanService, uConfigService, uHttpServer, uSpeechService,
+  uStatsService;
 
 type
 
@@ -32,6 +33,7 @@ type
       fScanService: TScanService;
       fConfigService: TConfigService;
       fSpeechService: TSpeechService;
+      fStatsService: TStatsService;
       fVersion: String;
       procedure SetSpoolFileName(AValue: String);
       procedure AskMainFormToFlushPrintBuffer;
@@ -65,6 +67,7 @@ type
       property ConfigService: TConfigService read fConfigService;
       property HttpService: THttpService read fHttpService;
       property SpeechService: TSpeechService read fSpeechService;
+      property StatsService: TStatsService read fStatsService;
       property Version: String read fVersion write SetVersion;
   end;
 
@@ -188,10 +191,12 @@ begin
   fConfigService := TConfigService.Create;
   fHttpService := THttpService.Create;
   fSpeechService := TSpeechService.Create;
+  fStatsService := TStatsService.Create;
 end;
 
 destructor TGlobals.Destroy;
 begin
+  fStatsService.Free;
   fSpeechService.Free;
   fHttpService.Free;
   fConfigService.Free;
