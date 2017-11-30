@@ -246,7 +246,7 @@ var
 begin
   if (Glb.LuaEngine.IsRunning) then
   begin
-    lCaption:=Format('Running 1 script, %d queued', [Glb.LuaEngine.GetExecutionQueueSize]);
+    lCaption:=Format('Running 1 script, %d queued', [Glb.LuaEngine.GetQueueSize]);
     RunScriptAction.Enabled:=False;
   end else begin
     RunScriptAction.Enabled:=True;

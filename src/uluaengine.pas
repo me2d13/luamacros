@@ -153,6 +153,8 @@ type
       fRunList: TFPObjectList;
       fRlSynchronizer: TMultiReadExclusiveWriteSynchronizer;
       fEvent: TEventObject;
+      fExecutionsCount: Int64;
+      fExecutionsTime: Int64;
     protected
       procedure Execute; override;
     public
@@ -163,6 +165,8 @@ type
       function Run(pItem: TFuncItem): TLuaResult; overload;
       procedure Terminate;
       function IsRunning: Boolean;
+      property ExecutionsCount: Int64 read fExecutionsCount;
+      property ExecutionsTime: Int64 read fExecutionsTime;
   end;
 
   { TLuaEngine }
@@ -174,6 +178,8 @@ type
       fInitOk: boolean;
       fTriggers: TTriggerList;
       fScriptToRun: String;
+      function GetExecutionsCount: Int64;
+      function GetExecutionsTime: Int64;
       procedure RegisterFunctions;
       procedure RegisterConfig;
       procedure CallFunctionByRef(pRef: Integer);overload;
@@ -192,7 +198,6 @@ type
       procedure OnDeviceEvent(pDevice: TDevice; pData: String);overload;
       function IsKeyHandled(pKsPtr: TKeyStrokePtr): boolean;
       function GetQueueSize: Integer;
-      function GetExecutionQueueSize: Integer;
       function IsRunning: Boolean;
       procedure StackDump(pLuaState: TLuaState);
       procedure CallFunctionByRef(pRef: Integer; pValue: PXplValue; pChangeCount: Integer);overload;
@@ -201,6 +206,8 @@ type
       procedure CallFunctionByRef(pRef: Integer; pKey: Int64; pDirection: Int64);overload;
       function CallFunctionByRefWithResult(pRef: Integer; pData: String):TLuaResult;
       property ScriptToRun: String read fScriptToRun write fScriptToRun;
+      property ExecutionsCount: Int64 read GetExecutionsCount;
+      property ExecutionsTime: Int64 read GetExecutionsTime;
   end;
 
 implementation
@@ -448,6 +455,8 @@ begin
         lStop:=Round(Now * 24*60*60*1000);
         Glb.DebugLogFmt('Lua worker: finished %s, execution time: %d ms',
             [lDesc, lStop - lStart], cLoggerLua);
+        Inc(fExecutionsCount);
+        Inc(fExecutionsTime, lStop - lStart);
         if (lProc <> nil) then lProc.Free;
       except
         on E: Exception do
@@ -479,6 +488,8 @@ constructor TLuaExecutor.Create(CreateSuspended: Boolean; pLua: TLua);
 begin
   inherited Create(CreateSuspended);
   fLua := pLua;
+  fExecutionsTime:=0;
+  fExecutionsCount:=0;
   fRunList := TFPObjectList.Create(False);
   fRlSynchronizer := TMultiReadExclusiveWriteSynchronizer.Create;
   fEvent:=TEventObject.Create(nil, true, false, 'LuaExe');
@@ -947,11 +958,6 @@ begin
   Result := fExecutor.GetQueueSize;
 end;
 
-function TLuaEngine.GetExecutionQueueSize: Integer;
-begin
-  Result := fExecutor.GetQueueSize;
-end;
-
 function TLuaEngine.IsRunning: Boolean;
 begin
   Result := fExecutor.IsRunning;
@@ -1005,6 +1011,16 @@ begin
   // http
   fLua.RegisterFunction('lmc_http_server','',nil,@HttpServerSimple);
   fLua.RegisterFunction('lmc_http_get','',nil,@HttpGet);
+end;
+
+function TLuaEngine.GetExecutionsCount: Int64;
+begin
+  Result := fExecutor.ExecutionsCount;
+end;
+
+function TLuaEngine.GetExecutionsTime: Int64;
+begin
+  Result := fExecutor.ExecutionsTime;
 end;
 
 

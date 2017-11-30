@@ -21,7 +21,9 @@ var
   lPort : Integer;
   lHandlerRef: Integer;
   lNumOfParams: Integer;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_http_server');
   //Glb.LuaEngine.StackDump(luaState);
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams < 2) then
@@ -42,6 +44,7 @@ begin
   Glb.DebugLog(Format('Got function reference with key %d', [lHandlerRef]), cLoggerLua);
   Glb.HttpService.StartServer(lPort, lHandlerRef);
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_http_server', lStart);
 end;
 
 function HttpGet(luaState: TLuaState): integer;
@@ -49,7 +52,9 @@ var
   lNumOfParams: Integer;
   lTimeOut: Integer;
   lUrl, lResult: String;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_http_get');
   //Glb.LuaEngine.StackDump(luaState);
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams < 1) then
@@ -71,6 +76,7 @@ begin
   lResult := Glb.HttpService.HttpGet(lUrl, lTimeOut);
   lua_pushstring(luaState, PChar(lResult));
   Result := 1;
+  Glb.StatsService.EndCommand('lmc_http_get', lStart);
 end;
 
 end.

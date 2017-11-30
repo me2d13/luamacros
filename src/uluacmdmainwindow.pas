@@ -28,54 +28,72 @@ uses
 
 function FormPrint(luaState : TLuaState) : integer;
 var arg : PAnsiChar;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('print');
      arg := lua_tostring(luaState, 1);
      Glb.print(arg); // glb version is thread safe
      Lua_Pop(luaState, Lua_GetTop(luaState));
      Result := 0;
+  Glb.StatsService.EndCommand('print', lStart);
 end;
 
 function FormClear(luaState : TLuaState) : integer;
+var lStart: Int64;
 begin
-     gMainForm.ClearLog;
-     Result := 0;
+  lStart := Glb.StatsService.BeginCommand('clear');
+  gMainForm.ClearLog;
+  Result := 0;
+  Glb.StatsService.EndCommand('clear', lStart);
 end;
 
 function LogModule(luaState : TLuaState) : integer;
 var arg : PAnsiChar;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_log_module');
      arg := lua_tostring(luaState, 1);
      Glb.LogModule(arg);
      Lua_Pop(luaState, Lua_GetTop(luaState));
      Result := 0;
+     Glb.StatsService.EndCommand('lmc_log_module', lStart);
 end;
 
 function LogAll(luaState : TLuaState) : integer;
+var lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_log_all');
      Glb.LogAll:=true;
      Result := 0;
+     Glb.StatsService.EndCommand('lmc_log_all', lStart);
 end;
 
 function LogSpool(luaState : TLuaState) : integer;
 var arg : PAnsiChar;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_log_spool');
      arg := lua_tostring(luaState, 1);
      Glb.SpoolFileName := arg;
      Lua_Pop(luaState, Lua_GetTop(luaState));
      Result := 0;
+     Glb.StatsService.EndCommand('lmc_log_spool', lStart);
 end;
 
 function SendKeys(luaState : TLuaState) : integer;
 var
   arg : PAnsiChar;
   lSndKey: TKeySequence;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_send_keys');
   arg := lua_tostring(luaState, 1);
   lSndKey := TKeySequence.Create;
   lSndKey.Sequence := arg;
   lSndKey.Resume;
   Lua_Pop(luaState, Lua_GetTop(luaState));
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_send_keys', lStart);
 end;
 
 function SendInput(luaState: TLuaState): integer;
@@ -84,7 +102,9 @@ var
   lArg2: Integer;
   lArg3: Integer;
   lNumOfParams: Integer;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_send_input');
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams <> 3) then
     raise LmcException.Create('Wrong number of arguments. Provide 3 numbers.');
@@ -94,6 +114,7 @@ begin
   Glb.DebugLogFmt('Sending input vk:%d, scan:%d, flags:%d', [lArg1, lArg2, lArg3], cLoggerKbd);
   SendKeyboardInput(lArg1, lArg2, lArg3);
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_send_input', lStart);
 end;
 
 function Spawn(luaState : TLuaState) : integer;
@@ -102,7 +123,9 @@ var
   lProcess: TProcess;
   I: Integer;
   lNumOfParams: Integer;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_spawn');
   lNumOfParams:=lua_gettop(luaState);
   arg := lua_tostring(luaState, 1);
   lProcess := TProcess.Create(nil);
@@ -125,18 +148,24 @@ begin
     lProcess.Free;
   end;
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_spawn', lStart);
 end;
 
 function MinimizeMainWindow(luaState: TLuaState): integer;
+var lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_minimize');
   SendMessage(Glb.MainFormHandle, WM_MAIN_WINDOW_COMMAND, MWC_MINIMIZE, 0);
+  Glb.StatsService.EndCommand('lmc_minimize', lStart);
 end;
 
 function LoadScript(luaState: TLuaState): integer;
 var
   arg : PAnsiChar;
   lNumOfParams: Integer;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_load');
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams <> 1) then
     raise LmcException.Create('Wrong number of arguments. Provide script name.');
@@ -149,13 +178,16 @@ begin
   else
     Glb.LogError('Cannot load scrpt ' + arg + '. File not found.', cLoggerLua);
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_load', lStart);
 end;
 
 function Say(luaState: TLuaState): integer;
 var
   arg : PAnsiChar;
   lNumOfParams: Integer;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_say');
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams <> 1) then
     raise LmcException.Create('Wrong number of arguments. Provide string.');
@@ -163,6 +195,7 @@ begin
   Glb.DebugLog('Saying ' + arg, cLoggerLua);
   Glb.SpeechService.Say(arg);
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_say', lStart);
 end;
 
 function GetActiveWindowTitle(luaState: TLuaState): integer;
@@ -171,7 +204,9 @@ var
   lHandle: THandle;
   lLen: LongInt;
   lTitle: string;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_get_window_title');
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams > 0) then
     raise LmcException.Create('Wrong number of parameters. No argument expected.');
@@ -187,13 +222,16 @@ begin
     lTitle:= '';
   lua_pushstring(luaState, PChar(lTitle));
   Result := 1;
+  Glb.StatsService.EndCommand('lmc_get_window_title', lStart);
 end;
 
 function DoSleep(luaState: TLuaState): integer;
 var
   lArg: Integer;
   lNumOfParams: Integer;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_sleep');
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams <> 1) then
     raise LmcException.Create('Wrong number of arguments. Provide number of ms.');
@@ -201,6 +239,7 @@ begin
   Glb.DebugLogFmt('Sleeping for %d msec.', [lArg], cLoggerLua);
   Sleep(lArg);
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_sleep', lStart);
 end;
 
 

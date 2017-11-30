@@ -95,7 +95,9 @@ var
   lTolerance: Integer;
   lHandlerRef: Integer;
   lNumOfParams: Integer;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_set_axis_handler');
   // Device name
   // Axis number
   // Interval
@@ -123,13 +125,16 @@ begin
   end else
     raise LmcException.Create('5 parameters expected: device, axis_number, interval[0], tolerance[1], handler');
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_set_axis_handler', lStart);
 end;
 
 function LuaCmdGetButtonState(luaState: TLuaState): integer;
 var arg : PAnsiChar;
   lNumOfParams: Integer;
   lIndex: Integer;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_get_button');
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams <> 2) then
     raise LmcException.Create('Wrong number of parameters. Provide at device name and button number.');
@@ -138,6 +143,7 @@ begin
   Glb.DebugLog(Format('Finding out button %d state of device %s', [lIndex, arg]), cLoggerLua);
   lua_pushinteger(luaState, Glb.DeviceService.DxDeviceService.GetButtonState(arg, lIndex));
   Result := 1;
+  Glb.StatsService.EndCommand('lmc_get_button', lStart);
 end;
 
 

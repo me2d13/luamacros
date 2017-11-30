@@ -14,11 +14,13 @@ type
 
   TStatisticsForm = class(TForm)
     CopyButton: TButton;
+    LuaMemo: TMemo;
     SummaryMemo: TMemo;
     PageControl1: TPageControl;
     DevicesMemo: TMemo;
     SummaryTabSheet: TTabSheet;
     DevicesTabSheet: TTabSheet;
+    LuaTabSheet: TTabSheet;
     Timer1: TTimer;
     procedure CopyButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -31,6 +33,7 @@ type
     procedure Render;
     procedure RenderSummary;
     procedure RenderDevices;
+    procedure RenderLua;
   public
     { public declarations }
   end;
@@ -57,6 +60,7 @@ procedure TStatisticsForm.Render;
 begin
   RenderSummary;
   RenderDevices;
+  RenderLua;
 end;
 
 procedure TStatisticsForm.RenderSummary;
@@ -95,6 +99,32 @@ begin
   end;
 end;
 
+procedure TStatisticsForm.RenderLua;
+var
+  lI: Integer;
+begin
+  with LuaMemo.Lines do
+  begin
+    BeginUpdate;
+    Clear;
+    Add('Lua script executions count (without callbacks) : %d', [Glb.LuaEngine.ExecutionsCount]);
+    Add('Lua script executions time (without callbacks) : %d ms', [Glb.LuaEngine.ExecutionsTime]);
+    Add('');
+    Add('Builtin command executions (total runs, failed runs, total time [ms], avg time per exec [ms]:');
+    for lI := 0 to Glb.StatsService.LuaCalls.Count -1 do
+    begin
+      Add(Format('  %20s: %9d %5d %10d %9.3f', [
+        Glb.StatsService.LuaCalls.Keys[lI],
+        Glb.StatsService.LuaCalls.Data[lI].StartsCount,
+        Glb.StatsService.LuaCalls.Data[lI].StartsCount - Glb.StatsService.LuaCalls.Data[lI].EndsCount,
+        Glb.StatsService.LuaCalls.Data[lI].TotalDuration,
+        Glb.StatsService.LuaCalls.Data[lI].TotalDuration / Glb.StatsService.LuaCalls.Data[lI].EndsCount
+      ]));
+    end;
+    EndUpdate;
+  end;
+end;
+
 procedure TStatisticsForm.FormCreate(Sender: TObject);
 begin
   fRefreshCount:=0;
@@ -108,6 +138,8 @@ begin
   lBuffer := lBuffer + SummaryMemo.Lines.Text;
   lBuffer := lBuffer + '=== Devices ===' + #13;
   lBuffer := lBuffer + DevicesMemo.Lines.Text;
+  lBuffer := lBuffer + '=== Lua ===' + #13;
+  lBuffer := lBuffer + LuaMemo.Lines.Text;
   Clipboard.Clear;
   Clipboard.AsText := lBuffer;
 end;

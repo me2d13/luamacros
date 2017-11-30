@@ -27,7 +27,9 @@ uses
 
 function XplCommand(luaState : TLuaState) : integer;
 var arg : PAnsiChar;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_xpl_command');
      //reads the first parameter passed to Increment as an integer
      arg := lua_tostring(luaState, 1);
 
@@ -39,22 +41,29 @@ begin
 
      //Result : number of results to give back to Lua
      Result := 0;
+     Glb.StatsService.EndCommand('lmc_xpl_command', lStart);
 end;
 
 function XplCommandBegin(luaState: TLuaState): integer;
 var arg : PAnsiChar;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_xpl_command_begin');
      arg := lua_tostring(luaState, 1);
      Glb.XplControl.ExecuteCommandBegin(arg);
      Result := 0;
+     Glb.StatsService.EndCommand('lmc_xpl_command_begin', lStart);
 end;
 
 function XplCommandEnd(luaState: TLuaState): integer;
 var arg : PAnsiChar;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_xpl_command_end');
      arg := lua_tostring(luaState, 1);
      Glb.XplControl.ExecuteCommandEnd(arg);
      Result := 0;
+     Glb.StatsService.EndCommand('lmc_xpl_command_end', lStart);
 end;
 
 function GetXplVariable(luaState: TLuaState): integer;
@@ -63,7 +72,9 @@ var arg : PAnsiChar;
   lMessage: String;
   lNumOfParams: Integer;
   lIndex: Integer;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_get_xpl_variable');
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams < 1) then
     raise LmcException.Create('Wrong number of parameters. Provide at least name.');
@@ -97,6 +108,7 @@ begin
    Result := 1;
    lRes.Free;
   end;
+  Glb.StatsService.EndCommand('lmc_get_xpl_variable', lStart);
 end;
 
 function SetXplVariable(luaState: TLuaState): integer;
@@ -104,7 +116,9 @@ var arg : PAnsiChar;
   lVal: TXplValue;
   lNumOfParams: Integer;
   lIndex: Integer;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_set_xpl_variable');
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams < 2) then
     raise LmcException.Create('Wrong number of parameters. Provide at least name and value.');
@@ -125,13 +139,16 @@ begin
     Glb.XplControl.SetXplVariable(arg, lVal);
   end;
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_set_xpl_variable', lStart);
 end;
 
 function IncXplVariable(luaState: TLuaState): integer;
 var arg : PAnsiChar;
   lNumOfParams: Integer;
   lData: TXplIncVariableRec;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_inc_xpl_variable');
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams < 2) then
     raise LmcException.Create('Wrong number of parameters. Provide at least name and value.');
@@ -162,13 +179,16 @@ begin
   lData.SetVariableData.Name:=arg;
   Glb.XplControl.IncVariable(lData);
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_inc_xpl_variable', lStart);
 end;
 
 function IncXplArrayVariable(luaState: TLuaState): integer;
 var arg : PAnsiChar;
   lNumOfParams: Integer;
   lData: TXplIncVariableRec;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_inc_xpl_array_variable');
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams < 3) then
     raise LmcException.Create('Wrong number of parameters. Provide at least name, index and value.');
@@ -197,6 +217,7 @@ begin
   lData.SetVariableData.Name:=arg;
   Glb.XplControl.IncVariable(lData);
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_inc_xpl_array_variable', lStart);
 end;
 
 function XplDrawText(luaState: TLuaState): integer;
@@ -205,7 +226,9 @@ var
   lNumOfParams: Integer;
   lPos: Single;
   lSec: Integer;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_xpl_text');
   lNumOfParams:=lua_gettop(luaState);
   lText := lua_tostring(luaState, 1);
   if (lNumOfParams > 1) then
@@ -218,6 +241,7 @@ begin
     lSec := 5;
   Glb.XplControl.DrawText(lText, lPos, lSec);
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_xpl_text', lStart);
 end;
 
 function XplVarChange(luaState: TLuaState): integer;
@@ -227,7 +251,9 @@ var
   lDelta : Integer;
   lHandlerRef: Integer;
   lNumOfParams: Integer;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_on_xpl_var_change');
   //Glb.LuaEngine.StackDump(luaState);
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams < 2) then
@@ -261,13 +287,16 @@ begin
   lVarName := lua_tostring(luaState, 1);
   Glb.XplControl.SetVariableHook(lVarName, lHandlerRef, lIntervalMs, lDelta);
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_on_xpl_var_change', lStart);
 end;
 
 function UnregisterXplVarChange(luaState: TLuaState): integer;
 var
   lVarName : PAnsiChar;
   lNumOfParams: Integer;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_remove_xpl_var_change');
   //Glb.LuaEngine.StackDump(luaState);
   lNumOfParams:=lua_gettop(luaState);
   if (lNumOfParams <> 1) then
@@ -280,12 +309,15 @@ begin
     raise LmcException.Create('1st parameter is supposed to be a string.');
   Glb.XplControl.UnhookVariable(lVarName);
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_remove_xpl_var_change', lStart);
 end;
 
 function XplLogCommand(luaState: TLuaState): integer;
 var arg1, arg2 : PAnsiChar;
   lNumOfParams: Integer;
+  lStart: Int64;
 begin
+  lStart := Glb.StatsService.BeginCommand('lmc_xpl_log');
   lNumOfParams:=lua_gettop(luaState);
   //reads the first parameter passed to Increment as an integer
   arg1 := lua_tostring(luaState, 1);
@@ -299,6 +331,7 @@ begin
 
   //Result : number of results to give back to Lua
   Result := 0;
+  Glb.StatsService.EndCommand('lmc_xpl_log', lStart);
 end;
 
 end.
