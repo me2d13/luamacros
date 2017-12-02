@@ -4,6 +4,15 @@ print('Text1')
 lmc_sleep(1500)
 print('Text2')
 lmc.autoReload = true
+lmc.statistics = true
+
+lmc_xpl_command('sim/view/3d_cockpit_cmnd_look')
+lmc_xpl_command('sim/view/3d_cockpit_cmnd_look')
+lmc_xpl_command('test')
+lmc_get_xpl_variable('asasaass')
+lmc_get_xpl_variable('asasaass')
+lmc_get_xpl_variable('asaddd')
+lmc_set_xpl_variable('asaddd', 1)
 
 --lmc_sleep(1500)
 lmc_send_input(16, 0, 0) -- press shift

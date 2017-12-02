@@ -27,6 +27,8 @@ type
 
   TDeviceException = class (Exception);
 
+  function DirectionToString(pDirection: Integer): String;
+
 const
   cDeviceLoggerName = 'DEV';
   cDirectionDown = 1;
@@ -37,6 +39,13 @@ implementation
 
 uses
   uGlobals;
+
+function DirectionToString(pDirection: Integer): String;
+begin
+  if (pDirection = 1) then Result := 'down'
+  else if (pDirection = 0) then Result := 'up'
+  else Result := '?';
+end;
 
 { TDevice }
 

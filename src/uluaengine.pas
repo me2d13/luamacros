@@ -208,6 +208,7 @@ type
       property ScriptToRun: String read fScriptToRun write fScriptToRun;
       property ExecutionsCount: Int64 read GetExecutionsCount;
       property ExecutionsTime: Int64 read GetExecutionsTime;
+      property Callbacks: TTriggerList read fTriggers;
   end;
 
 implementation

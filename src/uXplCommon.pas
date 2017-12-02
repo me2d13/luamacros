@@ -148,6 +148,7 @@ type
     LastValue: TXplValueRec;
     LastTriggerTs: Int64;
     ChangeCount: Integer;
+    ActivationCount: Integer;
   end;
 
 

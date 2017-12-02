@@ -43,6 +43,7 @@ type
     procedure UnhookVariable(pVarName: String);
     procedure Reset;
     procedure LogCommand(pPar1: String; pPar2: String);
+    property Callbacks: TCallbackInfoList read fCallbacks;
   end;
 
   TXPLRefHolder = class
@@ -296,6 +297,7 @@ begin
         Glb.LuaEngine.CallFunctionByRef(lCallbackInfo.LuaHandlerRef, @lValue.Value, lCallbackInfo.ChangeCount);
         lCallbackInfo.ChangeCount:=0;
         lCallbackInfo.LastTriggerTs:=lNow;
+        Inc(lCallbackInfo.ActivationCount);
       end;
     end
     else
@@ -313,6 +315,7 @@ var
   lCom: PLmcCommandRec;
   lTickCount: ULONGLONG;
 begin
+  Glb.StatsService.ReadXplVar(pName);
   Result := GetVariableValueFromXplSharedMemory(pName, pIndex);
   if (Result <> nil) then
     exit;
@@ -352,6 +355,7 @@ procedure TXPLcontrol.SetXplVariable(pName: String; pValue: TXplValue;
 var
   lCom: PLmcCommandRec;
 begin
+  Glb.StatsService.WriteXplVar(pName);
   lCom := getCommandSlotAndInitHeader;
   if (lCom <> nil) then
   begin
@@ -368,6 +372,7 @@ procedure TXPLcontrol.IncVariable(pData: TXplIncVariableRec);
 var
   lCom: PLmcCommandRec;
 begin
+  Glb.StatsService.WriteXplVar(pData.SetVariableData.Name);
   lCom := getCommandSlotAndInitHeader;
   if (lCom <> nil) then
   begin
@@ -390,6 +395,7 @@ begin
     lCom^.CommandData.Mode:=XPL_COMMAND_EXECUTE;
     lCom^.Header.Status:=LMC_STATUS_READY;
     DebugLog(Format('Sending execute command %s.', [pCmdName]));
+    Glb.StatsService.XplCommandExecuted(pCmdName);
   end;
 end;
 
@@ -405,6 +411,7 @@ begin
     lCom^.CommandData.Mode:=XPL_COMMAND_START;
     lCom^.Header.Status:=LMC_STATUS_READY;
     DebugLog(Format('Sending begin execute command %s.', [pCmdName]));
+    Glb.StatsService.XplCommandExecuted(pCmdName);
   end;
 end;
 
@@ -420,6 +427,7 @@ begin
     lCom^.CommandData.Mode:=XPL_COMMAND_END;
     lCom^.Header.Status:=LMC_STATUS_READY;
     DebugLog(Format('Sending end execute command %s.', [pCmdName]));
+    Glb.StatsService.XplCommandExecuted(pCmdName);
   end;
 end;
 
