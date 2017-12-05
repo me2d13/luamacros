@@ -5,6 +5,7 @@ unit uMainFrm;
 {
 Command line parameter - script with DX logger on:
   C:\work\luamacros\src\test.lua -L DX
+  c:\work\luamacros\src\lmc.lua
 }
 
 interface
@@ -80,6 +81,7 @@ type
     fAutoExecute: Boolean;
     fHookKeyboard: Boolean;
     fLastWriteTime: FILETIME;
+    fResetFlag: Boolean;
     procedure SetEditorDirty(AValue: boolean);
     procedure SetFileName(AValue: String);
     procedure BuildFormCaption;
@@ -96,6 +98,7 @@ type
     procedure print(what: String);
     procedure ClearLog;
     procedure Init;
+    procedure ResetAfterLuaScriptEnd;
     // message listeners
     procedure WmInputMessage(var Message: TMessage);
     procedure WmLuaRunChange(var Message: TMessage);
@@ -252,6 +255,11 @@ begin
     RunScriptAction.Enabled:=True;
     lCaption:='Not running';
     ManageTrayIcon;
+    if (fResetFlag) then
+    begin
+      fResetFlag:=False;
+      ResetActionExecute(Self);
+    end;
   end;
   if (Glb.ConfigService.GetBoolean(cParamAutoReload)) then
     lArFlag:='Auto reload'
@@ -458,10 +466,16 @@ begin
   // maybe resume LUA execution thread here to have panel update
 end;
 
+procedure TLmcMainForm.ResetAfterLuaScriptEnd;
+begin
+  fResetFlag:=True;
+end;
+
 procedure TLmcMainForm.FormCreate(Sender: TObject);
 begin
   gMainFormThreadId := GetCurrentThreadID;
   fAutoExecute := False;
+  fResetFlag:=False;
   fHookKeyboard := True;
   Glb.LogFunction:=@print;
   Glb.MainFormHandle:=handle;

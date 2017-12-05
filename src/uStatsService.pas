@@ -52,6 +52,7 @@ type
     public
       constructor Create;
       destructor Destroy; virtual;
+      procedure Reset;
       function BeginCommand(pName: String): Int64;
       procedure EndCommand(pName: String; pStartTs: Int64);
       procedure ReadXplVar(pName: String);
@@ -140,6 +141,19 @@ begin
     fXplVarInfoMap.Data[lI].Free;
   fXplVarInfoMap.Free;
   inherited;
+end;
+
+procedure TStatsService.Reset;
+var
+  lI: Integer;
+begin
+  for lI := 0 to fLuaCalls.Count - 1 do
+    fLuaCalls.Data[lI].Free;
+  fLuaCalls.Clear;
+  fXplCalls.Clear;
+  for lI := 0 to fXplVarInfoMap.Count - 1 do
+    fXplVarInfoMap.Data[lI].Free;
+  fXplVarInfoMap.Clear;
 end;
 
 function TStatsService.BeginCommand(pName: String): Int64;

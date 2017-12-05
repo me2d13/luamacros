@@ -175,8 +175,17 @@ begin
 end;
 
 procedure TXPLcontrol.Reset;
+var
+  lCom: PLmcCommandRec;
 begin
-  //TODO: Send unhook-all command to XPL
+  fCallbacks.Clear;
+  lCom := getCommandSlotAndInitHeader;
+  if (lCom <> nil) then
+  begin
+    lCom^.CommandType:=LMC_COMMAND_XPL_COMMAND;
+    lCom^.Header.Status:=LMC_STATUS_READY;
+    DebugLog('Sending XPL reset command.');
+  end;
 end;
 
 procedure TXPLcontrol.LogCommand(pPar1: String; pPar2: String);

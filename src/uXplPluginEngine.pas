@@ -58,6 +58,7 @@ TXplEngine = class (TObject)
     procedure UpdateWatchedValue(pIndex: Integer; pProduceLog: Boolean);
     function WatchedKey(lRec: PXplGetVariableRequestRec): String;
     procedure RefreshWatchedVariables;
+    procedure Reset;
   public
     { Public declarations }
     constructor Create;
@@ -179,6 +180,8 @@ begin
         Run(fLmcMem^.Commands[lIndex].IncVariableData);
       LMC_COMMAND_GET_VARIABLE:
         Run(fLmcMem^.Commands[lIndex].GetVariableData);
+      LMC_COMMAND_RESET:
+        Reset;
       end;
       DebugLogFmt('Tick %d: After slot process we have fLastProcessedId = %d, fMaxComIdInTick = %d', [fTickNo, fLastProcessedId, fMaxComIdInTick]);
     end;
@@ -228,6 +231,19 @@ var
 begin
   for I := 0 to fWatchedVariables.Count -1 do
     UpdateWatchedValue(I, False);
+end;
+
+procedure TXplEngine.Reset;
+var
+  I: Integer;
+begin
+  for I := 0 to fDataRefs.Count - 1 do
+  begin
+    fDataRefs.Objects[I].Free;
+  end;
+  fDataRefs.Clear;
+  fCommands.Clear;
+  fWatchedVariables.Clear; // objects already freed as fDataRefs
 end;
 
 procedure TXplEngine.String2XplValue(pIn: String; pOut: PXplValue; pDataType: XPLMDataTypeID);

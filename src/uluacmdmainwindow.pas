@@ -20,6 +20,7 @@ function LoadScript(luaState : TLuaState) : integer;
 function Say(luaState : TLuaState) : integer;
 function GetActiveWindowTitle(luaState : TLuaState) : integer;
 function DoSleep(luaState : TLuaState) : integer;
+function DoReset(luaState : TLuaState) : integer;
 
 implementation
 
@@ -240,6 +241,16 @@ begin
   Sleep(lArg);
   Result := 0;
   Glb.StatsService.EndCommand('lmc_sleep', lStart);
+end;
+
+function DoReset(luaState: TLuaState): integer;
+var lStart: Int64;
+begin
+  lStart := Glb.StatsService.BeginCommand('lmc_reset');
+  //Glb.Reset;  can't reset LUA interpreter in the middle of execution, just set the flag
+  gMainForm.ResetAfterLuaScriptEnd;
+  Result := 0;
+  Glb.StatsService.EndCommand('lmc_reset', lStart);
 end;
 
 

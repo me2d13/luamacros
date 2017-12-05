@@ -227,6 +227,7 @@ begin
   fLoggedModules.Clear;
   fLogAll:=False;
   fXplCLcontrol.Reset;
+  fStatsService.Reset;
 end;
 
 procedure TGlobals.DebugLog(pMessage: String; pLogger: String);

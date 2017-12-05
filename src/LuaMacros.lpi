@@ -19,7 +19,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="60"/>
+      <BuildNr Value="68"/>
       <StringTable ProductVersion=""/>
     </VersionInfo>
     <BuildModes Count="1">
@@ -31,7 +31,7 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="C:\work\luamacros\src\test.lua"/>
+        <CommandLineParams Value="c:\work\luamacros\src\lmc.lua"/>
       </local>
     </RunParams>
     <RequiredPackages Count="9">

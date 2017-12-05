@@ -17,15 +17,16 @@
       <Unit1>
         <Filename Value="uXplPluginEngine.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="100"/>
-        <CursorPos X="3" Y="102"/>
+        <TopLine Value="236"/>
+        <CursorPos Y="243"/>
         <UsageCount Value="124"/>
         <Bookmarks Count="4">
-          <Item0 Y="404" ID="3"/>
-          <Item1 Y="631" ID="4"/>
-          <Item2 X="5" Y="335" ID="2"/>
-          <Item3 X="3" Y="387" ID="1"/>
+          <Item0 Y="418" ID="3"/>
+          <Item1 Y="645" ID="4"/>
+          <Item2 X="5" Y="349" ID="2"/>
+          <Item3 X="3" Y="401" ID="1"/>
         </Bookmarks>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -93,10 +94,9 @@
       <Unit8>
         <Filename Value="uXplLogger.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="41"/>
-        <CursorPos Y="67"/>
+        <CursorPos X="19" Y="48"/>
         <UsageCount Value="44"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -339,7 +339,7 @@
         <UsageCount Value="10"/>
       </Unit43>
     </Units>
-    <JumpHistory Count="14" HistoryIndex="13">
+    <JumpHistory Count="15" HistoryIndex="14">
       <Position1>
         <Filename Value="XplPlugin.lpr"/>
         <Caret Line="42" Column="26" TopLine="13"/>
@@ -396,6 +396,10 @@
         <Filename Value="uXplLogger.pas"/>
         <Caret Line="67" Column="31" TopLine="41"/>
       </Position14>
+      <Position15>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="61" Column="21" TopLine="36"/>
+      </Position15>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

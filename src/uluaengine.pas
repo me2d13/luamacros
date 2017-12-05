@@ -165,6 +165,7 @@ type
       function Run(pItem: TFuncItem): TLuaResult; overload;
       procedure Terminate;
       function IsRunning: Boolean;
+      procedure Reset;
       property ExecutionsCount: Int64 read fExecutionsCount;
       property ExecutionsTime: Int64 read fExecutionsTime;
   end;
@@ -560,6 +561,12 @@ begin
   Result := GetQueueSize > 0;
 end;
 
+procedure TLuaExecutor.Reset;
+begin
+  fExecutionsCount := 0;
+  fExecutionsTime := 0;
+end;
+
 { TRiRefIntegerInteger }
 
 constructor TRiRefIntegerInteger.Create(pRef: Integer; p1, p2: Int64);
@@ -814,6 +821,7 @@ begin
   fLua.Free;
   fLua := TLua.Create();
   fTriggers.Clear;
+  fExecutor.Reset;
   Init;
 end;
 
@@ -985,6 +993,7 @@ begin
   fLua.RegisterFunction('lmc_say','',nil,@Say);
   fLua.RegisterFunction('lmc_get_window_title', '', nil, @GetActiveWindowTitle);
   fLua.RegisterFunction('lmc_sleep','',nil,@DoSleep);
+  fLua.RegisterFunction('lmc_reset','',nil,@DoReset);
   // devices
   fLua.RegisterFunction('lmc_print_devices','',nil,@PrintDevices);
   fLua.RegisterFunction('lmc_get_devices','',nil,@GetDevices);
