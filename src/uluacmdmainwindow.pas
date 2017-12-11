@@ -84,13 +84,23 @@ end;
 function SendKeys(luaState : TLuaState) : integer;
 var
   arg : PAnsiChar;
+  arg2 : Integer;
   lSndKey: TKeySequence;
+  lNumOfParams: Integer;
   lStart: Int64;
 begin
   lStart := Glb.StatsService.BeginCommand('lmc_send_keys');
   arg := lua_tostring(luaState, 1);
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams > 1) then
+  begin
+     arg2 := lua_tointeger(luaState, 2);
+  end
+  else
+      arg2 := 0;
   lSndKey := TKeySequence.Create;
   lSndKey.Sequence := arg;
+  lSndKey.DelayKeys:= arg2;
   lSndKey.Resume;
   Lua_Pop(luaState, Lua_GetTop(luaState));
   Result := 0;
