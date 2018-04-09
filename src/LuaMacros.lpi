@@ -64,7 +64,7 @@
         <PackageName Value="LCL"/>
       </Item9>
     </RequiredPackages>
-    <Units Count="36">
+    <Units Count="37">
       <Unit0>
         <Filename Value="LuaMacros.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -242,6 +242,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uMidiInputDevice"/>
       </Unit35>
+      <Unit36>
+        <Filename Value="umidioutputdevice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uMidiOutputDevice"/>
+      </Unit36>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

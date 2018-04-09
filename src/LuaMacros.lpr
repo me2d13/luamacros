@@ -7,13 +7,14 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, lnetbase, uniqueinstance_package, LazSerialPort, uMainFrm,
-  MemMap, uXplCommon, uXplControl, uGlobals, uLuaCmdXpl, uDxDeviceService,
-  uDevice, uDxDevice, udeviceservice, uLuaCmdDevice, uLuaEngine, uComDevice,
+  Forms, lnetbase, uniqueinstance_package, LazSerialPort, uMainFrm, MemMap,
+  uXplCommon, uXplControl, uGlobals, uLuaCmdXpl, uDxDeviceService, uDevice,
+  uDxDevice, udeviceservice, uLuaCmdDevice, uLuaEngine, uComDevice,
   uComDeviceService, uKbdDevice, uKbdDeviceService, uRawInput, uHookService,
   uHookCommon, uKeyLogService, uSendKeys, uScanService, uLuaCmdMainWindow,
   uXplListener, uxplsender, uXplMessages, uConfigService, uHttpServer,
-  uLuaCmdHttp, uSpeechService, uStatsForm, uStatsService, MIDI, uMidiDeviceService, uMidiInputDevice;
+  uLuaCmdHttp, uSpeechService, uStatsForm, uStatsService, MIDI,
+  uMidiDeviceService, uMidiInputDevice, uMidiOutputDevice;
 
 {$R *.res}
 

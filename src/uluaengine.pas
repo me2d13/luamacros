@@ -1010,6 +1010,7 @@ begin
   fLua.RegisterFunction('lmc_set_axis_handler','',nil,@LuaCmdSetAxisHandler);
   fLua.RegisterFunction('lmc_set_midi_handler','',nil,@LuaCmdSetMidiHandler);
   fLua.RegisterFunction('lmc_get_button','',nil,@LuaCmdGetButtonState);
+  fLua.RegisterFunction('lmc_send_midi_note','',nil,@LuaCmdSendMidiNote);
   // serial
   fLua.RegisterFunction('lmc_add_com','',nil,@AddCom);
   fLua.RegisterFunction('lmc_send_to_com','',nil,@SendCom);
