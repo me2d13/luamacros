@@ -32,6 +32,7 @@ gRotorBrake = true
 gHeadphone = true
 -- roratries
 gTs = {}
+gRotCount = 1
 
 gLastRAltInterval = 0
 gRAltCalls = {2, 5, 10, 20, 50, 100}
@@ -70,6 +71,10 @@ function lb_handler(button, direction)
     if (lb_as350(button, direction)) then
       return
     end
+  elseif (gName == 'N929BR') then
+    if (lb_ch300(button, direction)) then
+      return
+    end
   end
   if (lb_common(button, direction)) then
     return
@@ -79,9 +84,12 @@ function lb_handler(button, direction)
 end
 
 function handle_rotary_with_cycle_value(button, direction, ts, def)
-  print('Rotary: button ' .. button .. ', direction '..direction..', ts '..ts)
+  --print('Rotary #'..gRotCount..': button ' .. button .. ', direction '..direction..', ts '..ts)
   if button == def.button or button == def.button+1 then
     if (direction == 1) then
+      print('Rotary #'..gRotCount..': button ' .. button .. ', direction '..direction..', ts '..ts)
+      gRotCount = gRotCount + 1
+      --TODO: roatry can send tripple press on one "click" so store last 4 ts and check time of 4th back
       if gTs[def.button] == nil then gTs[def.button] = 0 end
       local tsDiff = ts - gTs[def.button]
       gTs[def.button] = ts
@@ -112,6 +120,10 @@ function lb2_handler(button, direction, ts)
     if (lb2_as350(button, direction, ts)) then
       return
     end
+  elseif (gName == 'N929BR') then
+    if (lb2_ch300(button, direction)) then
+      return
+    end
   end
   if (lb2_common(button, direction, ts)) then
     return
@@ -131,6 +143,10 @@ function keyb1(button, direction)
     if (keyb1_b407(button, direction)) then
       return
     end
+  elseif (gName == 'N929BR') then
+    if (keyb1_ch300(button, direction)) then
+      return
+    end
   end
   if (keyb1_common(button, direction)) then
     return
@@ -145,6 +161,10 @@ function keyb2(button, direction)
     end
   elseif (gName == 'B40714') then
     if (keyb2_b407(button, direction)) then
+      return
+    end
+  elseif (gName == 'N929BR') then
+    if (keyb2_ch300(button, direction)) then
       return
     end
   end
