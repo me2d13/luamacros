@@ -19,7 +19,7 @@ commands2[188]='sim/flight_controls/rotor_brake_toggle' -- rotor brake
 --lmc_set_xpl_variable('AS350/Rotor_Brake', 0)
 --lmc_set_xpl_variable('AS350/Headphone', 1)
 
-gInnerViews = {'sim/view/default_view','sim/view/quick_look_1','sim/view/quick_look_2','sim/view/quick_look_3','sim/view/quick_look_4'}
+gInnerViews = {'sim/view/default_view','sim/view/quick_look_1','sim/view/quick_look_2','sim/view/quick_look_3','sim/view/quick_look_4','sim/view/quick_look_5','sim/view/quick_look_6'}
 gInnerViewsIndex = 1
 gInnerViewsSentTs = 0
 
@@ -61,10 +61,6 @@ function lb2_common(button, direction, ts)
       def.button = 6
       def.var_name = 'sim/cockpit/radios/nav1_obs_degm'
       return handle_rotary_with_cycle_value(button, direction, ts, def)
-    elseif (button == 9 and direction == 0) then
-      print('toggle')
-      lmc_xpl_command('sim/view/track-ir_toggle')
-      return true
     end
     -- views
   if (direction == 1) then

@@ -1,5 +1,6 @@
 clear()
 --lmc_reset()
+--lmc.statistics = true
 lmc.autoReload = true
 --lmc.statistics = true
 --lmc_log_all()
@@ -30,12 +31,17 @@ gPitot = false
 gTranspoder = false
 gRotorBrake = true
 gHeadphone = true
--- roratries
+-- rotaries
 gTs = {}
 gRotCount = 1
 
 gLastRAltInterval = 0
 gRAltCalls = {2, 5, 10, 20, 50, 100}
+
+gX = -1
+gY = -1
+gXCenter = 32000
+gYCenter = 32000
 
 function getRAltInterval(value)
   if value < gRAltCalls[1] then
@@ -63,7 +69,7 @@ end
 
 
 function lb_handler(button, direction)
-  if (gName == 'B40714') then
+  if (gName == 'B40714' or gName == 'C-GELP') then
     if (lb_b407(button, direction)) then
       return
     end
@@ -112,7 +118,7 @@ end
 
 
 function lb2_handler(button, direction, ts)
-  if (gName == 'B40714') then
+  if (gName == 'B40714' or gName == 'C-GELP') then
     if (lb2_b407(button, direction, ts)) then
       return
     end
@@ -139,7 +145,7 @@ function keyb1(button, direction)
     if (keyb1_as350(button, direction)) then
       return
     end
-  elseif (gName == 'B40714') then
+  elseif (gName == 'B40714' or gName == 'C-GELP') then
     if (keyb1_b407(button, direction)) then
       return
     end
@@ -159,7 +165,7 @@ function keyb2(button, direction)
     if (keyb2_as350(button, direction)) then
       return
     end
-  elseif (gName == 'B40714') then
+  elseif (gName == 'B40714' or gName == 'C-GELP') then
     if (keyb2_b407(button, direction)) then
       return
     end
@@ -201,12 +207,26 @@ function setPlane(name)
     gIsPlane = true
     gIsHeli = false
     init_ch300() 
+  elseif (gName == 'C-GELP') then
+    lmc_say('Guimbal helicopter')
+    gIsPlane = false
+    gIsHeli = true
+    init_b407()
   else
     lmc_say('New plane with unknown type')
     gIsPlane = false
     gIsHeli = false
   end
   print('Have new plane ' .. gName)
+end
+
+function setForce()
+  currentMessage = 'Have axis [X,Y]: [' .. gX..','..gY..']'
+  centerMessage = 'center is set to [' .. gXCenter..','..gYCenter..']'
+  lXDelta = gXCenter - gX
+  lYDelta = gYCenter - gY
+  deltaMessage = 'need to move about [' .. lXDelta..','..lYDelta..']'
+  print(currentMessage..', '..centerMessage..', '..deltaMessage)
 end
 
 lmc_on_xpl_var_change('sim/aircraft/view/acf_tailnum', setPlane, 5000)
@@ -216,3 +236,17 @@ lmc_set_handler('KBD2',keyb2)
 lmc_set_handler('KBD1',keyb1)
 lmc_on_xpl_var_change('sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot', checkRAlt, 1000, 1)
 
+-- 1st param: device name
+-- 2nd param: axis index
+-- 3rd param: interval in ms
+-- 4th param: minimum delta
+lmc_set_axis_handler('LB',0, 100, 100, function(val, ts)
+  --print('Callback for X axis - value ' .. val..', timestamp '..ts)
+  gX = val
+  setForce()
+end)
+lmc_set_axis_handler('LB',1, 100, 100, function(val, ts)
+  -- print('Callback for Y axis - value ' .. val..', timestamp '..ts)
+  gY = val
+  setForce()
+end)

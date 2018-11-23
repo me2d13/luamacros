@@ -11,6 +11,11 @@ function lb_b407(button, direction)
 end
   
 function lb2_b407(button, direction, ts)
+    if (button == 9 and direction == 0) then
+        print('Track IR toggle')
+        lmc_xpl_command('sim/view/track-ir_toggle')
+        return true
+    end
     return false
 end
     
