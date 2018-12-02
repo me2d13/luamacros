@@ -205,6 +205,7 @@ type
       procedure CallFunctionByRef(pRef: Integer; pData: String);overload;
       procedure CallFunctionByRef(pRef: Integer; pData: Integer);overload;
       procedure CallFunctionByRef(pRef: Integer; pKey: Int64; pDirection: Int64);overload;
+      procedure CallFunctionByRef(pRef: Integer; pStatus, pData1, pData2: byte);overload;
       function CallFunctionByRefWithResult(pRef: Integer; pData: String):TLuaResult;
       property ScriptToRun: String read fScriptToRun write fScriptToRun;
       property ExecutionsCount: Int64 read GetExecutionsCount;
@@ -216,7 +217,7 @@ implementation
 
 uses uMainFrm, uGlobals,
   uLuaCmdXpl, uLuaCmdDevice, uComDevice, uLuaCmdMainWindow, uConfigService,
-  uLuaCmdHttp, uDxDeviceService;
+  uLuaCmdHttp, uDxDeviceService, uMidiDeviceService;
 
 const
 {$IFDEF UNIX}
@@ -753,6 +754,12 @@ begin
   fExecutor.Run(TRiRefIntegerIntegerInt64.Create(pRef, pKey, pDirection, pTimeStamp));
 end;
 
+
+procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pStatus, pData1, pData2: byte);overload;
+begin
+  fExecutor.Run(TRiRefIntegerIntegerInt64.Create(pRef, pStatus, pData1, pData2));
+end;
+
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer;
   pValue: PXplValue; pChangeCount: Integer);
 begin
@@ -1001,7 +1008,9 @@ begin
   fLua.RegisterFunction('lmc_device_set_name','',nil,@AssignDeviceNameByRegexp);
   fLua.RegisterFunction('lmc_set_handler','',nil,@LuaCmdSetCallback);
   fLua.RegisterFunction('lmc_set_axis_handler','',nil,@LuaCmdSetAxisHandler);
+  fLua.RegisterFunction('lmc_set_midi_handler','',nil,@LuaCmdSetMidiHandler);
   fLua.RegisterFunction('lmc_get_button','',nil,@LuaCmdGetButtonState);
+  fLua.RegisterFunction('lmc_send_midi_note','',nil,@LuaCmdSendMidiNote);
   // serial
   fLua.RegisterFunction('lmc_add_com','',nil,@AddCom);
   fLua.RegisterFunction('lmc_send_to_com','',nil,@SendCom);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="9"/>
+    <Version Value="10"/>
     <PathDelim Value="\"/>
     <General>
       <SessionStorage Value="InProjectDir"/>
@@ -19,8 +19,8 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="68"/>
-      <StringTable ProductVersion=""/>
+      <BuildNr Value="74"/>
+      <StringTable ProductVersion="0.1.1.68"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
@@ -31,7 +31,8 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="c:\work\luamacros\src\lmc.lua"/>
+        <CommandLineParams Value="C:\Users\hvolkmer\Documents\demo.lua"/>
+        <WorkingDirectory Value="C:\Users\hvolkmer\Documents\GitHub\luamacros\out"/>
       </local>
     </RunParams>
     <RequiredPackages Count="9">
@@ -63,7 +64,7 @@
         <PackageName Value="LCL"/>
       </Item9>
     </RequiredPackages>
-    <Units Count="33">
+    <Units Count="37">
       <Unit0>
         <Filename Value="LuaMacros.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -226,6 +227,26 @@
         <Filename Value="uStatsService.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit32>
+      <Unit33>
+        <Filename Value="midi.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MIDI"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="umidideviceservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uMidiDeviceService"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="umidiinputdevice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uMidiInputDevice"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="umidioutputdevice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uMidiOutputDevice"/>
+      </Unit36>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -28,7 +28,7 @@ type
       function KeyStrokeEqual(p1, p2: TKeyStroke): boolean;
     public
       constructor Create;
-      function AddRaw(pRawdata: PRAWINPUT): TKeyStrokePtr;
+      function AddRaw(pRawdata: URAWINPUT.PRAWINPUT): TKeyStrokePtr;
       procedure AssignDevice(var pKS: TKeyStroke);
       procedure RemoveOldItems;
       procedure ResetScanned;
@@ -53,7 +53,7 @@ begin
   ZeroMemory(@fLog[0], cLogArrayLength * SizeOf(TKeyLogItem));
 end;
 
-function TKeyLogService.AddRaw(pRawdata: PRAWINPUT): TKeyStrokePtr;
+function TKeyLogService.AddRaw(pRawdata: URAWINPUT.PRAWINPUT): TKeyStrokePtr;
 begin
   case pRawdata^.keyboard.Message of
     WM_KEYDOWN, WM_SYSKEYDOWN: fLog[fIndex].KeyStroke.Direction:=cDirectionDown;

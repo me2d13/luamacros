@@ -5,7 +5,8 @@ unit uDeviceService;
 interface
 
 uses
-  Classes, SysUtils, uDevice, fgl, uDxDeviceService, uComDeviceService, uKbdDeviceService;
+  Classes, SysUtils, uDevice, fgl, uDxDeviceService, uComDeviceService,
+  uKbdDeviceService, uMidiDeviceService;
 
 type
   TDeviceList = TFPGObjectList<TDevice>;
@@ -18,6 +19,7 @@ type
       fDxService: TDxDeviceService;
       fComService: TComDeviceService;
       fKbdService: TKbdDeviceService;
+      fMidiService: TMidiDeviceService;
     public
       constructor Create;
       destructor Destroy; virtual;
@@ -38,6 +40,7 @@ type
       property Devices:TDeviceList read fDevices;
       property KbdDeviceService: TKbdDeviceService read fKbdService;
       property DxDeviceService: TDxDeviceService read fDxService;
+      property MidiDeviceService: TMidiDeviceService read fMidiService;
   end;
 
 implementation
@@ -53,6 +56,7 @@ begin
   fDxService := TDxDeviceService.Create;
   fComService := TComDeviceService.Create;
   fKbdService := TKbdDeviceService.Create;
+  fMidiService := TMidiDeviceService.Create;
 end;
 
 destructor TDeviceService.Destroy;
@@ -61,6 +65,7 @@ begin
   fDevices.Free;
   fComService.Free;
   fKbdService.Free;
+  fMidiService.Free;
   inherited;
 end;
 
@@ -84,6 +89,7 @@ procedure TDeviceService.Init;
 begin
   fDxService.Init;
   fKbdService.Init;
+  fMidiService.Init;
   DetectDevices;
 end;
 
@@ -93,6 +99,7 @@ begin
   fDxService.DetectDevices;
   fKbdService.DetectDevices;
   fComService.ClearDevices;
+  fMidiService.DetectDevices;
   Result := fDevices.Count;
 end;
 
