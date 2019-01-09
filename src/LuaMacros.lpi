@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="9"/>
+    <Version Value="10"/>
     <PathDelim Value="\"/>
     <General>
       <SessionStorage Value="InProjectDir"/>
@@ -19,8 +19,8 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="68"/>
-      <StringTable ProductVersion=""/>
+      <BuildNr Value="70"/>
+      <StringTable ProductVersion="0.1.1.68"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
@@ -34,34 +34,25 @@
         <CommandLineParams Value="c:\work\luamacros\src\lmc.lua"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="9">
+    <RequiredPackages Count="6">
       <Item1>
-        <PackageName Value="mqttcomponents"/>
+        <PackageName Value="ExtraHighlighters"/>
       </Item1>
       <Item2>
-        <PackageName Value="bkutils"/>
+        <PackageName Value="lnetbase"/>
       </Item2>
       <Item3>
-        <PackageName Value="crytopkg"/>
+        <PackageName Value="uniqueinstance_package"/>
       </Item3>
       <Item4>
-        <PackageName Value="extrahighlighters_RT"/>
+        <PackageName Value="LazSerialPort"/>
       </Item4>
       <Item5>
-        <PackageName Value="lnetbase"/>
+        <PackageName Value="SynEdit"/>
       </Item5>
       <Item6>
-        <PackageName Value="uniqueinstance_package"/>
-      </Item6>
-      <Item7>
-        <PackageName Value="LazSerialPort"/>
-      </Item7>
-      <Item8>
-        <PackageName Value="SynEdit"/>
-      </Item8>
-      <Item9>
         <PackageName Value="LCL"/>
-      </Item9>
+      </Item6>
     </RequiredPackages>
     <Units Count="33">
       <Unit0>
@@ -236,7 +227,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\inc\lua;..\inc\XPL_SDK213_XPLM;..\inc\DirectX_Borland_D9-10;..\inc\synapse40;..\inc\LazSerial;..\inc\uniqueinstance-1.0"/>
+      <OtherUnitFiles Value="..\inc\lua;..\inc\XPL_SDK213_XPLM;..\inc\DirectX_Borland_D9-10;..\inc\synapse40"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

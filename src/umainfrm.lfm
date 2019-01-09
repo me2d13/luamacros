@@ -10,7 +10,7 @@ object LmcMainForm: TLmcMainForm
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnWindowStateChange = FormWindowStateChange
-  LCLVersion = '1.6.0.4'
+  LCLVersion = '1.8.4.0'
   object PairSplitter1: TPairSplitter
     Cursor = crVSplit
     Left = 0
@@ -574,7 +574,7 @@ object LmcMainForm: TLmcMainForm
     Images = ImageList1
     TabOrder = 2
     object ToolButton1: TToolButton
-      Left = 80
+      Left = 78
       Top = 2
       Action = RunScriptAction
     end
@@ -597,20 +597,18 @@ object LmcMainForm: TLmcMainForm
       Left = 70
       Height = 22
       Top = 2
-      Width = 10
       Caption = 'ToolButton5'
       Style = tbsSeparator
     end
     object ToolButton7: TToolButton
-      Left = 103
+      Left = 101
       Height = 22
       Top = 2
-      Width = 10
       Caption = 'ToolButton7'
       Style = tbsSeparator
     end
     object ToolButton6: TToolButton
-      Left = 113
+      Left = 109
       Top = 2
       Action = ResetAction
       ParentShowHint = False
@@ -906,11 +904,6 @@ object LmcMainForm: TLmcMainForm
     left = 270
     top = 129
   end
-  object SynLuaSyn1: TSynLuaSyn
-    Enabled = False
-    left = 369
-    top = 147
-  end
   object UniqueInstance1: TUniqueInstance
     Enabled = True
     left = 465
@@ -978,5 +971,10 @@ object LmcMainForm: TLmcMainForm
     object MenuItem2: TMenuItem
       Action = ExitAction
     end
+  end
+  object SynLuaSyn1: TSynLuaSyn
+    Enabled = False
+    left = 361
+    top = 165
   end
 end
