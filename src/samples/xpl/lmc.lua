@@ -13,16 +13,21 @@ lmc_device_set_name('LB2', '8001444553540000')
 lmc_device_set_name('KBD1', '34A63ED7') -- upper
 lmc_device_set_name('KBD2', 'VID_04FC') -- lower
 --lmc_device_set_name('ST', 'Saitek')
+lmc_add_com('FF-COM', 'COM9', 9600, 8, 'N', 1) -- 9600,8,N,1
 lmc_print_devices()
 
 lmc.minimizeToTray = true
 
-scriptRoot = 'C:\\Work\\luamacros\\src\\'
+DOWN = 1
+UP = 0
+
+scriptRoot = 'C:\\Work\\luamacros\\src\\samples\\xpl\\'
 
 dofile(scriptRoot..'common.lua')
 dofile(scriptRoot..'b407.lua')
 dofile(scriptRoot..'as350.lua')
 dofile(scriptRoot..'chal300.lua')
+dofile(scriptRoot..'ff.lua')
 
 gPlane = ''
 gIsHeli = false
@@ -37,11 +42,6 @@ gRotCount = 1
 
 gLastRAltInterval = 0
 gRAltCalls = {2, 5, 10, 20, 50, 100}
-
-gX = -1
-gY = -1
-gXCenter = 32000
-gYCenter = 32000
 
 function getRAltInterval(value)
   if value < gRAltCalls[1] then
@@ -83,6 +83,9 @@ function lb_handler(button, direction)
     end
   end
   if (lb_common(button, direction)) then
+    return
+  end
+  if (lb_ff(button, direction)) then
     return
   end
 
@@ -220,33 +223,9 @@ function setPlane(name)
   print('Have new plane ' .. gName)
 end
 
-function setForce()
-  currentMessage = 'Have axis [X,Y]: [' .. gX..','..gY..']'
-  centerMessage = 'center is set to [' .. gXCenter..','..gYCenter..']'
-  lXDelta = gXCenter - gX
-  lYDelta = gYCenter - gY
-  deltaMessage = 'need to move about [' .. lXDelta..','..lYDelta..']'
-  print(currentMessage..', '..centerMessage..', '..deltaMessage)
-end
-
 lmc_on_xpl_var_change('sim/aircraft/view/acf_tailnum', setPlane, 5000)
 lmc_set_handler('LB',lb_handler)
 lmc_set_handler('LB2',lb2_handler)
 lmc_set_handler('KBD2',keyb2)
 lmc_set_handler('KBD1',keyb1)
 lmc_on_xpl_var_change('sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot', checkRAlt, 1000, 1)
-
--- 1st param: device name
--- 2nd param: axis index
--- 3rd param: interval in ms
--- 4th param: minimum delta
-lmc_set_axis_handler('LB',0, 100, 100, function(val, ts)
-  --print('Callback for X axis - value ' .. val..', timestamp '..ts)
-  gX = val
-  setForce()
-end)
-lmc_set_axis_handler('LB',1, 100, 100, function(val, ts)
-  -- print('Callback for Y axis - value ' .. val..', timestamp '..ts)
-  gY = val
-  setForce()
-end)

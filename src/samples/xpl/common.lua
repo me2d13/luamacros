@@ -32,9 +32,7 @@ commands1={}
 commands1[string.byte('R')]='sim/transponder/transponder_ident'
 
 function lb_common(button, direction)
-    if (button == 3) then
-      lmc_xpl_command('sim/view/still_spot')
-    elseif (button == 8) then
+    if (button == 8) then
       if (direction == 1) then
         lmc_set_xpl_variable('sim/time/sim_speed', 0)
       else
