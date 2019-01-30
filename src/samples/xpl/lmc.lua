@@ -21,7 +21,7 @@ lmc.minimizeToTray = true
 DOWN = 1
 UP = 0
 
-scriptRoot = 'C:\\Work\\luamacros\\src\\samples\\xpl\\'
+scriptRoot = 'c:\\work\\lmc\\2\\luamacros\\src\\samples\\xpl\\'
 
 dofile(scriptRoot..'common.lua')
 dofile(scriptRoot..'b407.lua')
@@ -69,7 +69,7 @@ end
 
 
 function lb_handler(button, direction)
-  if (gName == 'B40714' or gName == 'C-GELP') then
+  if (gName == 'B40714' or gName == 'C-GELP' or gName == 'N429NA') then
     if (lb_b407(button, direction)) then
       return
     end
@@ -121,7 +121,7 @@ end
 
 
 function lb2_handler(button, direction, ts)
-  if (gName == 'B40714' or gName == 'C-GELP') then
+  if (gName == 'B40714' or gName == 'C-GELP' or gName == 'N429NA') then
     if (lb2_b407(button, direction, ts)) then
       return
     end
@@ -148,7 +148,7 @@ function keyb1(button, direction)
     if (keyb1_as350(button, direction)) then
       return
     end
-  elseif (gName == 'B40714' or gName == 'C-GELP') then
+  elseif (gName == 'B40714' or gName == 'C-GELP' or gName == 'N429NA') then
     if (keyb1_b407(button, direction)) then
       return
     end
@@ -168,7 +168,7 @@ function keyb2(button, direction)
     if (keyb2_as350(button, direction)) then
       return
     end
-  elseif (gName == 'B40714' or gName == 'C-GELP') then
+  elseif (gName == 'B40714' or gName == 'C-GELP' or gName == 'N429NA') then
     if (keyb2_b407(button, direction)) then
       return
     end
@@ -212,6 +212,11 @@ function setPlane(name)
     init_ch300() 
   elseif (gName == 'C-GELP') then
     lmc_say('Guimbal helicopter')
+    gIsPlane = false
+    gIsHeli = true
+    init_b407()
+  elseif (gName == 'N429NA') then
+    lmc_say('Bell 4 2 9 helicopter')
     gIsPlane = false
     gIsHeli = true
     init_b407()

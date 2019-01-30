@@ -5,7 +5,7 @@ unit uKeyLogService;
 interface
 
 uses
-  uRawInput, Classes, SysUtils, uKbdDevice;
+  Windows, Classes, SysUtils, uKbdDevice;
 
 const
   cLogArrayLength = 100;
@@ -38,7 +38,7 @@ type
 implementation
 
 uses
-  Windows, dateutils, uDevice, uGlobals, uHookService;
+  dateutils, uDevice, uGlobals, uHookService;
 
 { TKeyLogService }
 
@@ -55,13 +55,13 @@ end;
 
 function TKeyLogService.AddRaw(pRawdata: PRAWINPUT): TKeyStrokePtr;
 begin
-  case pRawdata^.keyboard.Message of
+    case pRawdata^.data.keyboard.Message of
     WM_KEYDOWN, WM_SYSKEYDOWN: fLog[fIndex].KeyStroke.Direction:=cDirectionDown;
     WM_KEYUP, WM_SYSKEYUP: fLog[fIndex].KeyStroke.Direction:=cDirectionUp;
   end;
   fLog[fIndex].TimeStamp:=Glb.UnixTimestampMs;
   fLog[fIndex].KeyStroke.DeviceHandle:=pRawdata^.header.hDevice;
-  fLog[fIndex].KeyStroke.VKeyCode:=pRawdata^.keyboard.VKey;
+  fLog[fIndex].KeyStroke.VKeyCode:=pRawdata^.data.keyboard.VKey;
   Result := @(fLog[fIndex].KeyStroke);
   if (Glb.ScanService.Scanning) and (fLog[fIndex].KeyStroke.Direction=cDirectionDown) then
   begin
@@ -69,6 +69,7 @@ begin
     Glb.DebugLog('Recorder scanned keystroke', cLoggerHook);
   end;
   fIndex:=(fIndex+1) mod cLogArrayLength;
+
 end;
 
 procedure TKeyLogService.AssignDevice(var pKS: TKeyStroke);

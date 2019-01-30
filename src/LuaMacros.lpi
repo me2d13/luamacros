@@ -19,7 +19,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="70"/>
+      <BuildNr Value="71"/>
       <StringTable ProductVersion="0.1.1.68"/>
     </VersionInfo>
     <BuildModes Count="1">
@@ -235,6 +235,9 @@
         <SyntaxMode Value="Delphi"/>
       </SyntaxOptions>
     </Parsing>
+    <CodeGeneration>
+      <TargetOS Value="win64"/>
+    </CodeGeneration>
     <Linking>
       <Options>
         <Win32>

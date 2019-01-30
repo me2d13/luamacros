@@ -63,28 +63,28 @@ begin
   pDeviceInfo := nil;
   pDevicesHID := nil;
   deviceCount := 0;
-  if (GetRawInputDeviceList(nil, deviceCount, sizeof(RAWINPUTDEVICELIST)) = 0) then
+  if (GetRawInputDeviceList(nil, @deviceCount, sizeof(RAWINPUTDEVICELIST)) = 0) then
   begin
     try
       GetMem(pDevicesHID, deviceCount * sizeOf(RAWINPUTDEVICELIST));
       GetMem(pDeviceInfo, sizeOf(RID_DEVICE_INFO));
       pDevice := pDevicesHID;
-      GetRawInputDeviceList(pDevicesHID, deviceCount, sizeof(RAWINPUTDEVICELIST));
+      GetRawInputDeviceList(pDevicesHID, @deviceCount, sizeof(RAWINPUTDEVICELIST));
       begin
         // process the list
         strLen := 0;
         for I := 0 to deviceCount - 1 do
         begin
           if (GetRawInputDeviceInfo(pDevice^.hDevice, RIDI_DEVICENAME,
-              nil, StrLen) = 0) then
+              nil, @StrLen) = 0) then
           begin
             GetMem(pDeviceName, StrLen + 1);
             try
               GetRawInputDeviceInfo(pDevice^.hDevice, RIDI_DEVICENAME,
-                  pDeviceName, StrLen);
+                  pDeviceName, @StrLen);
               TmpSize := sizeof(RID_DEVICE_INFO);
               pDeviceInfo^.cbSize := TmpSize;
-              GetRawInputDeviceInfo(pDevice^.hDevice, RIDI_DEVICEINFO, pDeviceInfo, TmpSize);
+              GetRawInputDeviceInfo(pDevice^.hDevice, RIDI_DEVICEINFO, pDeviceInfo, @TmpSize);
               if (pDeviceInfo^.dwType = RIM_TYPEKEYBOARD) and (strpos(strUpper(pDeviceName), 'ROOT') = nil) then
               begin
                 // create kbd object
@@ -133,15 +133,15 @@ var
   lDirection: Integer;
   lKeyStrokePtr: TKeyStrokePtr;
 begin
-  GetRawInputData(Message.LParam, RID_INPUT, nil, pcbSize, sizeOf(RAWINPUTHEADER));
+  GetRawInputData(Message.LParam, RID_INPUT, nil, @pcbSize, sizeOf(RAWINPUTHEADER));
   GetMem(buff, pcbSize);
   try
     if (GetRawInputData(Message.LParam, RID_INPUT, buff,
-        pcbSize, sizeOf(RAWINPUTHEADER)) = pcbSize) then
+        @pcbSize, sizeOf(RAWINPUTHEADER)) = pcbSize) then
     begin
       if (buff^.header.dwType = RIM_TYPEKEYBOARD)then
       begin
-        case buff^.keyboard.Message of
+        case buff^.data.keyboard.Message of
           WM_KEYDOWN, WM_SYSKEYDOWN: lDirection:=cDirectionDown;
           WM_KEYUP, WM_SYSKEYUP: lDirection:=cDirectionUp;
         end;
@@ -155,7 +155,7 @@ begin
             if (lDev.Name <> '') then
             begin
               lKeyStrokePtr^.Device:=lDev;
-              Glb.LuaEngine.OnDeviceEvent(lDev, buff^.keyboard.VKey, lDirection, buff^.keyboard.Flags);
+              Glb.LuaEngine.OnDeviceEvent(lDev, buff^.data.keyboard.VKey, lDirection, buff^.data.keyboard.Flags);
             end;
             // for scanning consider only key down messages
             // key ups usually come when Ctrl+Enter is released to execute script
@@ -241,13 +241,13 @@ function TKbdDeviceService.DescribeRawMessage(rawdata: PRAWINPUT): String;
 var
   lDirection: String;
 begin
-  case rawdata^.keyboard.Message of
+  case rawdata^.data.keyboard.Message of
     WM_KEYDOWN, WM_SYSKEYDOWN: lDirection:='UP';
     WM_KEYUP, WM_SYSKEYUP: lDirection:='DOWN';
   end;
   Result := Format('message %s, key code %d, extended %d, flags %d, makecode %d, direction %s, keyboard handle %d',
-    [GetMessageId(rawdata^.keyboard.Message), rawdata^.keyboard.VKey,
-     rawdata^.keyboard.ExtraInformation, rawdata^.keyboard.Flags, rawdata^.keyboard.MakeCode,
+    [GetMessageId(rawdata^.data.keyboard.Message), rawdata^.data.keyboard.VKey,
+     rawdata^.data.keyboard.ExtraInformation, rawdata^.data.keyboard.Flags, rawdata^.data.keyboard.MakeCode,
      lDirection, rawdata^.header.hDevice]);
 end;
 
