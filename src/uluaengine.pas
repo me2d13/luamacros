@@ -994,6 +994,7 @@ begin
   fLua.RegisterFunction('lmc_get_window_title', '', nil, @GetActiveWindowTitle);
   fLua.RegisterFunction('lmc_sleep','',nil,@DoSleep);
   fLua.RegisterFunction('lmc_reset','',nil,@DoReset);
+  fLua.RegisterFunction('lmc_set_timer', '', nil, @DoSetTimer);
   // devices
   fLua.RegisterFunction('lmc_print_devices','',nil,@PrintDevices);
   fLua.RegisterFunction('lmc_get_devices','',nil,@GetDevices);

@@ -1,22 +1,19 @@
 -- GUI thing: clear log window
 clear();
-print('Text1')
-lmc_sleep(1500)
-print('Text2')
+lmc_log_module('TMR')
 lmc.autoReload = true
 lmc.statistics = true
 
-lmc_xpl_command('sim/view/3d_cockpit_cmnd_look')
-lmc_xpl_command('sim/view/3d_cockpit_cmnd_look')
-lmc_xpl_command('test')
-lmc_get_xpl_variable('asasaass')
-lmc_get_xpl_variable('asasaass')
-lmc_get_xpl_variable('asaddd')
-lmc_set_xpl_variable('asaddd', 1)
+lmc_set_timer(5000, function()
+  print('Timer callback - lua handler')
+end)
+
+--lmc_xpl_command('sim/view/3d_cockpit_cmnd_look')
+--lmc_get_xpl_variable('asasaass')
 
 --lmc_sleep(1500)
-lmc_send_input(16, 0, 0) -- press shift
-lmc_send_input(16, 0, 2) -- release shift
+--lmc_send_input(16, 0, 0) -- press shift
+--lmc_send_input(16, 0, 2) -- release shift
 --lmc_send_input(67, 0, 0) -- press C
 --lmc_send_input(67, 0, 2) -- release C
 
@@ -54,25 +51,25 @@ lmc_print_devices();
 -- 1st arg: logical name
 -- 2nd arg: regexp applied on DirectX name
 -- returns: Found directX name
-print(lmc_device_set_name('LB', '7E9AD920'))
-print(lmc_device_set_name('LB2', '53175550'))
-print(lmc_device_set_name('KBD1', '3970CC3F'))
-print(lmc_device_set_name('KBD2', '31BB05D2'))
-print(lmc_device_set_name('ST', 'Saitek'))
+--print(lmc_device_set_name('LB', '7E9AD920'))
+--print(lmc_device_set_name('LB2', '53175550'))
+--print(lmc_device_set_name('KBD1', '3970CC3F'))
+--print(lmc_device_set_name('KBD2', '31BB05D2'))
+--print(lmc_device_set_name('ST', 'Saitek'))
 -- remember 2nd param is regexp, so any unique part from that ugly keyboard system id works
 --lmc_assign_keyboard('KBD2');
 
-print(lmc_get_button('LB2', 9))
+--print(lmc_get_button('LB2', 9))
 
 -- now logical name is assigned to game device
-lmc_print_devices()
+--lmc_print_devices()
 
 --define callback function
 log_handler = function(button, direction, ts)
   print('Callback for device: button ' .. button .. ', direction '..direction..', ts '..ts)
 end
 
-lmc_set_handler('KBD1', log_handler)
+--lmc_set_handler('KBD1', log_handler)
 
 -- assign callback to game device, button no 2, press event
 -- 1st param: logical name
@@ -88,16 +85,16 @@ lmc_set_handler('KBD1', log_handler)
 -- then callback function has 2 parameters and logic is in the function
 -- 1st param: button number
 -- 2nd param: direction, 1=down, 0=up
-lmc_set_handler('LB',function(button, direction)
-  print('Callback for whole joystick: button ' .. button .. ', direction '..direction)
-  if (button == 3) then
-    lmc_xpl_command('sim/view/still_spot')
+--lmc_set_handler('LB',function(button, direction)
+--  print('Callback for whole joystick: button ' .. button .. ', direction '..direction)
+--  if (button == 3) then
+--    lmc_xpl_command('sim/view/still_spot')
     --lmc_xpl_command('sim/view/3d_cockpit_cmnd_look')
-  end
-end)
+--  end
+--end)
 
 --lmc_set_handler('LB2', log_handler)
-lmc_set_handler('ST', log_handler)
+--lmc_set_handler('ST', log_handler)
 
 -- add COM port (with default config values) as device
 -- 1st param: logical name
@@ -113,7 +110,7 @@ lmc_set_handler('ST', log_handler)
 --lmc_add_com('C3', 'COM3', 1200, 6, 'E', 2)
 
 -- check device was added
-lmc_print_devices()
+--lmc_print_devices()
 
 -- define callback for whole device using inline function
 -- 1st param: logical name
@@ -143,19 +140,19 @@ end)
 --lmc_xpl_text('From LUA macros', 0.7, 10)
 
 -- keyboard handler
-lmc_set_handler('KBD2',function(button, direction)
-  print('Callback for whole keyboard 2: button ' .. button .. ', direction '..direction)
-end)
+--lmc_set_handler('KBD2',function(button, direction)
+--  print('Callback for whole keyboard 2: button ' .. button .. ', direction '..direction)
+--end)
 
-lmc_set_handler('KBD2',65, 1, function()
-  print('Callback for keyboard 1 key "a" down')
-  lmc_send_keys('It rocks!')
-end)
+--lmc_set_handler('KBD2',65, 1, function()
+--  print('Callback for keyboard 1 key "a" down')
+--  lmc_send_keys('It rocks!')
+--end)
 
 --cleanThisKey=cleanThisKey:gsub("%(","%(")
-lmc_set_handler("LB",function(button, direction)
-      cleanThisKey=cleanThisKey:gsub("%(","%(")
-end)
+--lmc_set_handler("LB",function(button, direction)
+--      cleanThisKey=cleanThisKey:gsub("%(","%(")
+--end)
 
 --print(lmc_get_xpl_variable('sim/flightmodel/position/latitude'))
 
@@ -194,7 +191,7 @@ lmc_http_server(12345, function(url)
   --return '{"HDG" : 123}', 'application/json'
 end)
 
-lmc_set_axis_handler('LB2',0, 2000, 1000, function(val, ts)
-  print('Callback for axis - value ' .. val..', ts '..ts)
-end)
+--lmc_set_axis_handler('LB2',0, 2000, 1000, function(val, ts)
+--  print('Callback for axis - value ' .. val..', ts '..ts)
+--end)
 
