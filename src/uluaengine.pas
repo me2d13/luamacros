@@ -110,9 +110,9 @@ type
 
   TRiRefInteger = class (TRiRef)
     protected
-      fPar1: Integer;
+      fPar1: Int64;
     public
-      constructor Create(pRef: Integer; p1: Integer);
+      constructor Create(pRef: Integer; p1: Int64);
       procedure Execute(pLua: TLua); override;
       function Describe: String; override;
   end;
@@ -203,7 +203,7 @@ type
       procedure StackDump(pLuaState: TLuaState);
       procedure CallFunctionByRef(pRef: Integer; pValue: PXplValue; pChangeCount: Integer);overload;
       procedure CallFunctionByRef(pRef: Integer; pData: String);overload;
-      procedure CallFunctionByRef(pRef: Integer; pData: Integer);overload;
+      procedure CallFunctionByRef(pRef: Integer; pData: Int64);overload;
       procedure CallFunctionByRef(pRef: Integer; pKey: Int64; pDirection: Int64);overload;
       function CallFunctionByRefWithResult(pRef: Integer; pData: String):TLuaResult;
       property ScriptToRun: String read fScriptToRun write fScriptToRun;
@@ -211,6 +211,9 @@ type
       property ExecutionsTime: Int64 read GetExecutionsTime;
       property Callbacks: TTriggerList read fTriggers;
   end;
+
+const
+  cMaxQueueSize = 50;
 
 implementation
 
@@ -233,7 +236,6 @@ const
 {$ENDIF}
 {$ENDIF}
 
-  cMaxQueueSize = 30;
 
 { TRiRefIntegerIntegerInt64 }
 
@@ -262,7 +264,7 @@ end;
 
 { TRiRefInteger }
 
-constructor TRiRefInteger.Create(pRef: Integer; p1: Integer);
+constructor TRiRefInteger.Create(pRef: Integer; p1: Int64);
 begin
   inherited Create(pRef);
   fPar1:=p1;
@@ -729,7 +731,7 @@ begin
   fExecutor.Run(TRiRefString.Create(pRef, pData));
 end;
 
-procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pData: Integer);
+procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pData: Int64);
 begin
   fExecutor.Run(TRiRefInteger.Create(pRef, pData));
 end;

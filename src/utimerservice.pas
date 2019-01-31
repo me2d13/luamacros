@@ -31,12 +31,15 @@ type
   TTimerService = class
     private
       fTimers: TTimersList;
+    protected
+      procedure RemoveTimer(pThread: TWaitingThread);
     public
       constructor Create;
       destructor Destroy; virtual;
+      procedure Reset;
       procedure AddTimer(pInterval: Integer; pHandlerRef: Integer);
+      function GetTimersCount: Integer;
   end;
-
 
 implementation
 
@@ -51,10 +54,14 @@ begin
   Glb.DebugLog(Format('Sleep thread: going to sleep for %d ms',
         [fInterval]), cLoggerTmr);
   Sleep(fInterval);
-  Glb.DebugLog(Format('Sleep thread: sleep for %d ms is done, calling lua',
-        [fInterval]), cLoggerTmr);
-  lNow:=GetTickCount64;
-  Glb.LuaEngine.CallFunctionByRef(fHandlerRef, lNow);
+  if (not Terminated) then
+  begin
+    Glb.DebugLog(Format('Sleep thread: sleep for %d ms is done, calling lua',
+          [fInterval]), cLoggerTmr);
+    lNow:=GetTickCount64;
+    Glb.TimerService.RemoveTimer(self);
+    Glb.LuaEngine.CallFunctionByRef(fHandlerRef, lNow);
+  end;
 end;
 
 constructor TWaitingThread.Create(CreateSuspended: Boolean; pInterval: Integer;
@@ -73,14 +80,30 @@ end;
 
 { TTimerService }
 
+procedure TTimerService.RemoveTimer(pThread: TWaitingThread);
+begin
+  fTimers.Remove(pThread);
+end;
+
 constructor TTimerService.Create;
 begin
-  fTimers := TTimersList.Create();
+  fTimers := TTimersList.Create(False); // do not free objects
 end;
 
 destructor TTimerService.Destroy;
 begin
   fTimers.Free;
+end;
+
+procedure TTimerService.Reset;
+var lThread: TWaitingThread;
+begin
+  while fTimers.Count > 0 do
+  begin
+    lThread := fTimers.First;
+    fTimers.Delete(0);
+    lThread.Terminate;
+  end;
 end;
 
 procedure TTimerService.AddTimer(pInterval: Integer; pHandlerRef: Integer);
@@ -90,6 +113,12 @@ begin
         [pInterval, pHandlerRef]), cLoggerTmr);
   lSleepThread := TWaitingThread.Create(true, pInterval, pHandlerRef);
   lSleepThread.Start;
+  fTimers.Add(lSleepThread);
+end;
+
+function TTimerService.GetTimersCount: Integer;
+begin
+  Result := fTimers.Count;
 end;
 
 end.

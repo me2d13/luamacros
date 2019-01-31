@@ -247,13 +247,13 @@ var
   lArFlag: String;
   lStatsFlag: Boolean;
 begin
+  lCaption:=Format('Callback queue %d/%d', [Glb.LuaEngine.GetQueueSize, cMaxQueueSize]);
   if (Glb.LuaEngine.IsRunning) then
   begin
-    lCaption:=Format('Running 1 script, %d queued', [Glb.LuaEngine.GetQueueSize]);
+    lCaption:=lCaption + ' (running)';
     RunScriptAction.Enabled:=False;
   end else begin
     RunScriptAction.Enabled:=True;
-    lCaption:='Not running';
     ManageTrayIcon;
     if (fResetFlag) then
     begin

@@ -226,6 +226,7 @@ end;
 
 procedure TGlobals.Reset;
 begin
+  fTimerService.Reset;
   fLuaEngine.Reset;
   fHttpService.StopServer;
   fDeviceService.DetectDevices; // clears device table

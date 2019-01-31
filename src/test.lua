@@ -4,9 +4,15 @@ lmc_log_module('TMR')
 lmc.autoReload = true
 lmc.statistics = true
 
-lmc_set_timer(5000, function()
-  print('Timer callback - lua handler')
-end)
+function timerHandler(ts)
+  print('Timer alarm at time stamp '..ts..'. Waiting 2s.')
+  lmc_sleep(2000)
+  print('Timer callback complete')
+end
+
+
+lmc_set_timer(5000, timerHandler)
+--lmc_set_timer(10000, timerHandler)
 
 --lmc_xpl_command('sim/view/3d_cockpit_cmnd_look')
 --lmc_get_xpl_variable('asasaass')
