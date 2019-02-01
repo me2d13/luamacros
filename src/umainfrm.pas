@@ -17,6 +17,7 @@ uses
 
 const
   WM_LUA_RUN_CHANGE = WM_USER + 310;
+  WM_LUA_QUEUE_CHANGE = WM_USER + 311;
 
 type
 
@@ -145,7 +146,7 @@ begin
   begin
     Glb.HookService.OnHookMessage(lMessage);
     Result := lMessage.Result;
-  end else if uMsg=WM_LUA_RUN_CHANGE then
+  end else if (uMsg=WM_LUA_RUN_CHANGE) or (uMsg=WM_LUA_QUEUE_CHANGE) then
   begin
     gMainForm.WmLuaRunChange(lMessage);
     Result := lMessage.Result;

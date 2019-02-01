@@ -1,17 +1,24 @@
 -- GUI thing: clear log window
 clear();
-lmc_log_module('TMR')
+--lmc_log_module('TMR')
+--lmc_log_module('LUA')
 lmc.autoReload = true
 lmc.statistics = true
 
 function timerHandler(ts)
   print('Timer alarm at time stamp '..ts..'. Waiting 2s.')
-  lmc_sleep(2000)
+  lmc_sleep(20000)
   print('Timer callback complete')
 end
 
+function timerHandlerWhichRuns5seconds(ts)
+  print('STARTED timer alarm at time stamp '..ts..'.')
+  lmc_sleep(5000)
+  print('FINISHED handler which started at time stamp '..ts..'.')
+end
 
-lmc_set_timer(5000, timerHandler)
+
+--lmc_set_timer(5000, timerHandler)
 --lmc_set_timer(10000, timerHandler)
 
 --lmc_xpl_command('sim/view/3d_cockpit_cmnd_look')
@@ -200,4 +207,8 @@ end)
 --lmc_set_axis_handler('LB2',0, 2000, 1000, function(val, ts)
 --  print('Callback for axis - value ' .. val..', ts '..ts)
 --end)
+
+for i=1,70 do
+  lmc_set_timer(1000*i, timerHandlerWhichRuns5seconds)
+end
 

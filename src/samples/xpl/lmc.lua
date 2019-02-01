@@ -21,7 +21,7 @@ lmc.minimizeToTray = true
 DOWN = 1
 UP = 0
 
-scriptRoot = 'C:\\Work\\luamacros\\src\\samples\\xpl\\'
+scriptRoot = 'C:\\Work\\lmc\\2\\luamacros\\src\\samples\\xpl\\'
 
 dofile(scriptRoot..'common.lua')
 dofile(scriptRoot..'b407.lua')

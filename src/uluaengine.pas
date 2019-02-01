@@ -236,6 +236,11 @@ const
 {$ENDIF}
 {$ENDIF}
 
+procedure RefreshQueueIndicatorInMainWindow;
+begin
+  if (Glb.MainFormHandle <> 0) then // first start handle is not yet ready
+    PostMessage(Glb.MainFormHandle, WM_LUA_QUEUE_CHANGE, 0, 0);
+end;
 
 { TRiRefIntegerIntegerInt64 }
 
@@ -484,6 +489,7 @@ begin
       finally
         fRlSynchronizer.Endwrite;
       end;
+      RefreshQueueIndicatorInMainWindow;
     end;
   end;
 end;
@@ -518,7 +524,10 @@ end;
 function TLuaExecutor.Run(pItem: TRunItem): Integer;
 begin
   if GetQueueSize > cMaxQueueSize then
-    raise LmcException.Create('Maximum execution queue size reached. Make scripts faster or triggers slower.');
+  begin
+    Glb.LogError('Maximum execution queue size reached. Make scripts faster or triggers slower.', cLoggerLua);
+    Exit;
+  end;
   fRlSynchronizer.Beginwrite;
   try
     fRunList.Add(pItem);
@@ -526,6 +535,7 @@ begin
   finally
     fRlSynchronizer.Endwrite;
   end;
+  RefreshQueueIndicatorInMainWindow;
   Glb.DebugLogFmt('Item %s added to queue making it %d items big.', [pItem.Describe, Result], cLoggerLua);
   fEvent.SetEvent; // even if it runs already
 end;
@@ -535,7 +545,10 @@ var
   lSize: Integer;
 begin
   if GetQueueSize > cMaxQueueSize then
-    raise LmcException.Create('Maximum execution queue size reached. Make scripts faster or triggers slower.');
+  begin
+    Glb.LogError('Maximum execution queue size reached. Make scripts faster or triggers slower.', cLoggerLua);
+    Exit;
+  end;
   fRlSynchronizer.Beginwrite;
   try
     fRunList.Add(pItem);
@@ -543,6 +556,7 @@ begin
   finally
     fRlSynchronizer.Endwrite;
   end;
+  RefreshQueueIndicatorInMainWindow;
   Glb.DebugLogFmt('Item %s added to queue making it %d items big. Waiting for result.', [pItem.Describe, lSize], cLoggerLua);
   fEvent.SetEvent; // even if it runs already
   pItem.WaitForResult;
