@@ -31,7 +31,7 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="c:\work\luamacros\src\lmc.lua"/>
+        <CommandLineParams Value="c:\work\lmc\64\luamacros\src\test.lua"/>
       </local>
     </RunParams>
     <RequiredPackages Count="6">

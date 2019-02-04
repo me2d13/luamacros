@@ -242,8 +242,8 @@ var
   lDirection: String;
 begin
   case rawdata^.data.keyboard.Message of
-    WM_KEYDOWN, WM_SYSKEYDOWN: lDirection:='UP';
-    WM_KEYUP, WM_SYSKEYUP: lDirection:='DOWN';
+    WM_KEYDOWN, WM_SYSKEYDOWN: lDirection:='DOWN';
+    WM_KEYUP, WM_SYSKEYUP: lDirection:='UP';
   end;
   Result := Format('message %s, key code %d, extended %d, flags %d, makecode %d, direction %s, keyboard handle %d',
     [GetMessageId(rawdata^.data.keyboard.Message), rawdata^.data.keyboard.VKey,
