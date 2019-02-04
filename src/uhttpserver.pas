@@ -274,6 +274,7 @@ begin
     fHttpServer.Terminate;
     fHttpServer.WaitFor;
     fHttpServer.Free;
+    fHttpServer := nil;
   end;
 end;
 

@@ -128,7 +128,8 @@ begin
   with lSL do
   begin
     Add('Lua script executions count (without callbacks) : %d', [Glb.LuaEngine.ExecutionsCount]);
-    Add('Lua script executions time (without callbacks) : %d ms', [Glb.LuaEngine.ExecutionsTime]);
+    Add('Lua script executions time (without callbacks)  : %d ms', [Glb.LuaEngine.ExecutionsTime]);
+    Add('Number of active timers                         : %d', [Glb.TimerService.GetTimersCount]);
     Add('');
     Add('Builtin command executions (total runs, failed runs, total time [ms], avg time per exec [ms]:');
     for lI := 0 to Glb.StatsService.LuaCalls.Count -1 do

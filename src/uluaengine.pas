@@ -110,9 +110,9 @@ type
 
   TRiRefInteger = class (TRiRef)
     protected
-      fPar1: Integer;
+      fPar1: Int64;
     public
-      constructor Create(pRef: Integer; p1: Integer);
+      constructor Create(pRef: Integer; p1: Int64);
       procedure Execute(pLua: TLua); override;
       function Describe: String; override;
   end;
@@ -203,7 +203,7 @@ type
       procedure StackDump(pLuaState: TLuaState);
       procedure CallFunctionByRef(pRef: Integer; pValue: PXplValue; pChangeCount: Integer);overload;
       procedure CallFunctionByRef(pRef: Integer; pData: String);overload;
-      procedure CallFunctionByRef(pRef: Integer; pData: Integer);overload;
+      procedure CallFunctionByRef(pRef: Integer; pData: Int64);overload;
       procedure CallFunctionByRef(pRef: Integer; pKey: Int64; pDirection: Int64);overload;
       function CallFunctionByRefWithResult(pRef: Integer; pData: String):TLuaResult;
       property ScriptToRun: String read fScriptToRun write fScriptToRun;
@@ -211,6 +211,9 @@ type
       property ExecutionsTime: Int64 read GetExecutionsTime;
       property Callbacks: TTriggerList read fTriggers;
   end;
+
+const
+  cMaxQueueSize = 50;
 
 implementation
 
@@ -233,7 +236,11 @@ const
 {$ENDIF}
 {$ENDIF}
 
-  cMaxQueueSize = 30;
+procedure RefreshQueueIndicatorInMainWindow;
+begin
+  if (Glb.MainFormHandle <> 0) then // first start handle is not yet ready
+    PostMessage(Glb.MainFormHandle, WM_LUA_QUEUE_CHANGE, 0, 0);
+end;
 
 { TRiRefIntegerIntegerInt64 }
 
@@ -262,7 +269,7 @@ end;
 
 { TRiRefInteger }
 
-constructor TRiRefInteger.Create(pRef: Integer; p1: Integer);
+constructor TRiRefInteger.Create(pRef: Integer; p1: Int64);
 begin
   inherited Create(pRef);
   fPar1:=p1;
@@ -482,6 +489,7 @@ begin
       finally
         fRlSynchronizer.Endwrite;
       end;
+      RefreshQueueIndicatorInMainWindow;
     end;
   end;
 end;
@@ -516,7 +524,10 @@ end;
 function TLuaExecutor.Run(pItem: TRunItem): Integer;
 begin
   if GetQueueSize > cMaxQueueSize then
-    raise LmcException.Create('Maximum execution queue size reached. Make scripts faster or triggers slower.');
+  begin
+    Glb.LogError('Maximum execution queue size reached. Make scripts faster or triggers slower.', cLoggerLua);
+    Exit;
+  end;
   fRlSynchronizer.Beginwrite;
   try
     fRunList.Add(pItem);
@@ -524,6 +535,7 @@ begin
   finally
     fRlSynchronizer.Endwrite;
   end;
+  RefreshQueueIndicatorInMainWindow;
   Glb.DebugLogFmt('Item %s added to queue making it %d items big.', [pItem.Describe, Result], cLoggerLua);
   fEvent.SetEvent; // even if it runs already
 end;
@@ -533,7 +545,10 @@ var
   lSize: Integer;
 begin
   if GetQueueSize > cMaxQueueSize then
-    raise LmcException.Create('Maximum execution queue size reached. Make scripts faster or triggers slower.');
+  begin
+    Glb.LogError('Maximum execution queue size reached. Make scripts faster or triggers slower.', cLoggerLua);
+    Exit;
+  end;
   fRlSynchronizer.Beginwrite;
   try
     fRunList.Add(pItem);
@@ -541,6 +556,7 @@ begin
   finally
     fRlSynchronizer.Endwrite;
   end;
+  RefreshQueueIndicatorInMainWindow;
   Glb.DebugLogFmt('Item %s added to queue making it %d items big. Waiting for result.', [pItem.Describe, lSize], cLoggerLua);
   fEvent.SetEvent; // even if it runs already
   pItem.WaitForResult;
@@ -729,7 +745,7 @@ begin
   fExecutor.Run(TRiRefString.Create(pRef, pData));
 end;
 
-procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pData: Integer);
+procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pData: Int64);
 begin
   fExecutor.Run(TRiRefInteger.Create(pRef, pData));
 end;
@@ -994,6 +1010,7 @@ begin
   fLua.RegisterFunction('lmc_get_window_title', '', nil, @GetActiveWindowTitle);
   fLua.RegisterFunction('lmc_sleep','',nil,@DoSleep);
   fLua.RegisterFunction('lmc_reset','',nil,@DoReset);
+  fLua.RegisterFunction('lmc_set_timer', '', nil, @DoSetTimer);
   // devices
   fLua.RegisterFunction('lmc_print_devices','',nil,@PrintDevices);
   fLua.RegisterFunction('lmc_get_devices','',nil,@GetDevices);

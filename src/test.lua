@@ -54,7 +54,7 @@ print(lmc_device_set_name('KBD2', 'FF905BA'))
 --print(lmc_get_button('LB2', 9))
 
 -- now logical name is assigned to game device
-lmc_print_devices()
+--lmc_print_devices()
 
 --define callback function
 log_handler = function(button, direction, ts)

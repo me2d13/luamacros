@@ -21,6 +21,7 @@ function Say(luaState : TLuaState) : integer;
 function GetActiveWindowTitle(luaState : TLuaState) : integer;
 function DoSleep(luaState : TLuaState) : integer;
 function DoReset(luaState : TLuaState) : integer;
+function DoSetTimer(luaState : TLuaState) : integer;
 
 implementation
 
@@ -261,6 +262,31 @@ begin
   gMainForm.ResetAfterLuaScriptEnd;
   Result := 0;
   Glb.StatsService.EndCommand('lmc_reset', lStart);
+end;
+
+function DoSetTimer(luaState: TLuaState): integer;
+var
+  lHandlerRef: Integer;
+  lInterval : Integer;
+  lNumOfParams: Integer;
+  lStart: Int64;
+begin
+  lStart := Glb.StatsService.BeginCommand('lmc_set_timer');
+  // Interval
+  // handler
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams = 2) then
+  begin
+    if lua_isnumber(luaState, 1) = 1 then
+      lInterval:= Trunc(lua_tonumber(luaState, 1))
+    else
+      raise LmcException.Create('Wrong type of 1st parameter. It must number [miliseconds]');
+    lHandlerRef := luaL_ref(luaState, LUA_REGISTRYINDEX);
+    Glb.TimerService.AddTimer(lInterval, lHandlerRef);
+  end else
+    raise LmcException.Create('Provide 2 parameters for lmc_set_timer - interval and callback function');
+  Result := 0;
+  Glb.StatsService.EndCommand('lmc_set_timer', lStart);
 end;
 
 
