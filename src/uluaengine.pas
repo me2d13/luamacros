@@ -194,8 +194,7 @@ type
       procedure RunCode(pSource: String);
       procedure SetCallback(pDeviceName: String; pButton: Integer; pDirection: Integer; pHandlerRef: Integer);
       procedure SetDeviceCallback(pDeviceName: String; pHandlerRef: Integer);
-      procedure OnDeviceEvent(pDevice: TDevice; pButton: Integer; pDirection: Integer);overload;
-      procedure OnDeviceEvent(pDevice: TDevice; pButton: Integer; pDirection: Integer; pTimeStamp: Int64);overload;
+      procedure OnDeviceEvent(pDevice: TDevice; pButton: Integer; pDirection: Integer; pFlags: Integer);overload;
       procedure OnDeviceEvent(pDevice: TDevice; pData: String);overload;
       function IsKeyHandled(pKsPtr: TKeyStrokePtr): boolean;
       function GetQueueSize: Integer;
@@ -869,8 +868,7 @@ begin
   end;
 end;
 
-procedure TLuaEngine.SetDeviceCallback(pDeviceName: String; pHandlerRef: Integer
-  );
+procedure TLuaEngine.SetDeviceCallback(pDeviceName: String; pHandlerRef: Integer);
 var
   lDevice: TDevice;
   lTrigger: TTrigger;
@@ -904,36 +902,29 @@ begin
 end;
 
 procedure TLuaEngine.OnDeviceEvent(pDevice: TDevice; pButton: Integer;
-  pDirection: Integer);
-begin
-  OnDeviceEvent(pDevice, pButton, pDirection, 0);
-end;
-
-procedure TLuaEngine.OnDeviceEvent(pDevice: TDevice; pButton: Integer;
-  pDirection: Integer; pTimeStamp: Int64);
+  pDirection: Integer; pFlags: Integer);
 var
   lTrigger: TTrigger;
+  lTimeStamp: Int64;
 begin
   for lTrigger in fTriggers do
   begin
     if (pDevice = lTrigger.Device) then
     begin
+      lTimeStamp:=GetTickCount64;
       // callbacks with specific button and direction
       if (not lTrigger.WholeDevice) and (pButton = lTrigger.KeyNumber) and
       (pDirection = lTrigger.Direction) then
       begin
         Glb.DebugLog(Format('Calling handler %d for device %s, key %d, direction %d, ts %d',
-            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection, pTimeStamp]), cLoggerLua);
-        CallFunctionByRef(lTrigger.LuaRef);
+            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection, lTimeStamp]), cLoggerLua);
+        CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection, lTimeStamp)
       end;
       if (lTrigger.WholeDevice) then
       begin
         Glb.DebugLog(Format('Calling handler %d for device %s with params key %d, direction %d, ts %d',
-            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection, pTimeStamp]), cLoggerLua);
-        if (pTimeStamp > 0) then
-          CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection, pTimeStamp)
-        else
-          CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection);
+            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection, lTimeStamp]), cLoggerLua);
+        CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection, lTimeStamp);
       end;
     end;
   end;

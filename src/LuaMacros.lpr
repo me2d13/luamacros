@@ -10,7 +10,7 @@ uses
   Forms, lnetbase, uniqueinstance_package, LazSerialPort, uMainFrm,
   MemMap, uXplCommon, uXplControl, uGlobals, uLuaCmdXpl, uDxDeviceService,
   uDevice, uDxDevice, udeviceservice, uLuaCmdDevice, uLuaEngine, uComDevice,
-  uComDeviceService, uKbdDevice, uKbdDeviceService, uRawInput, uHookService,
+  uComDeviceService, uKbdDevice, uKbdDeviceService, uHookService,
   uHookCommon, uKeyLogService, uSendKeys, uScanService, uLuaCmdMainWindow,
   uXplListener, uxplsender, uXplMessages, uConfigService, uHttpServer,
   uLuaCmdHttp, uSpeechService, uStatsForm, uStatsService;

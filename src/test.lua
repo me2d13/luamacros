@@ -22,7 +22,7 @@ lmc.autoReload = true
 --lmc_log_module('CFG')
 --lmc_log_module('SPE')
 --lmc_log_module('HTP')
-lmc_log_module('KBD')
+--lmc_log_module('KBD')
 --lmc_log_module('HOOK')
 --lmc_log_spool('lmc_spool.log')
 print('Version: ' .. lmc.version)
@@ -36,8 +36,14 @@ print('Version: ' .. lmc.version)
 -- common LUA statement
 print('This is LuaMacros. Listing detected devices...');
 
+function oneSecondTimerHandler(ts)
+  print('Timer alarm at time stamp '..ts..'.')
+end
+
+--lmc_set_timer(1000, oneSecondTimerHandler)
+
 -- print device table
---lmc_print_devices();
+lmc_print_devices();
 
 -- assign logical name to game device by regexp
 -- 1st arg: logical name
@@ -58,6 +64,7 @@ print(lmc_device_set_name('KBD2', 'FF905BA'))
 
 --define callback function
 log_handler = function(button, direction, ts)
+  print('AHOJ')
   print('Callback for device: button ' .. button .. ', direction '..direction..', ts '..ts)
 end
 

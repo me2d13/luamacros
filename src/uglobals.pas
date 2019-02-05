@@ -108,6 +108,8 @@ function Sto_GetFmtFileVersion(const FileName: String = ''; const Fmt: String = 
 
 implementation
 
+uses DateUtils;
+
 {$Define offHARD_LOG}
 
 const
@@ -347,8 +349,9 @@ end;
 function TGlobals.UnixTimestampMs: Int64;
 begin
   //Result := Round(Now * 24*60*60*1000);
-  //Result := Trunc((Now - EncodeDate(1970, 1 ,1)) * 24 * 60 * 60);
-  Result := Round((Now - 25569) * 86400*1000);
+  //Result := Trunc((Now - EncodeDate(1970, 1 ,1)) * 24 * 60 * 60); //TODO: in locale time, not GMT
+  //Result := Round((Now - 25569) * 86400*1000);
+  Result := DateTimeToUnix(Now);
 end;
 
 initialization
