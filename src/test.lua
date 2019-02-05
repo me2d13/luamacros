@@ -70,7 +70,7 @@ lmc_print_devices();
 --print(lmc_device_set_name('KBD2', '31BB05D2'))
 --print(lmc_device_set_name('ST', 'Saitek'))
 -- remember 2nd param is regexp, so any unique part from that ugly keyboard system id works
---lmc_assign_keyboard('KBD2');
+lmc_assign_keyboard('KBD2');
 
 --print(lmc_get_button('LB2', 9))
 
@@ -82,7 +82,7 @@ log_handler = function(button, direction, ts)
   print('Callback for device: button ' .. button .. ', direction '..direction..', ts '..ts)
 end
 
---lmc_set_handler('KBD1', log_handler)
+lmc_set_handler('KBD2', log_handler)
 
 -- assign callback to game device, button no 2, press event
 -- 1st param: logical name
@@ -208,7 +208,7 @@ end)
 --  print('Callback for axis - value ' .. val..', ts '..ts)
 --end)
 
-for i=1,70 do
-  lmc_set_timer(1000*i, timerHandlerWhichRuns5seconds)
-end
+--for i=1,70 do
+--  lmc_set_timer(1000*i, timerHandlerWhichRuns5seconds)
+--end
 
