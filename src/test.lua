@@ -2,8 +2,9 @@
 clear();
 --lmc_log_module('TMR')
 --lmc_log_module('LUA')
+--lmc_log_module('KBD')
 lmc.autoReload = true
-lmc.statistics = true
+--lmc.statistics = true
 
 function timerHandler(ts)
   print('Timer alarm at time stamp '..ts..'. Waiting 2s.')
@@ -47,13 +48,6 @@ if (lmc.minimizeToTray) then
 else
   print('Won\'t minimize to tray')
 end
---lmc_minimize()
-
--- log all modules, very verbose
---lmc_log_all();
---lmc_log_spool('lmc_spool.log')
---lmc_spawn('calc.exe')
-
 -- common LUA statement
 print('This is LuaMacros. Listing detected devices...');
 
@@ -78,8 +72,8 @@ lmc_assign_keyboard('KBD2');
 --lmc_print_devices()
 
 --define callback function
-log_handler = function(button, direction, ts)
-  print('Callback for device: button ' .. button .. ', direction '..direction..', ts '..ts)
+log_handler = function(button, direction, ts, flags)
+  print('Callback for device: button ' .. button .. ', direction '..direction..', ts '..ts..', flags '..flags)
 end
 
 lmc_set_handler('KBD2', log_handler)

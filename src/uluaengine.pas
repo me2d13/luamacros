@@ -108,6 +108,17 @@ type
       function Describe: String; override;
   end;
 
+  { TRiRefIntegerIntegerInt64Integer }
+
+  TRiRefIntegerIntegerInt64Integer = class (TRiRefIntegerIntegerInt64)
+    protected
+      fPar4: Integer;
+    public
+      constructor Create(pRef: Integer; p1, p2: Integer; p3: Int64; p4: Integer);
+      procedure Execute(pLua: TLua); override;
+      function Describe: String; override;
+  end;
+
   TRiRefInteger = class (TRiRef)
     protected
       fPar1: Int64;
@@ -184,7 +195,7 @@ type
       procedure RegisterFunctions;
       procedure RegisterConfig;
       procedure CallFunctionByRef(pRef: Integer);overload;
-      procedure CallFunctionByRef(pRef: Integer; pKey: Int64; pDirection: Int64; pTimeStamp: Int64);overload;
+      procedure CallFunctionByRef(pRef: Integer; pKey: Int64; pDirection: Int64; pTimeStamp: Int64; pFlags: Integer);overload;
     public
       constructor Create;
       destructor Destroy;override;
@@ -239,6 +250,32 @@ procedure RefreshQueueIndicatorInMainWindow;
 begin
   if (Glb.MainFormHandle <> 0) then // first start handle is not yet ready
     PostMessage(Glb.MainFormHandle, WM_LUA_QUEUE_CHANGE, 0, 0);
+end;
+
+{ TRiRefIntegerIntegerInt64Integer }
+
+constructor TRiRefIntegerIntegerInt64Integer.Create(pRef: Integer; p1,
+  p2: Integer; p3: Int64; p4: Integer);
+begin
+  inherited Create(pRef, p1, p2, p3);
+  fPar4:=p4;
+end;
+
+procedure TRiRefIntegerIntegerInt64Integer.Execute(pLua: TLua);
+begin
+  if (pLua = nil) then
+    raise LmcException.Create('LUA not initialized');
+  lua_rawgeti(pLua.LuaInstance, LUA_REGISTRYINDEX, fRef);
+  lua_pushinteger(pLua.LuaInstance, fPar1);
+  lua_pushinteger(pLua.LuaInstance, fPar2);
+  lua_pushinteger(pLua.LuaInstance, fPar3);
+  lua_pushinteger(pLua.LuaInstance, fPar4);
+  lua_pcall(pLua.LuaInstance, 4, 0, LUA_MULTRET);
+end;
+
+function TRiRefIntegerIntegerInt64Integer.Describe: String;
+begin
+  Result:=Format('callback id %d, int params %d, %d, %d, %d', [fRef, fPar1, fPar2, fPar3, fPar4]);
 end;
 
 { TRiRefIntegerIntegerInt64 }
@@ -763,9 +800,9 @@ begin
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pKey: Int64;
-  pDirection: Int64; pTimeStamp: Int64);
+  pDirection: Int64; pTimeStamp: Int64; pFlags: Integer);
 begin
-  fExecutor.Run(TRiRefIntegerIntegerInt64.Create(pRef, pKey, pDirection, pTimeStamp));
+  fExecutor.Run(TRiRefIntegerIntegerInt64Integer.Create(pRef, pKey, pDirection, pTimeStamp, pFlags));
 end;
 
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer;
@@ -916,15 +953,15 @@ begin
       if (not lTrigger.WholeDevice) and (pButton = lTrigger.KeyNumber) and
       (pDirection = lTrigger.Direction) then
       begin
-        Glb.DebugLog(Format('Calling handler %d for device %s, key %d, direction %d, ts %d',
-            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection, lTimeStamp]), cLoggerLua);
-        CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection, lTimeStamp)
+        Glb.DebugLog(Format('Calling handler %d for device %s, key %d, direction %d, ts %d, flags %d',
+            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection, lTimeStamp, pFlags]), cLoggerLua);
+        CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection, lTimeStamp, pFlags)
       end;
       if (lTrigger.WholeDevice) then
       begin
-        Glb.DebugLog(Format('Calling handler %d for device %s with params key %d, direction %d, ts %d',
-            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection, lTimeStamp]), cLoggerLua);
-        CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection, lTimeStamp);
+        Glb.DebugLog(Format('Calling handler %d for device %s with params key %d, direction %d, ts %d, flags %d',
+            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection, lTimeStamp, pFlags]), cLoggerLua);
+        CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection, lTimeStamp, pFlags);
       end;
     end;
   end;
