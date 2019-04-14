@@ -156,11 +156,12 @@ type
   function Pointer2Pointer8b(Input: Pointer) : Pointer8b;
   function Pointer8b2Pointer(Input: Pointer8b) : Pointer;
   function MemoryDump(pAddr: Pointer; pSize: Integer) : String;
+  function UnixTimeStampCommonForXpl: Int64;
 
 
 implementation
 
-uses SysUtils;
+uses SysUtils, DateUtils;
 
 function Pointer2Pointer8b(Input: Pointer) : Pointer8b;
 begin
@@ -210,6 +211,11 @@ begin
     lRes := lRes + sLineBreak;
   end;
   Result := lRes;
+end;
+
+function UnixTimeStampCommonForXpl: Int64;
+begin
+  Result := DateTimeToUnix(Now);
 end;
 
 { TXplVariableCallbackInfo }

@@ -132,7 +132,7 @@ begin
     lCom^.TextData.Value:=pText;
     lCom^.Header.Status:=LMC_STATUS_READY;
     DebugLog(Format('Sending DrawText command for text %s at pos %f.', [pText, pPos]));
-    //DebugLogFmt('Size of TLmc2XplSharedMem is %d', [SizeOf(TLmc2XplSharedMem)]);
+    // DebugLogFmt('Size of TLmc2XplSharedMem is %d', [SizeOf(TLmc2XplSharedMem)]);
   end;
 end;
 
@@ -208,13 +208,13 @@ begin
   begin
     if fLmcMem^.Commands[lIndex].Header.Status = LMC_STATUS_FREE then
     begin
-      lCommand:=@fLmcMem^.Commands[lIndex];
+      lCommand:=@(fLmcMem^.Commands[lIndex]);
       break;
     end;
     if (fLmcMem^.Commands[lIndex].Header.Status = LMC_STATUS_READY) and
       (fXplMem.LastProcessedId > fLmcMem^.Commands[lIndex].Header.Id) then
     begin
-      lCommand:=@fLmcMem^.Commands[lIndex];
+      lCommand:=@(fLmcMem^.Commands[lIndex]);
       lCommand.Header.Status:=LMC_STATUS_FREE;
       break;
     end;
@@ -227,7 +227,7 @@ begin
     Result := lCommand;
     Result^.Header.Status:=LMC_STATUS_WRITING;
     Result^.Header.Id:=fRequestSequence;
-    Result^.Header.TimeStamp:=Glb.UnixTimestampMs;
+    Result^.Header.TimeStamp:=UnixTimeStampCommonForXpl;
     DebugLog(Format('Initiated command slot %d with request id %d at %d.', [lIndex, fRequestSequence, Result^.Header.TimeStamp]));
     Inc(fRequestSequence);
     DebugLog(Format('XPL memory: last id %d, updated %d.', [fXplMem^.LastProcessedId, fXplMem^.UpdateTimeStamp]));
@@ -244,7 +244,7 @@ begin
   begin
     if (fXplMem^.Values[lIndex].Header.Status = LMC_STATUS_READY)
       and (fXplMem^.Values[lIndex].Value.Index = pIndex)
-      and (fXplMem^.Values[lIndex].Header.TimeStamp + cAcceptableXplAnswerDelayInMs >= Glb.UnixTimestampMs)
+      and (fXplMem^.Values[lIndex].Header.TimeStamp + cAcceptableXplAnswerDelayInMs >= UnixTimeStampCommonForXpl)
       and (fXplMem^.Values[lIndex].Value.Name = pName) then
     begin
       Result := TXplValue.Create(fXplMem^.Values[lIndex].Value.Value);
@@ -297,7 +297,7 @@ begin
         Inc(lCallbackInfo.ChangeCount);
       end;
       // should we send the change? Calculate interval
-      lNow := Glb.UnixTimestampMs;
+      lNow := UnixTimeStampCommonForXpl;
       lSend := (lNow - lCallbackInfo.LastTriggerTs) >= lCallbackInfo.Interval;
       if (lSend) then
       begin
@@ -316,7 +316,7 @@ end;
 
 function TXPLcontrol.IsXplConnected: Boolean;
 begin
-  Result := (Glb.UnixTimestampMs - fXplMem.UpdateTimeStamp) < cMaxAcceptableRequestDelayMs;
+  Result := (UnixTimeStampCommonForXpl - fXplMem.UpdateTimeStamp) < cMaxAcceptableRequestDelayMs;
 end;
 
 function TXPLcontrol.GetXplVariable(pName: String; pIndex: Integer): TXplValue;
