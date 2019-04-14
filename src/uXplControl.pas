@@ -64,7 +64,6 @@ uses SysUtils, Windows, Forms, XPLMDataAccess, Variants,
 
 constructor TXPLcontrol.Create;
 begin
-  //lGlb.DebugLog('Xplane control created.', 'XPL');
   fRequestSequence := 1;
   fCallbacks := TCallbackInfoList.Create;
   fXpl2LmcMem := TMemMap.Create(cXpl2LmcMemName, SizeOf(TXpl2LmcSharedMem), True);
@@ -96,7 +95,12 @@ procedure TXPLcontrol.Init;
 var
   lCom: PLmcCommandRec;
 begin
+  DebugLogFmt('Xpl -> lmc shared memory mapped with handle %d', [fXpl2LmcMem.Handle]);
+  DebugLogFmt('Lmc -> xpl shared memory mapped with handle %d', [fLmc2XplMem.Handle]);
   fRequestSequence := fXplMem.LastProcessedId + 1;   // ususally 0+1, but if XPL
+  DebugLogFmt('Lmc will send first request id %d', [fRequestSequence]);
+  // DebugLogFmt('Size of TLmcCommandRec is %d', [SizeOf(TLmcCommandRec)]);
+  // DebugLogFmt('Size of TComSlotRec is %d', [SizeOf(TComSlotRec)]);
   // is running and LMC was restarted, the sequence continues (otherwise XPL would
   // ignore requests 1,2,3... as processed
   lCom := getCommandSlotAndInitHeader;
@@ -105,6 +109,7 @@ begin
     lCom^.CommandType:=LMC_COMMAND_LMC_STARTED;
     lCom^.Header.Status:=LMC_STATUS_READY;
     DebugLog('Sending LMC started command to reset XPL plugin structures');
+    //DebugLog('Memory dump is ' + MemoryDump(lCom, SizeOf(TLmcCommandRec)));
   end;
 end;
 
@@ -227,8 +232,8 @@ begin
     Result := lCommand;
     Result^.Header.Status:=LMC_STATUS_WRITING;
     Result^.Header.Id:=fRequestSequence;
-    Result^.Header.TimeStamp:=Glb.UnixTimestampMs;
-    DebugLog(Format('Initiated command slot %d with request id %d at %d.', [lIndex, fRequestSequence, Result^.Header.TimeStamp]));
+    Result^.Header.TimeStamp:=UnixTimeStampCommonForXpl;
+    DebugLog(Format('Initiated command slot index %d with request id %d at ts %d.', [lIndex, fRequestSequence, Result^.Header.TimeStamp]));
     Inc(fRequestSequence);
     DebugLog(Format('XPL memory: last id %d, updated %d.', [fXplMem^.LastProcessedId, fXplMem^.UpdateTimeStamp]));
   end;
@@ -244,7 +249,7 @@ begin
   begin
     if (fXplMem^.Values[lIndex].Header.Status = LMC_STATUS_READY)
       and (fXplMem^.Values[lIndex].Value.Index = pIndex)
-      and (fXplMem^.Values[lIndex].Header.TimeStamp + cAcceptableXplAnswerDelayInMs >= Glb.UnixTimestampMs)
+      and (fXplMem^.Values[lIndex].Header.TimeStamp + cAcceptableXplAnswerDelayInMs >= UnixTimeStampCommonForXpl)
       and (fXplMem^.Values[lIndex].Value.Name = pName) then
     begin
       Result := TXplValue.Create(fXplMem^.Values[lIndex].Value.Value);

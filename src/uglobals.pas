@@ -186,8 +186,8 @@ constructor TGlobals.Create;
 begin
   InitCriticalSection(fLogCs);
   fPrintBuffer := TStringList.Create;
-  fXplCLcontrol:=TXPLcontrol.Create;
   fLoggedModules := TStringList.Create;
+  fXplCLcontrol:=TXPLcontrol.Create;
   fLuaEngine := TLuaEngine.Create;
   fScanService := TScanService.Create;
   fDeviceService := TDeviceService.Create;

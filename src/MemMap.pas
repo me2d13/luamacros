@@ -45,6 +45,7 @@ type
     procedure WriteBuffer(const ABuffer; const ASize: Cardinal);
 
     property Memory: Pointer read FMemory default nil;
+    property Handle: THandle read FHandle;
   end;
 
 implementation
