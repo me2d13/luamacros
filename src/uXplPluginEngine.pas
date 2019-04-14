@@ -51,7 +51,6 @@ TXplEngine = class (TObject)
     procedure SetVariable(pDef: TXplVariable; pVal: TXplValue; pIndex: Int64);
     function GetVariable(pDef: TXplVariable; pProduceLog: Boolean): TXplValue; overload;
     function GetVariable(pDef: TXplVariable; pIndex: Integer; pProduceLog: Boolean): TXplValue; overload;
-    function UnixTimestampMs: Int64;
     function ValidLmcRequest(header: TComSlotRec): Boolean;
     procedure CheckCommandQueue;
     procedure LmcStarted;
@@ -80,8 +79,10 @@ begin
   fTickNo := 0;
   fLogger := TXplLogger.Create;
   fXpl2LmcMem := TMemMap.Create(cXpl2LmcMemName, SizeOf(TXpl2LmcSharedMem), True);
+  DebugLogFmt('Xpl -> lmc shared memory mapped with handle %d', [fXpl2LmcMem.Handle]);
   fXplMem:=fXpl2LmcMem.Memory;
   fLmc2XplMem := TMemMap.Create(cLmc2XplMemName, SizeOf(TLmc2XplSharedMem), True);
+  DebugLogFmt('Lmc -> xpl shared memory mapped with handle %d', [fLmc2XplMem.Handle]);
   fLmcMem:=fLmc2XplMem.Memory;
   fLastProcessedId:=0;
   fTextToBeDrawn:='';
@@ -94,8 +95,10 @@ begin
   fWatchedVariables:=TStringList.Create;
   fWatchedVariables.CaseSensitive:=False;
   InitGlValues;
+  // DebugLogFmt('Size of TLmc2XplSharedMem is %d', [SizeOf(TLmc2XplSharedMem)]);
+  // DebugLogFmt('Size of TLmcCommandRec is %d', [SizeOf(TLmcCommandRec)]);
+  // DebugLogFmt('Size of TComSlotRec is %d', [SizeOf(TComSlotRec)]);
   DebugLog('LuaMacros init done');
-  //DebugLogFmt('Size of TLmc2XplSharedMem is %d', [SizeOf(TLmc2XplSharedMem)]);
 end;
 
 procedure TXplEngine.DebugLog(Value: String);
@@ -143,6 +146,12 @@ var
   lOrigLastId: Int64;
 begin
   Inc(fTickNo);
+  // if (fTickNo mod 500 = 0) then
+  // begin
+  //   DebugLogFmt('Xpl tick number %d', [fTickNo]);
+  //   DebugLog('Memory dump is ' + MemoryDump(@fLmcMem.Commands[0], 20));
+  // end;
+
   lOrigLastId := fLastProcessedId;
   fMaxComIdInTick:=0;
   CheckCommandQueue;
@@ -155,7 +164,7 @@ begin
     DebugLogFmt('After xpl tick %d we have fLastProcessedId = %d, fMaxComIdInTick = %d', [fTickNo, fLastProcessedId, fMaxComIdInTick]);
   fXplMem^.LastProcessedId:=fLastProcessedId;
   fXplMem^.Lock:=LOCK_NONE;
-  fXplMem^.UpdateTimeStamp:=UnixTimestampMs;
+  fXplMem^.UpdateTimeStamp:=UnixTimeStampCommonForXpl;
 end;
 
 procedure TXplEngine.CheckCommandQueue;
@@ -167,6 +176,7 @@ begin
     if ValidLmcRequest(fLmcMem^.Commands[lIndex].Header) then
     begin
       DebugLogFmt('Tick %d: Detected valid command index %d, id %d type %d', [fTickNo, lIndex, fLmcMem^.Commands[lIndex].Header.Id, fLmcMem^.Commands[lIndex].CommandType]);
+      //DebugLog('Memory dump is ' + MemoryDump(@fLmcMem^.Commands[lIndex], SizeOf(TLmcCommandRec)));
       case fLmcMem^.Commands[lIndex].CommandType of
       LMC_COMMAND_LMC_STARTED:
           LmcStarted;
@@ -191,8 +201,10 @@ end;
 procedure TXplEngine.LmcStarted;
 begin
   DebugLog('Processing Lmc started command');
-  fLastProcessedId:=0;
-  fMaxComIdInTick:=0;
+  //fLastProcessedId:=0;
+  //fMaxComIdInTick:=0;
+  // should not be needed as LMC will read last processed id from plugin's
+  // shared memory and continue with this sequence
 end;
 
 procedure TXplEngine.UpdateWatchedValue(pIndex: Integer; pProduceLog: Boolean);
@@ -209,7 +221,7 @@ begin
     lValue := GetVariable(lXplVariable, fXplMem.Values[pIndex].Value.Index, pProduceLog);
     if (lValue <> nil) then
     begin
-      lNow:=UnixTimestampMs;
+      lNow:=UnixTimeStampCommonForXpl;
       fXplMem.Values[pIndex].Header.Status:=LMC_STATUS_WRITING;
       fXplMem.Values[pIndex].Header.TimeStamp:=lNow;
       fXplMem.Values[pIndex].Value.Value := lValue.Value;
@@ -699,20 +711,22 @@ begin
   end;
 end;
 
-function TXplEngine.UnixTimestampMs: Int64;
-begin
-  //Result := Round(Now * 24*60*60*1000);
-  Result := Round((Now - 25569) * 86400*1000);
-end;
-
 function TXplEngine.ValidLmcRequest(header: TComSlotRec): Boolean;
 begin
   Result := (header.Status = LMC_STATUS_READY)
-    and (UnixTimestampMs - header.TimeStamp < cMaxAcceptableRequestDelayMs)
-    and (header.Id > fLastProcessedId);
-  if Result and (fMaxComIdInTick < header.Id) then
+    and (UnixTimeStampCommonForXpl - header.TimeStamp < cMaxAcceptableRequestDelayMs)
+    and (header.Id > fLastProcessedId)
+    and (header.Id - fLastProcessedId < 1000); // prevent non-sense jumps. Somthing is destroying id in shared memory and I can't find what :-(
+  if Result then
   begin
-    fMaxComIdInTick := header.Id;
+    if (fMaxComIdInTick < header.Id) then begin
+      fMaxComIdInTick := header.Id;
+      DebugLogFmt('Detected valid request with id %d. Setting fMaxComIdInTick to %d',
+        [header.Id, fMaxComIdInTick]);
+    end else begin
+      DebugLogFmt('Detected valid request with id %d but ignoring as we already processed higher id %d in this tick',
+        [header.Id, fMaxComIdInTick]);
+    end;
   end;
 end;
 
