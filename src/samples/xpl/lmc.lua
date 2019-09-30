@@ -13,7 +13,7 @@ lmc_device_set_name('LB2', '8001444553540000')
 lmc_device_set_name('KBD1', '34A63ED7') -- upper
 lmc_device_set_name('KBD2', 'VID_04FC') -- lower
 --lmc_device_set_name('ST', 'Saitek')
-lmc_add_com('FF-COM', 'COM12', 9600, 8, 'N', 1) -- 9600,8,N,1, was COM9
+--lmc_add_com('FF-COM', 'COM12', 9600, 8, 'N', 1) -- 9600,8,N,1, was COM9
 lmc_print_devices()
 
 lmc.minimizeToTray = true
@@ -27,7 +27,7 @@ dofile(scriptRoot..'common.lua')
 dofile(scriptRoot..'b407.lua')
 dofile(scriptRoot..'as350.lua')
 dofile(scriptRoot..'chal300.lua')
-dofile(scriptRoot..'ff.lua')
+--dofile(scriptRoot..'ff.lua')
 
 gPlane = ''
 gIsHeli = false
@@ -215,6 +215,17 @@ function setPlane(name)
     gIsPlane = false
     gIsHeli = true
     init_b407()
+  elseif (gName == '') then
+    if (math.floor(lmc_get_xpl_variable('sim/aircraft/gear/acf_the_eqlbm')*1000) == 3613) then
+      lmc_say('Huey helicopter')
+      gIsPlane = false
+      gIsHeli = true
+      init_b407()
+    else
+      lmc_say('New plane with unknown type')
+      gIsPlane = false
+      gIsHeli = false
+    end
   else
     lmc_say('New plane with unknown type')
     gIsPlane = false
