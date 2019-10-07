@@ -7,6 +7,8 @@ lmc.autoReload = true
 --lmc_log_module('XPL')
 --lmc_log_module('LUA')
 --lmc_log_module('CFG')
+--lmc_xpl_command('sim/view/track-ir_toggle')
+--print(lmc_get_xpl_variable('sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot'))
 lmc_device_set_name('LB', '800F444553540000')
 lmc_device_set_name('LB2', '8001444553540000')
 --lmc_device_set_name('KBD1', '826BD90') this is my regular
@@ -56,6 +58,7 @@ function getRAltInterval(value)
 end
 
 function checkRAlt(cra)
+  print('Alt '..cra)
   curIndex = getRAltInterval(cra)
   if gLastRAltInterval ~= curIndex then
     if gLastRAltInterval > curIndex then

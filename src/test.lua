@@ -1,8 +1,10 @@
 -- GUI thing: clear log window
+--lmc_xpl_text('From LUA macros', 0.3, 5)
 clear();
 --lmc_log_module('TMR')
 --lmc_log_module('LUA')
 --lmc_log_module('KBD')
+--lmc_log_module('XPL')
 lmc.autoReload = true
 --lmc.statistics = true
 
@@ -23,7 +25,7 @@ end
 --lmc_set_timer(10000, timerHandler)
 
 --lmc_xpl_command('sim/view/3d_cockpit_cmnd_look')
---lmc_get_xpl_variable('asasaass')
+--print(lmc_get_xpl_variable('sim/cockpit/autopilot/heading_mag'))
 
 --lmc_sleep(1500)
 --lmc_send_input(16, 0, 0) -- press shift
@@ -64,7 +66,7 @@ lmc_print_devices();
 --print(lmc_device_set_name('KBD2', '31BB05D2'))
 --print(lmc_device_set_name('ST', 'Saitek'))
 -- remember 2nd param is regexp, so any unique part from that ugly keyboard system id works
-lmc_assign_keyboard('KBD2');
+--lmc_assign_keyboard('KBD2');
 
 --print(lmc_get_button('LB2', 9))
 
@@ -76,7 +78,7 @@ log_handler = function(button, direction, ts, flags)
   print('Callback for device: button ' .. button .. ', direction '..direction..', ts '..ts..', flags '..flags)
 end
 
-lmc_set_handler('KBD2', log_handler)
+--lmc_set_handler('KBD2', log_handler)
 
 -- assign callback to game device, button no 2, press event
 -- 1st param: logical name
@@ -172,7 +174,8 @@ end)
 
 
 --varName='sim/cockpit2/radios/actuators/adf1_frequency_hz'
-varName='sim/cockpit/radios/gps_dme_time_secs'
+--varName='sim/cockpit/radios/gps_dme_time_secs'
+varName='sim/cockpit/autopilot/heading_mag'
 lmc_on_xpl_var_change(varName,
   function(value, count)
     print(varName .. ' changed to ' .. value .. ' with ' .. count .. ' changes')
@@ -205,4 +208,12 @@ end)
 --for i=1,70 do
 --  lmc_set_timer(1000*i, timerHandlerWhichRuns5seconds)
 --end
+
+lmc_sleep(2000)
+lmc_send_input(0, 1080, 4) -- press и
+lmc_send_input(0, 1080, 6) -- release и
+lmc_send_unicode(0x222, 1)
+lmc_send_unicode(0x222, 0)
+lmc_send_unicode(0x1f3cd, 1)
+--lmc_send_unicode(0x1f3cd, 0)
 

@@ -74,6 +74,7 @@ begin
     BeginUpdate;
     Clear;
     Add('Current time: %s', [FormatDateTime('yyyy-mm-dd hh:nn:ss:zzz', Now)]);
+    Add('Current Unix ts [ms]: %d', [UnixTimeStampCommonForXpl]);
     Add('Refresh count of this window: %d', [fRefreshCount]);
     EndUpdate;
   end;

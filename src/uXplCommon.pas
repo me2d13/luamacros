@@ -215,7 +215,7 @@ end;
 
 function UnixTimeStampCommonForXpl: Int64;
 begin
-  Result := DateTimeToUnix(Now);
+  Result := MilliSecondsBetween(Now, 25569); //25569 is TDateTime of Unix epoch 1.1.1970
 end;
 
 { TXplVariableCallbackInfo }

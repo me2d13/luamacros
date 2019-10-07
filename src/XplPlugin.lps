@@ -2,13 +2,13 @@
 <CONFIG>
   <ProjectSession>
     <PathDelim Value="\"/>
-    <Version Value="9"/>
+    <Version Value="10"/>
     <BuildModes Active="Default"/>
-    <Units Count="44">
+    <Units Count="45">
       <Unit0>
         <Filename Value="XplPlugin.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="13"/>
+        <TopLine Value="73"/>
         <CursorPos X="26" Y="42"/>
         <UsageCount Value="124"/>
         <Loaded Value="True"/>
@@ -19,14 +19,14 @@
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="236"/>
-        <CursorPos Y="243"/>
+        <TopLine Value="367"/>
+        <CursorPos Y="379"/>
         <UsageCount Value="124"/>
         <Bookmarks Count="4">
-          <Item0 Y="418" ID="3"/>
-          <Item1 Y="645" ID="4"/>
+          <Item0 Y="419" ID="3"/>
+          <Item1 Y="646" ID="4"/>
           <Item2 X="5" Y="349" ID="2"/>
-          <Item3 X="3" Y="401" ID="1"/>
+          <Item3 X="3" Y="402" ID="1"/>
         </Bookmarks>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -34,11 +34,11 @@
       <Unit2>
         <Filename Value="uXplCommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <WindowIndex Value="1"/>
+        <EditorIndex Value="2"/>
         <TopLine Value="71"/>
-        <CursorPos X="20" Y="103"/>
+        <CursorPos X="32" Y="93"/>
         <UsageCount Value="124"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit2>
       <Unit3>
@@ -94,7 +94,7 @@
       <Unit8>
         <Filename Value="uXplLogger.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="41"/>
         <CursorPos X="19" Y="48"/>
         <UsageCount Value="44"/>
@@ -338,68 +338,128 @@
         <CursorPos X="3" Y="22"/>
         <UsageCount Value="10"/>
       </Unit43>
+      <Unit44>
+        <Filename Value="..\inc\XPL_SDK213_XPLM\XPLMDataAccess.pas"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="83"/>
+        <CursorPos X="22" Y="108"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit44>
     </Units>
-    <JumpHistory Count="15" HistoryIndex="14">
+    <JumpHistory Count="28" HistoryIndex="27">
       <Position1>
-        <Filename Value="XplPlugin.lpr"/>
-        <Caret Line="42" Column="26" TopLine="13"/>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="65" Column="14" TopLine="28"/>
       </Position1>
       <Position2>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="128" Column="31" TopLine="110"/>
+        <Caret Line="152" Column="3" TopLine="144"/>
       </Position2>
       <Position3>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="152" Column="3" TopLine="144"/>
+        <Caret Line="59" Column="15" TopLine="38"/>
       </Position3>
       <Position4>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="233" Column="3" TopLine="229"/>
+        <Caret Line="52" Column="15" TopLine="39"/>
       </Position4>
       <Position5>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="58" Column="48" TopLine="34"/>
+        <Caret Line="646" Column="3" TopLine="644"/>
       </Position5>
       <Position6>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="199" Column="78" TopLine="199"/>
+        <Caret Line="53" Column="14" TopLine="31"/>
       </Position6>
       <Position7>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="234" Column="32" TopLine="209"/>
+        <Caret Line="675" Column="3" TopLine="667"/>
       </Position7>
       <Position8>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="128" Column="31" TopLine="110"/>
+        <Caret Line="27" Column="21" TopLine="23"/>
       </Position8>
       <Position9>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="147" Column="3" TopLine="140"/>
+        <Caret Line="95" Column="20" TopLine="59"/>
       </Position9>
       <Position10>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="164" Column="3" TopLine="160"/>
+        <Caret Line="96" Column="20" TopLine="60"/>
       </Position10>
       <Position11>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="400" Column="6" TopLine="393"/>
+        <Caret Line="127" Column="20" TopLine="91"/>
       </Position11>
       <Position12>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="411" Column="33" TopLine="393"/>
+        <Caret Line="220" Column="51" TopLine="184"/>
       </Position12>
       <Position13>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="102" Column="3" TopLine="100"/>
+        <Caret Line="244" Column="34" TopLine="208"/>
       </Position13>
       <Position14>
-        <Filename Value="uXplLogger.pas"/>
-        <Caret Line="67" Column="31" TopLine="41"/>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="258" Column="20" TopLine="222"/>
       </Position14>
       <Position15>
         <Filename Value="uXplPluginEngine.pas"/>
-        <Caret Line="61" Column="21" TopLine="36"/>
+        <Caret Line="372" Column="30" TopLine="336"/>
       </Position15>
+      <Position16>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="380" Column="24" TopLine="344"/>
+      </Position16>
+      <Position17>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="44" Column="15" TopLine="23"/>
+      </Position17>
+      <Position18>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="372" Column="3" TopLine="367"/>
+      </Position18>
+      <Position19>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="44" Column="15" TopLine="23"/>
+      </Position19>
+      <Position20>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="372" Column="3" TopLine="367"/>
+      </Position20>
+      <Position21>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="53" Column="25" TopLine="23"/>
+      </Position21>
+      <Position22>
+        <Filename Value="uXplPluginEngine.pas"/>
+      </Position22>
+      <Position23>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="44" Column="41" TopLine="8"/>
+      </Position23>
+      <Position24>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="45" Column="47" TopLine="9"/>
+      </Position24>
+      <Position25>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="52" Column="25" TopLine="17"/>
+      </Position25>
+      <Position26>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="53" Column="25" TopLine="18"/>
+      </Position26>
+      <Position27>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="58" Column="46" TopLine="23"/>
+      </Position27>
+      <Position28>
+        <Filename Value="uXplPluginEngine.pas"/>
+        <Caret Line="44" Column="15" TopLine="24"/>
+      </Position28>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

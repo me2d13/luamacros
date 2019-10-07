@@ -348,10 +348,7 @@ end;
 
 function TGlobals.UnixTimestampMs: Int64;
 begin
-  //Result := Round(Now * 24*60*60*1000);
-  //Result := Trunc((Now - EncodeDate(1970, 1 ,1)) * 24 * 60 * 60); //TODO: in locale time, not GMT
-  //Result := Round((Now - 25569) * 86400*1000);
-  Result := DateTimeToUnix(Now);
+  Result := MilliSecondsBetween(Now, 25569); //25569 is TDateTime of Unix epoch 1.1.1970
 end;
 
 initialization

@@ -373,9 +373,10 @@ begin
   if (lIndex < 0) then
   begin
     // not found, add to list
-    lVariable := GetOrRegisterXplVariable(pData.Name);;
+    lVariable := GetOrRegisterXplVariable(pData.Name);
     if (lVariable <> nil) then
     begin
+      DebugLog(Format('Adding variable %s to watched list.', [pData.Name]));
       fXplMem.Lock:=LOCK_LIST_CHANGING;
       fWatchedVariables.AddObject(WatchedKey(@pData), lVariable);
       lIndex:=fWatchedVariables.Count-1;
@@ -651,35 +652,29 @@ var
   lBuff: array[0..500] of char;
   lBuffPtr: PChar;
   lLength: Integer;
+  lType: Integer;
   lSingle: Single;
   lReal: Real;
   lInt: Integer;
 begin
-
-  case Ord(pDef.DataType) of
-    Ord(xplmType_Float):
-    begin
-      lSingle:=XPLMGetDataf(pDef.DataRef);
-      if pProduceLog then
-        DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
-      Result := TXplValue.Create(lSingle);
-    end;
-    Ord(xplmType_Double), Ord(xplmType_Double) + Ord(xplmType_Float):
-    begin
-      lReal:=XPLMGetDatad(pDef.DataRef);
-      if pProduceLog then
-        DebugLog(Format('Got double value %f of variable %s.', [lReal, pDef.Name]));
-      Result := TXplValue.Create(lReal);
-    end;
-    Ord(xplmType_Int):
-    begin
-      lInt:=XPLMGetDatai(pDef.DataRef);
-      if pProduceLog then
-        DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
-      Result := TXplValue.Create(lInt);
-    end;
-    Ord(xplmType_Data):
-    begin
+  lType := Ord(pDef.DataType);
+  if (lType and Ord(xplmType_Double) > 0) then
+  begin
+    lReal:=XPLMGetDatad(pDef.DataRef);
+    if pProduceLog then
+      DebugLog(Format('Got double value %f of variable %s.', [lReal, pDef.Name]));
+    Result := TXplValue.Create(lReal);
+  end else if (lType and Ord(xplmType_Float) > 0) then begin
+    lSingle:=XPLMGetDataf(pDef.DataRef);
+    if pProduceLog then
+      DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
+    Result := TXplValue.Create(lSingle);
+  end else if (lType and Ord(xplmType_Int) > 0) then begin
+    lInt:=XPLMGetDatai(pDef.DataRef);
+    if pProduceLog then
+      DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
+    Result := TXplValue.Create(lInt);
+  end else if (lType and Ord(xplmType_Data) > 0) then begin
       if (pDef.Length > 500) then
         lLength:=500
       else
@@ -689,25 +684,18 @@ begin
       if pProduceLog then
         DebugLog('Got string value of variable ' + pDef.Name + ': ' + lBuff);
       Result := TXplValue.Create(lBuff);
-    end;
-    Ord(xplmType_FloatArray):
-    begin
-      XPLMGetDatavf(pDef.DataRef, @lSingle, pIndex, 1);
-      if pProduceLog then
-        DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
-      Result := TXplValue.Create(lSingle);
-    end;
-    Ord(xplmType_IntArray):
-    begin
-      XPLMGetDatavi(pDef.DataRef, @lInt, pIndex, 1);
-      if pProduceLog then
-        DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
-      Result := TXplValue.Create(lInt);
-    end;
-    else
-    begin
-      DebugLog(Format('Unknown type %d of variable %s.', [pDef.DataType, pDef.Name]));
-    end;
+  end else if (lType and Ord(xplmType_FloatArray) > 0) then begin
+    XPLMGetDatavf(pDef.DataRef, @lSingle, pIndex, 1);
+    if pProduceLog then
+      DebugLog(Format('Got float value %f of variable %s.', [lSingle, pDef.Name]));
+    Result := TXplValue.Create(lSingle);
+  end else if (lType and Ord(xplmType_IntArray) > 0) then begin
+    XPLMGetDatavi(pDef.DataRef, @lInt, pIndex, 1);
+    if pProduceLog then
+      DebugLog(Format('Got int value %d of variable %s.', [lInt, pDef.Name]));
+    Result := TXplValue.Create(lInt);
+  end else begin
+    DebugLog(Format('Unknown type %d of variable %s.', [pDef.DataType, pDef.Name]));
   end;
 end;
 

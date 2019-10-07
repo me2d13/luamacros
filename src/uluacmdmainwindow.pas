@@ -14,6 +14,7 @@ function LogAll(luaState : TLuaState) : integer;
 function LogSpool(luaState : TLuaState) : integer;
 function SendKeys(luaState : TLuaState) : integer;
 function SendInput(luaState : TLuaState) : integer;
+function SendUnicode(luaState : TLuaState) : integer;
 function Spawn(luaState : TLuaState) : integer;
 function MinimizeMainWindow(luaState : TLuaState) : integer;
 function LoadScript(luaState : TLuaState) : integer;
@@ -127,6 +128,25 @@ begin
   SendKeyboardInput(lArg1, lArg2, lArg3);
   Result := 0;
   Glb.StatsService.EndCommand('lmc_send_input', lStart);
+end;
+
+function SendUnicode(luaState: TLuaState): integer;
+var
+  lArg1: Integer;
+  lArg2: Integer;
+  lNumOfParams: Integer;
+  lStart: Int64;
+begin
+  lStart := Glb.StatsService.BeginCommand('lmc_send_unicode');
+  lNumOfParams:=lua_gettop(luaState);
+  if (lNumOfParams <> 2) then
+    raise LmcException.Create('Wrong number of arguments. Provide 2 numbers.');
+  lArg1 := lua_tointeger(luaState, 1);
+  lArg2 := lua_tointeger(luaState, 2);
+  Glb.DebugLogFmt('Sending unicode input char code:%d, direction:%d', [lArg1, lArg2], cLoggerKbd);
+  SendUnicodeInput(lArg1, lArg2);
+  Result := 0;
+  Glb.StatsService.EndCommand('lmc_send_unicode', lStart);
 end;
 
 function Spawn(luaState : TLuaState) : integer;

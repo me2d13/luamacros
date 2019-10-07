@@ -155,7 +155,7 @@ begin
             if (lDev.Name <> '') then
             begin
               lKeyStrokePtr^.Device:=lDev;
-              Glb.LuaEngine.OnDeviceEvent(lDev, buff^.keyboard.VKey, lDirection, buff^.keyboard.Flags);
+              Glb.LuaEngine.OnDeviceEvent(lDev, buff^.keyboard.VKey, lDirection, buff^.keyboard.Flags, buff^.keyboard.MakeCode);
             end;
             // for scanning consider only key down messages
             // key ups usually come when Ctrl+Enter is released to execute script
@@ -242,8 +242,8 @@ var
   lDirection: String;
 begin
   case rawdata^.keyboard.Message of
-    WM_KEYDOWN, WM_SYSKEYDOWN: lDirection:='UP';
-    WM_KEYUP, WM_SYSKEYUP: lDirection:='DOWN';
+    WM_KEYDOWN, WM_SYSKEYDOWN: lDirection:='DOWN';
+    WM_KEYUP, WM_SYSKEYUP: lDirection:='UP';
   end;
   Result := Format('message %s, key code %d, extended %d, flags %d, makecode %d, direction %s, keyboard handle %d',
     [GetMessageId(rawdata^.keyboard.Message), rawdata^.keyboard.VKey,

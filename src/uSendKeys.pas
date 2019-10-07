@@ -41,10 +41,11 @@ type
   end;
 
 procedure SendKeyboardInput(pVk, pScan, pFlags: Integer);
+procedure SendUnicodeInput(pCode, pDirection: Integer);
 
 implementation
 
-uses uGlobals, JwaWinUser;
+uses uGlobals, JwaWinUser, uDevice, character;
 
 type
   TSendKey = record
@@ -171,6 +172,43 @@ begin
   Input.ki.wVk := pVk;
   Input.ki.wScan:=pScan;
   SendInput(1, @Input, SizeOf(Input));
+end;
+
+procedure SendUnicodeInput(pCode, pDirection: Integer);
+var
+  lInput: packed array[0..4] of TInput;
+  lFlags: Integer;
+  I: Integer;
+  lCount: Integer;
+  lStr: UnicodeString;
+begin
+  if (pDirection = cDirectionDown) then lFlags:=4;
+  if (pDirection = cDirectionUp) then lFlags:=6;
+  FillChar(lInput, SizeOf(Input)*5, 0);
+  if (lFlags > 0) and (pCode <= 65535) then
+  begin
+    lInput[0].type_ := INPUT_KEYBOARD;
+    lInput[0].ki.dwFlags := lFlags;
+    lInput[0].ki.wVk := 0;
+    lInput[0].ki.wScan:=pCode;
+    SendInput(1, @lInput[0], SizeOf(TInput));
+  end;
+  if (lFlags > 0) and (pCode >= $010000) and (pCode <= $10FFFF) then
+  begin
+    lStr := ConvertFromUtf32(pCode);
+    lCount := Length(lStr);
+    lCount := 2;
+    for I := 0 to lCount - 1 do
+    begin
+      lInput[I].type_ := INPUT_KEYBOARD;
+      lInput[I].ki.dwFlags := lFlags;
+      lInput[I].ki.wVk := 0;
+      lInput[I].ki.wScan:=Word(lStr[I]);
+    end;
+    lInput[0].ki.wScan:=$D83D;
+    lInput[1].ki.wScan:=$DE04;
+    SendInput(lCount, lInput, SizeOf(TInput));
+  end;
 end;
 
 constructor TKeySequence.Create;

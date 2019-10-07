@@ -119,6 +119,17 @@ type
       function Describe: String; override;
   end;
 
+  { TRiRefIntegerIntegerInt64IntegerInteger }
+
+  TRiRefIntegerIntegerInt64IntegerInteger = class (TRiRefIntegerIntegerInt64Integer)
+    protected
+      fPar5: Integer;
+    public
+      constructor Create(pRef: Integer; p1, p2: Integer; p3: Int64; p4: Integer; p5: Integer);
+      procedure Execute(pLua: TLua); override;
+      function Describe: String; override;
+  end;
+
   TRiRefInteger = class (TRiRef)
     protected
       fPar1: Int64;
@@ -196,6 +207,7 @@ type
       procedure RegisterConfig;
       procedure CallFunctionByRef(pRef: Integer);overload;
       procedure CallFunctionByRef(pRef: Integer; pKey: Int64; pDirection: Int64; pTimeStamp: Int64; pFlags: Integer);overload;
+      procedure CallFunctionByRef(pRef: Integer; pKey: Int64; pDirection: Int64; pTimeStamp: Int64; pFlags: Integer; pMakeCode: Integer);overload;
     public
       constructor Create;
       destructor Destroy;override;
@@ -206,6 +218,7 @@ type
       procedure SetCallback(pDeviceName: String; pButton: Integer; pDirection: Integer; pHandlerRef: Integer);
       procedure SetDeviceCallback(pDeviceName: String; pHandlerRef: Integer);
       procedure OnDeviceEvent(pDevice: TDevice; pButton: Integer; pDirection: Integer; pFlags: Integer);overload;
+      procedure OnDeviceEvent(pDevice: TDevice; pButton: Integer; pDirection: Integer; pFlags: Integer; pMakeCode: Integer);overload;
       procedure OnDeviceEvent(pDevice: TDevice; pData: String);overload;
       function IsKeyHandled(pKsPtr: TKeyStrokePtr): boolean;
       function GetQueueSize: Integer;
@@ -250,6 +263,33 @@ procedure RefreshQueueIndicatorInMainWindow;
 begin
   if (Glb.MainFormHandle <> 0) then // first start handle is not yet ready
     PostMessage(Glb.MainFormHandle, WM_LUA_QUEUE_CHANGE, 0, 0);
+end;
+
+{ TRiRefIntegerIntegerInt64IntegerInteger }
+
+constructor TRiRefIntegerIntegerInt64IntegerInteger.Create(pRef: Integer; p1,
+  p2: Integer; p3: Int64; p4: Integer; p5: Integer);
+begin
+  inherited Create(pRef, p1, p2, p3, p4);
+  fPar5:=p5;
+end;
+
+procedure TRiRefIntegerIntegerInt64IntegerInteger.Execute(pLua: TLua);
+begin
+  if (pLua = nil) then
+    raise LmcException.Create('LUA not initialized');
+  lua_rawgeti(pLua.LuaInstance, LUA_REGISTRYINDEX, fRef);
+  lua_pushinteger(pLua.LuaInstance, fPar1);
+  lua_pushinteger(pLua.LuaInstance, fPar2);
+  lua_pushinteger(pLua.LuaInstance, fPar3);
+  lua_pushinteger(pLua.LuaInstance, fPar4);
+  lua_pushinteger(pLua.LuaInstance, fPar5);
+  lua_pcall(pLua.LuaInstance, 5, 0, LUA_MULTRET);
+end;
+
+function TRiRefIntegerIntegerInt64IntegerInteger.Describe: String;
+begin
+  Result:=Format('callback id %d, int params %d, %d, %d, %d, %d', [fRef, fPar1, fPar2, fPar3, fPar4, fPar5]);
 end;
 
 { TRiRefIntegerIntegerInt64Integer }
@@ -805,6 +845,12 @@ begin
   fExecutor.Run(TRiRefIntegerIntegerInt64Integer.Create(pRef, pKey, pDirection, pTimeStamp, pFlags));
 end;
 
+procedure TLuaEngine.CallFunctionByRef(pRef: Integer; pKey: Int64;
+  pDirection: Int64; pTimeStamp: Int64; pFlags: Integer; pMakeCode: Integer);
+begin
+  fExecutor.Run(TRiRefIntegerIntegerInt64IntegerInteger.Create(pRef, pKey, pDirection, pTimeStamp, pFlags, pMakeCode));
+end;
+
 procedure TLuaEngine.CallFunctionByRef(pRef: Integer;
   pValue: PXplValue; pChangeCount: Integer);
 begin
@@ -940,6 +986,12 @@ end;
 
 procedure TLuaEngine.OnDeviceEvent(pDevice: TDevice; pButton: Integer;
   pDirection: Integer; pFlags: Integer);
+begin
+  OnDeviceEvent(pDevice, pButton, pDirection, pFlags, 0);
+end;
+
+procedure TLuaEngine.OnDeviceEvent(pDevice: TDevice; pButton: Integer;
+  pDirection: Integer; pFlags: Integer; pMakeCode: Integer);
 var
   lTrigger: TTrigger;
   lTimeStamp: Int64;
@@ -953,15 +1005,15 @@ begin
       if (not lTrigger.WholeDevice) and (pButton = lTrigger.KeyNumber) and
       (pDirection = lTrigger.Direction) then
       begin
-        Glb.DebugLog(Format('Calling handler %d for device %s, key %d, direction %d, ts %d, flags %d',
-            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection, lTimeStamp, pFlags]), cLoggerLua);
-        CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection, lTimeStamp, pFlags)
+        Glb.DebugLog(Format('Calling handler %d for device %s, key %d, direction %d, ts %d, flags %d, makeCode %d',
+            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection, lTimeStamp, pFlags, pMakeCode]), cLoggerLua);
+        CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection, lTimeStamp, pFlags, pMakeCode)
       end;
       if (lTrigger.WholeDevice) then
       begin
-        Glb.DebugLog(Format('Calling handler %d for device %s with params key %d, direction %d, ts %d, flags %d',
-            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection, lTimeStamp, pFlags]), cLoggerLua);
-        CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection, lTimeStamp, pFlags);
+        Glb.DebugLog(Format('Calling handler %d for device %s with params key %d, direction %d, ts %d, flags %d, makeCode %d',
+            [lTrigger.LuaRef, lTrigger.Device.Name, pButton, pDirection, lTimeStamp, pFlags, pMakeCode]), cLoggerLua);
+        CallFunctionByRef(lTrigger.LuaRef, pButton, pDirection, lTimeStamp, pFlags, pMakeCode);
       end;
     end;
   end;
@@ -1031,6 +1083,7 @@ begin
   fLua.RegisterFunction('lmc_log_all','',nil,@LogAll);
   fLua.RegisterFunction('lmc_send_keys','',nil,@SendKeys);
   fLua.RegisterFunction('lmc_send_input','',nil,@SendInput);
+  fLua.RegisterFunction('lmc_send_unicode','',nil,@SendUnicode);
   fLua.RegisterFunction('lmc_spawn','',nil,@Spawn);
   fLua.RegisterFunction('lmc_minimize','',nil,@MinimizeMainWindow);
   fLua.RegisterFunction('lmc_load','',nil,@LoadScript);

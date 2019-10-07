@@ -19,7 +19,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="99"/>
+      <BuildNr Value="121"/>
       <StringTable ProductVersion="0.1.1.68"/>
     </VersionInfo>
     <BuildModes Count="1">
@@ -31,7 +31,7 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="c:\work\lmc\2\luamacros\src\test.lua -L TMR"/>
+        <CommandLineParams Value="c:\work\lmc\2\luamacros\src\test.lua -L XPL"/>
       </local>
     </RunParams>
     <RequiredPackages Count="6">

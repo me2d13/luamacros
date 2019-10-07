@@ -1,5 +1,7 @@
 unit uXplControl;
 
+{$define LxxMC_XPL_VERY_VERBOSE_DEBUG}
+
 interface
 
 uses uXplCommon, Classes, uXplListener, uXplSender, uXplMessages, fgl, MemMap;
@@ -312,6 +314,11 @@ begin
         lCallbackInfo.ChangeCount:=0;
         lCallbackInfo.LastTriggerTs:=lNow;
         Inc(lCallbackInfo.ActivationCount);
+      {$ifdef LMC_XPL_VERY_VERBOSE_DEBUG}
+      end else begin
+        Glb.DebugLogFmt('Change ignored on timestamp, last callback %d, now is %d, diff is %d',
+          [lCallbackInfo.LastTriggerTs, lNow, lNow - lCallbackInfo.LastTriggerTs], cLoggerXpl);
+      {$endif}
       end;
     end
     else
