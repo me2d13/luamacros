@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, uXplControl, uLuaEngine, uDeviceService, uDevice, uHookService,
   uKeyLogService, windows, uScanService, uConfigService, uHttpServer, uSpeechService,
-  uStatsService, uTimerService;
+  uStatsService, uTimerService, uusb;
 
 type
 
@@ -35,10 +35,12 @@ type
       fSpeechService: TSpeechService;
       fStatsService: TStatsService;
       fTimerService: TTimerService;
+      fUsbNotifier: TUsbNotifier;
       fVersion: String;
       procedure SetSpoolFileName(AValue: String);
       procedure AskMainFormToFlushPrintBuffer;
       procedure SetVersion(AValue: String);
+      procedure UsbConnected(Sender: TObject; const DeviceName: String);
     public
       constructor Create;
       destructor Destroy; Override;
@@ -182,6 +184,11 @@ begin
   fConfigService.SetVersion(AValue);
 end;
 
+procedure TGlobals.UsbConnected(Sender: TObject; const DeviceName: String);
+begin
+  Print('USB Connected ' + DeviceName);
+end;
+
 constructor TGlobals.Create;
 begin
   InitCriticalSection(fLogCs);
@@ -198,10 +205,13 @@ begin
   fSpeechService := TSpeechService.Create;
   fStatsService := TStatsService.Create;
   fTimerService := TTimerService.Create;
+//  fUsbNotifier := TUsbNotifier.Create;
+//  fUsbNotifier.OnUsbArrival:= @UsbConnected;
 end;
 
 destructor TGlobals.Destroy;
 begin
+  //fUsbNotifier.Free;
   fTimerService.Free;
   fStatsService.Free;
   fSpeechService.Free;

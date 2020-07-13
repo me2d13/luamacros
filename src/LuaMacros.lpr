@@ -13,7 +13,7 @@ uses
   uComDeviceService, uKbdDevice, uKbdDeviceService, uRawInput, uHookService,
   uHookCommon, uKeyLogService, uSendKeys, uScanService, uLuaCmdMainWindow,
   uXplListener, uxplsender, uXplMessages, uConfigService, uHttpServer,
-  uLuaCmdHttp, uSpeechService, uStatsForm, uStatsService;
+  uLuaCmdHttp, uSpeechService, uStatsForm, uStatsService, uusb;
 
 {$R *.res}
 

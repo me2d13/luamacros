@@ -1,11 +1,12 @@
 object LmcMainForm: TLmcMainForm
-  Left = 378
+  Left = 2856
   Height = 701
-  Top = 126
+  Top = 29
   Width = 918
   Caption = 'Lua Macros'
   ClientHeight = 701
   ClientWidth = 918
+  DesignTimePPI = 120
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -14,7 +15,7 @@ object LmcMainForm: TLmcMainForm
   object PairSplitter1: TPairSplitter
     Cursor = crVSplit
     Left = 0
-    Height = 652
+    Height = 646
     Top = 26
     Width = 918
     Align = alClient
@@ -41,7 +42,7 @@ object LmcMainForm: TLmcMainForm
         ParentColor = False
         ParentFont = False
         TabOrder = 0
-        Gutter.Width = 57
+        Gutter.Width = 61
         Gutter.MouseActions = <>
         RightGutter.Width = 0
         RightGutter.MouseActions = <>
@@ -496,7 +497,7 @@ object LmcMainForm: TLmcMainForm
             MouseActions = <>
           end
           object SynGutterLineNumber1: TSynGutterLineNumber
-            Width = 17
+            Width = 21
             MouseActions = <>
             MarkupInfo.Background = clBtnFace
             MarkupInfo.Foreground = clNone
@@ -530,14 +531,14 @@ object LmcMainForm: TLmcMainForm
     object PairSplitterSide2: TPairSplitterSide
       Cursor = crArrow
       Left = 0
-      Height = 397
+      Height = 391
       Top = 255
       Width = 918
       ClientWidth = 918
-      ClientHeight = 397
+      ClientHeight = 391
       object Memo1: TMemo
         Left = 0
-        Height = 397
+        Height = 391
         Top = 0
         Width = 918
         Align = alClient
@@ -550,8 +551,8 @@ object LmcMainForm: TLmcMainForm
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 23
-    Top = 678
+    Height = 29
+    Top = 672
     Width = 918
     Panels = <    
       item

@@ -122,7 +122,7 @@ implementation
 {$R *.lfm}
 
 uses
-  uGlobals, uHookCommon, uConfigService, comobj, uStatsForm;
+  uGlobals, uHookCommon, uConfigService, comobj, uStatsForm, uUsb;
 
 const
   cUntitled = 'Untitled';
@@ -133,6 +133,8 @@ var
 function WndCallback(Ahwnd: HWND; uMsg: UINT; wParam: WParam; lParam: LParam):LRESULT; stdcall;
 var
   lMessage : TMessage;
+  Dbi: PDevBroadcastDeviceInterface;
+  lName: String;
 begin
   lMessage.lParam:=lParam;
   lMessage.wParam:=wParam;
@@ -161,6 +163,17 @@ begin
   begin
     gMainForm.ScanningChange;
     Result := lMessage.Result;
+  end else if uMsg=WM_DEVICECHANGE then
+  begin
+    if (wParam = $8000) or (wParam = $8004) then
+    begin
+      Dbi := PDevBroadcastDeviceInterface(LParam);
+      if Dbi^.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE then
+      begin
+        lName := PChar(@Dbi^.dbcc_name);
+        Glb.Print('HOLA ' + lName);
+      end;
+    end
   end else
     result:=CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
 end;
@@ -453,7 +466,10 @@ begin
 end;
 
 procedure TLmcMainForm.Init;
+var
+  lUsbNotifier : TUsbNotifier;
 begin
+  lUsbNotifier := TUsbNotifier.Create;
   // here Glb is alreadu created & initialized
   OrderRawInputMessagesToBeReceived;
   if (fHookKeyboard) then

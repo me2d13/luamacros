@@ -63,6 +63,7 @@ begin
   pDeviceInfo := nil;
   pDevicesHID := nil;
   deviceCount := 0;
+//  RegisterDeviceNotificationW();
   if (GetRawInputDeviceList(nil, deviceCount, sizeof(RAWINPUTDEVICELIST)) = 0) then
   begin
     try

@@ -69,6 +69,7 @@ var
   lItem: TDevice;
   lName: String;
 begin
+  DetectDevices;
   for lItem in fDevices do
   begin
     if (lItem.Name = '') then
