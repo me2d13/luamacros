@@ -19,11 +19,11 @@ commands2[188]='sim/flight_controls/rotor_brake_toggle' -- rotor brake
 --lmc_set_xpl_variable('AS350/Rotor_Brake', 0)
 --lmc_set_xpl_variable('AS350/Headphone', 1)
 
-gInnerViews = {'sim/view/default_view','sim/view/quick_look_1','sim/view/quick_look_2','sim/view/quick_look_3','sim/view/quick_look_4','sim/view/quick_look_5','sim/view/quick_look_6'}
+gInnerViews = {'sim/view/default_view','sim/view/quick_look_1','sim/view/quick_look_2','sim/view/quick_look_3','sim/view/quick_look_4','sim/view/quick_look_5'}
 gInnerViewsIndex = 1
 gInnerViewsSentTs = 0
 
-gOuterViews = {'sim/view/still_spot','sim/view/tower','sim/view/runway','sim/view/circle', 'sim/view/chase'}
+gOuterViews = {'sim/view/still_spot','sim/view/circle', 'sim/view/chase','sim/view/quick_look_6'}
 gOuterViewsIndex = 1
 gOuterViewsSentTs = 0
 
@@ -51,11 +51,7 @@ function lb2_common(button, direction, ts)
     --print('Lb2 common button'..button..', direction '..direction..', ts '..ts)
     local def = {}
     def.cycle = 360
-    if (button == 0 or button == 1) then
-      def.button = 0
-      def.var_name = 'sim/cockpit/autopilot/heading_mag'
-      return handle_rotary_with_cycle_value(button, direction, ts, def)
-    elseif (button == 6 or button == 7) then
+    if (button == 6 or button == 7) then
       def.button = 6
       def.var_name = 'sim/cockpit/radios/nav1_obs_degm'
       return handle_rotary_with_cycle_value(button, direction, ts, def)

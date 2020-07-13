@@ -7,6 +7,7 @@ clear();
 --lmc_log_module('XPL')
 lmc.autoReload = true
 --lmc.statistics = true
+--lmc_set_xpl_variable('S300/MagnetoKey', 0)
 
 function timerHandler(ts)
   print('Timer alarm at time stamp '..ts..'. Waiting 2s.')
@@ -24,7 +25,7 @@ end
 --lmc_set_timer(5000, timerHandler)
 --lmc_set_timer(10000, timerHandler)
 
---lmc_xpl_command('sim/view/3d_cockpit_cmnd_look')
+--lmc_xpl_command('sim/magnetos/magnetos_left_1')
 --print(lmc_get_xpl_variable('sim/cockpit/autopilot/heading_mag'))
 
 --lmc_sleep(1500)

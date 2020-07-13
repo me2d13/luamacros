@@ -5,5 +5,6 @@ $LAZ_HOME/lazbuild.exe --compiler="C:\Apps\FPC\3.0.0\bin\i386-Win32\fpc.exe" $LM
 $LAZ_HOME/lazbuild.exe --compiler="C:\Apps\Lazarus\lazarus184x64\fpc\3.0.4\bin\x86_64-win64\fpc.exe" $LMC_HOME/src/XplPlugin.lpi
 cp -v $LMC_HOME/out/LuaMacros.exe $DIST_HOME
 cp -v $LMC_HOME/out/win.xpl $DIST_HOME/xpl_lmc_plugin/64
+cp -v $LMC_HOME/src/samples/*.lua $DIST_HOME/samples
 cd /c/work/lmc/dist
 zip -r ../luamacros.zip *
