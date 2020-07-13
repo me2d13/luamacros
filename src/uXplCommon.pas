@@ -72,7 +72,7 @@ type
 
 
   TXplCommandRec = packed record
-    Name: String[50];
+    Name: String[255];
     Mode: byte;
   end;
 
