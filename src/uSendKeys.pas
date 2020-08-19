@@ -59,7 +59,7 @@ const
   If you add to this list, you must be sure to keep it sorted alphabetically
   by Name because a binary search routine is used to scan it.}
 
-  MaxSendKeyRecs = 64;
+  MaxSendKeyRecs = 66;
   SendKeyRecs : array[1..MaxSendKeyRecs] of TSendKey =
   (
    (Name:'BKSP';            VKey:VK_BACK),
@@ -103,6 +103,7 @@ const
    (Name:'HOME';            VKey:VK_HOME),
    (Name:'INS';             VKey:VK_INSERT),
    (Name:'LEFT';            VKey:VK_LEFT),
+   (Name:'LWIN';            VKey:VK_LWIN),
    (Name:'NUM0';            VKey:VK_NUMPAD0),
    (Name:'NUM1';            VKey:VK_NUMPAD1),
    (Name:'NUM2';            VKey:VK_NUMPAD2),
@@ -123,6 +124,7 @@ const
    (Name:'PGUP';            VKey:VK_PRIOR),
    (Name:'PRTSC';           VKey:VK_PRINT),
    (Name:'RIGHT';           VKey:VK_RIGHT),
+   (Name:'RWIN';            VKey:VK_RWIN),
    (Name:'SCROLLLOCK';      VKey:VK_SCROLL),
    (Name:'TAB';             VKey:VK_TAB),
    (Name:'UP';              VKey:VK_UP)
