@@ -218,7 +218,7 @@ implementation
 
 uses uMainFrm, uGlobals,
   uLuaCmdXpl, uLuaCmdDevice, uComDevice, uLuaCmdMainWindow, uConfigService,
-  uLuaCmdHttp, uDxDeviceService;
+  uLuaCmdHttp, uDxDeviceService, uLuaCmdFs;
 
 const
 {$IFDEF UNIX}
@@ -1029,6 +1029,8 @@ begin
   // http
   fLua.RegisterFunction('lmc_http_server','',nil,@HttpServerSimple);
   fLua.RegisterFunction('lmc_http_get','',nil,@HttpGet);
+  // fsxx
+  fLua.RegisterFunction('lmc_fs_event','',nil,@FsEvent);
 end;
 
 function TLuaEngine.GetExecutionsCount: Int64;

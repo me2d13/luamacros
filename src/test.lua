@@ -1,3 +1,6 @@
+lmc_log_module('FSXX')
+lmc_fs_event('LANDING_LIGHTS_TOGGLE')
+lmc_fs_event('NAV1_STBY_SET', 0x11480)
 --z GUI thing: clear log window
 clear();
 lmc.autoReload = true

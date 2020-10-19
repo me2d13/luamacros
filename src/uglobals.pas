@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, uXplControl, uLuaEngine, uDeviceService, uDevice, uHookService,
   uKeyLogService, windows, uScanService, uConfigService, uHttpServer, uSpeechService,
-  uStatsService, uTimerService;
+  uStatsService, uTimerService, uFsEngine;
 
 type
 
@@ -35,6 +35,7 @@ type
       fSpeechService: TSpeechService;
       fStatsService: TStatsService;
       fTimerService: TTimerService;
+      fFsService: TFsService;
       fVersion: String;
       procedure SetSpoolFileName(AValue: String);
       procedure AskMainFormToFlushPrintBuffer;
@@ -70,6 +71,7 @@ type
       property SpeechService: TSpeechService read fSpeechService;
       property StatsService: TStatsService read fStatsService;
       property TimerService: TTimerService read fTimerService;
+      property FsService: TFsService read fFsService;
       property Version: String read fVersion write SetVersion;
   end;
 
@@ -100,6 +102,7 @@ const
   cLoggerDx = 'DX';
   cLoggerKbd = 'KBD';
   cLoggerTmr = 'TMR';
+  cLoggerFsxx = 'FSXX';
 
 
 
@@ -198,10 +201,12 @@ begin
   fSpeechService := TSpeechService.Create;
   fStatsService := TStatsService.Create;
   fTimerService := TTimerService.Create;
+  fFsService := TFsService.Create;
 end;
 
 destructor TGlobals.Destroy;
 begin
+  fFsService.Free;
   fTimerService.Free;
   fStatsService.Free;
   fSpeechService.Free;
@@ -224,6 +229,7 @@ begin
   fXplCLcontrol.Init;
   fLuaEngine.Init;
   fDeviceService.Init;
+  fFsService.Init;
 end;
 
 procedure TGlobals.Reset;

@@ -5,7 +5,7 @@ unit uKbdDeviceService;
 interface
 
 uses
-  uRawInput, Classes, Windows, SysUtils, uKbdDevice, fgl;
+  Classes, Windows, SysUtils, uKbdDevice, fgl;
 
 type
   TKbdDeviceList = TFPGObjectList<TKbdDevice>;
